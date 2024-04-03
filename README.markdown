@@ -45,6 +45,9 @@ With DVCT, data exchange participants can be assured that the data fulfils prede
 
 ## Requirements
 
+_To be discussed with Félix and Robin_
+_To be validated with use case partners & pool of experts_
+
 * **`[BB_06__01]`** DVCT MUST define schemata for xxx
 * **`[BB_06__02]`** DVCT MUST support tracking direct and indirect data usage 
 * **`[BB_06__03]`** DVCT MUST support tracking indirect data usage up to 5 level of indirect usage
