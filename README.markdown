@@ -46,14 +46,14 @@ With DVCT, data exchange participants can be assured that the data fulfils prede
 ## Requirements
 
 * **`[BB_06__01]`** DVCT MUST define schemata for xxx
-* **`[BB_06__02]`** DVCT MUST support xx
-* **`[BB_06__03]`** DVCT MUST provide xx
-* **`[BB_06__03]`** DVCT MUST support xx
-* **`[BB_06__04]`** DVCT SHOULD support xx
-* **`[BB_06__05]`** DVCT SHOULD support xx
-* **`[BB_06__06]`** DVCT SHOULD support xx
-* **`[BB_06__07]`** DVCT SHOULD support xx
-* **`[BB_06__08]`** DVCT SHOULD interface with the Distributed data visualization Building block
+* **`[BB_06__02]`** DVCT MUST support tracking direct and indirect data usage 
+* **`[BB_06__03]`** DVCT MUST support tracking indirect data usage up to 5 level of indirect usage
+* **`[BB_06__03]`** DVCT MUST support decentralized data store
+* **`[BB_06__04]`** DVCT SHOULD generate points based on the contract
+* **`[BB_06__05]`** DVCT SHOULD store points and data usage in immutable database
+* **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type
+* **`[BB_06__07]`** DVCT SHOULD provide visualization of data usage history
+* **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 * **`[BB_06__09]`** DVCT SHOULD interface with the Connector
 
 
