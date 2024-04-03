@@ -1,14 +1,10 @@
-# Data Veracity Assurance BB Design Document
+# Data Value Chain Tracker BB Design Document
 
-The Data Veracity Assurance (DVA from now on) building block allows data exchange participants to agree on and later prove/verify quality requirements or properties of the exchanged data.
+The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and incentivizes data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange. This innovative approach not only ensures auditability and traceability of data usage, but also enables organizations and individuals to see the value of their data
 
-For example, if a data producer (abbreviated P from now on) provides simple sensor data to a data consumer (C from now on), the DVA BB can facilitate P to prove (and C to verify) that the provided data is credible (eg temperature values are within a certain range).
+Example of use case, ...
 
-The DVA BB requires a **veracity level agreement** between the exchange participants.
-The agreement is made for a specific data exchange unit, as per the contract.
-The agreement defines a number of **veracity objectives** that each describe a data quality aspect (eg completeness or accuracy) and an evaluation schema (eg value is within a numerical range).
-When the data exchange occurs, in the simplest model, P attaches a proof (or at least an attestation) regarding the exchanged data’s quality that C trusts or can verify.
-
+**DVCT objectives**
 
 ## Conceptual Overview
 
@@ -24,15 +20,15 @@ When the data exchange occurs, in the simplest model, P attaches a proof (or at 
 ### Features/Main Functionalities
 
 Key functionalities:
-1. Manage data veracity level agreements
-2. Provide means to verify the veracity of exchanged data
-3. Log results of verification
+1. xxxx
+2. xxx
+3. xxx
 
-DVA also potentially enables proving/verifying such properties about the shared data that are related to additional, sensitive (eg due to GDPR) data, without disclosing them (possibly using zero-knowledge proofs).
+DVCT also potentially enables proving/verifying such properties about the shared data that are related to additional, sensitive (eg due to GDPR) data, without disclosing them (possibly using zero-knowledge proofs).
 
 ### Technical Usage Scenarios
 
-With DVA, data exchange participants can be assured that the data fulfils predefined quality requirements.
+With DVCT, data exchange participants can be assured that the data fulfils predefined quality requirements.
 
 #### Management of Veracity Level Agreements
 
@@ -49,16 +45,16 @@ With DVA, data exchange participants can be assured that the data fulfils predef
 
 ## Requirements
 
-* **`[BB_08__01]`** DVA MUST define schemata for Data Veracity Agreements
-* **`[BB_08__02]`** DVA MUST support striking Data Veracity Agreements through the Catalogue
-* **`[BB_08__03]`** DVA MUST provide multiple veracity assurance methods
-* **`[BB_08__03]`** DVA MUST support veracity attestation (ie either provider or a third party attests that veracity requirements are met
-* **`[BB_08__04]`** DVA SHOULD support veracity self-attestation
-* **`[BB_08__05]`** DVA SHOULD support third-party veracity attestation
-* **`[BB_08__06]`** DVA SHOULD support provider-proven veracity
-* **`[BB_08__07]`** DVA SHOULD support consumer-verified veracity
-* **`[BB_08__08]`** DVA SHOULD interface with the Contract service
-* **`[BB_08__09]`** DVA SHOULD interface with the Connector
+* **`[BB_06__01]`** DVCT MUST define schemata for xxx
+* **`[BB_06__02]`** DVCT MUST support xx
+* **`[BB_06__03]`** DVCT MUST provide xx
+* **`[BB_06__03]`** DVCT MUST support xx
+* **`[BB_06__04]`** DVCT SHOULD support xx
+* **`[BB_06__05]`** DVCT SHOULD support xx
+* **`[BB_06__06]`** DVCT SHOULD support xx
+* **`[BB_06__07]`** DVCT SHOULD support xx
+* **`[BB_06__08]`** DVCT SHOULD interface with the Distributed data visualization Building block
+* **`[BB_06__09]`** DVCT SHOULD interface with the Connector
 
 
 ## Integrations
@@ -70,11 +66,10 @@ _No direct integrations identified as of yet._
 
 ### Integrations via Connector
 
-* DVA will likely have to directly integrate with the **Connector** itself to extend data exchange flows with veracity assurance steps
-* As veracity level agreements are similar to contracts (or will become part of the contracts), DVA will have interactions with the **Contract** component
+* DVCT will likely have to directly integrate with the **Connector** itself to extend data exchange flows with veracity assurance steps
+* As veracity level agreements are similar to contracts (or will become part of the contracts), DVCT will have interactions with the **Contract** component
 * Potential integrations with **Consent** as well (?)
-* Most likely, DVA will integrate closely with the **Data Value Chain Tracker** BB
-  * The _value_ is strongly related to the quality of the data assured by DVA
+* The _point_ is strongly related to data usage
 
 
 ## Relevant Standards
