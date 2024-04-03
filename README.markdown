@@ -99,14 +99,15 @@ _No concrete schema has been defined yet, please refer to conceptual model for w
 
 The sequence diagrams below describe possible DVA additions to the basic Connector flows.
 
-_To be discussed with Félix_
+_To be discussed with Félix and Robin_
 
 ```mermaid
 ---
-title: Data Exchange with Attestation of Veracity
+title: Data Exchange for Data Value Chain Tracker
 ---
 
 sequenceDiagram
+    participant o as Orchestrator
     participant p as Provider
     participant pc as Provider Connector
     participant con as Contract Service
