@@ -85,9 +85,11 @@ _No direct integrations identified as of yet._
 
 ## Input / Output Data
 
-### Data Veracity Level Agreements
+### Data Value Chain Tracker Visualization and points
 
 _No concrete schema has been defined yet, please refer to conceptual model for what may be included in an agreement._
+
+![Example Instance Model](diagrams/DVCT-visualization.svg)
 
 
 ## Architecture
