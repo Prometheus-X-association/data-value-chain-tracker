@@ -20,9 +20,10 @@ Example of use case, ...
 ### Features/Main Functionalities
 
 Key functionalities:
-1. xxxx
-2. xxx
-3. xxx
+1. Track the history of direct and indirect data usage
+2. Provides digital incentives (in term of points, badges or label) for data usage
+3. Distribution of points or digital incentive based on the contribution to data usage
+4. Provide an overview of data usage within the ecosystem
 
 DVCT also potentially enables proving/verifying such properties about the shared data that are related to additional, sensitive (eg due to GDPR) data, without disclosing them (possibly using zero-knowledge proofs).
 
