@@ -108,6 +108,9 @@ title: Data Exchange for Data Value Chain Tracker
 
 sequenceDiagram
     participant o as Orchestrator
+    participant dp1 as Data provider 1
+    participant pc1 as Connector of Data provider 1
+    participant dvct1 as DVCT of Data provider 1
     participant p as Provider
     participant pc as Provider Connector
     participant con as Contract Service
