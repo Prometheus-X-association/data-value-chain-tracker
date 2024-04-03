@@ -142,48 +142,6 @@ sequenceDiagram
     cc -) c: data
 ```
 
-```mermaid
----
-title: Data Exchange with Proof of Veracity
----
-
-sequenceDiagram
-    participant p as Provider
-    participant pc as Provider Connector
-    participant con as Contract Service
-    participant evs as External Veracity Proving Service
-    participant cat as Catalogue Service
-    participant cc as Consumer Connector
-    participant c as Consumer
-
-    p -) cat: Trigger data exchange
-    cat -) cc: data exchange info (w/ veracity level agreement)
-    cc -) pc: data request (w/ contract + veracity level agreement)
-    pc -) con: Verify contract & policies + veracity agreement
-    Note over pc: Policy verification & Access control
-    pc -) p: Get data
-    p -) pc: data
-
-    alt provider-proven veracity
-        pc -) evs: Get Proof of Veracity
-        evs -) pc: proof
-        pc -) cc: data + proof
-        cc -) cc: Verify proof
-    else consumer-verified veracity
-        pc -) cc: data
-        alt local verification
-            cc -) cc: Verify data veracity
-        else external verification
-            cc -) evs: Verify data veracity
-        end
-    else no agreement / verification
-        pc -) cc: data
-    end
-
-    Note over cc: Policy verification & Access control
-    cc -) c: data
-```
-
 
 ## Configuration & Deployment Settings
 
