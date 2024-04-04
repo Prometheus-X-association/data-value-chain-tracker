@@ -24,40 +24,22 @@ Example of technical usage scenarios could be skills gap analytics,
 
 
 visualization of value tracking for DP1:
-![data-type-usage](diagrams/dvct-viz-1.png)
+![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
 
 Visualization of value tracking for DP2/DC1
-![data-type-usage](diagrams/dvct-viz-2.png)
+![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
 
 visualization of value tracking for DC2
-![data-type-usage](diagrams/dvct-viz-3.png)
+![data-chain-visualization-participant 3](diagrams/dvct-viz-3.png)
 
 ### Features/Main Functionalities
 
 Key functionalities:
-1. Track the history of direct and indirect data usage
-2. Provides digital incentives (in term of points, badges or label) for data usage
-3. Distribution of points or digital incentives based on the contribution to data usage
-4. Provide an overview of data usage within the ecosystem
+1. Track the history of direct and indirect data usage of shared data
+2. Handle the distribution of digital incentives (in terms of points, tokens, badges, or labels) based on the contract.
+3. Provide a map/overview of data-usage of shared data within the ecosystem.
 
 DVCT also potentially enables proving/verifying such properties about the shared data that are related to additional, sensitive (eg due to GDPR) data, without disclosing them (possibly using zero-knowledge proofs).
-
-### Technical Usage Scenarios
-
-With DVCT, data exchange participants can be assured that the data fulfils predefined quality requirements.
-
-#### Management of Veracity Level Agreements
-
-<!-- TODO -->
-
-#### Proving & Attestation of Veracity
-
-<!-- TODO -->
-
-#### Logging of Results
-
-<!-- TODO -->
-
 
 ## Requirements
 
@@ -65,15 +47,16 @@ _To be discussed with Félix and Robin_
 _To be validated with use case partners & pool of experts_
 
 * **`[BB_06__01]`** DVCT MUST define schemata for xxx
-* **`[BB_06__02]`** DVCT MUST support tracking direct and indirect data usage 
-* **`[BB_06__03]`** DVCT MUST support tracking indirect data usage up to 5 level of indirect usage
-* **`[BB_06__03]`** DVCT MUST support decentralized data store
-* **`[BB_06__04]`** DVCT SHOULD generate points based on the contract
-* **`[BB_06__05]`** DVCT SHOULD store points and data usage in immutable database
-* **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type
-* **`[BB_06__07]`** DVCT SHOULD provide visualization of data usage history
-* **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
-* **`[BB_06__09]`** DVCT SHOULD interface with the Connector
+* **`[BB_06__02]`** DVCT MUST support tracking direct and indirect data usage  
+* **`[BB_06__03]`** DVCT SHOULD interface with the Contract
+* **`[BB_06__04]`** DVCT MUST support decentralized data store
+* **`[BB_06__05]`** DVCT SHOULD have access to points/token storage
+* **`[BB_06__06]`** DVCT SHOULD store points/tokens and data-usage-history in immutable database
+* **`[BB_06__07]`** DVCT SHOULD distribute points based on the data output type 
+* **`[BB_06__08]`** DVCT SHOULD provide visualization of data usage history
+* **`[BB_06__09]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
+* **`[BB_06__10]`** DVCT SHOULD interface with the Data Space Connector
+* **`[BB_06__11]`** DVCT MUST support tracking indirect data usage up to 5 level of indirect usage
 
 
 ## Integrations
@@ -103,13 +86,12 @@ _No direct integrations identified as of yet._
 
 
 ## Input / Output Data
+Input data:
 
-### Data Value Chain Tracker Visualization and points
+The output of data type is inform of JSON format:
+![node-data](diagrams/node-data.png)
 
-_No concrete schema has been defined yet, please refer to conceptual model for what may be included in an agreement._
-
-![Example Instance Model](diagrams/DVCT-visualization.svg)
-
+### Data Value Chain Tracker points distribution
 
 ## Architecture
 
