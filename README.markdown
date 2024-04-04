@@ -51,7 +51,7 @@ _To be validated with use case partners & pool of experts_
 * **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
 * **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
 * **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type 
-* **`[BB_06__07]`** DVCT SHOULD provide visualization of data usage history
+* **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
 * **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 * **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
 * **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
