@@ -2,10 +2,6 @@
 
 The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and incentivizes data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data
 
-**DVCT objectives**
-
-The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem. In addition, by tracking the use of data in the ecosystem, the DVCT can also incentivize the organizations that participate in the value creation of the data. 
-
 ## Conceptual Overview
 
 According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or concatenated data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
@@ -20,6 +16,8 @@ Regardless of your role in the use case, as a data provider individual or organi
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus X ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
 ## Technical Usage Scenarios & Features
+
+The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem. In addition, by tracking the use of data in the ecosystem, the DVCT can also incentivize the organizations that participate in the value creation of the data. 
 
 Example of technical usage scenarios could be skills gap analytics, 
 
@@ -47,24 +45,25 @@ DVCT also potentially enables proving/verifying such properties about the shared
 _To be discussed with Félix and Robin_
 _To be validated with use case partners & pool of experts_
 
-* **`[BB_06__01]`** DVCT MUST define schemata for xxx
-* **`[BB_06__02]`** DVCT MUST support tracking direct and indirect data usage  
-* **`[BB_06__03]`** DVCT SHOULD interface with the Contract
-* **`[BB_06__04]`** DVCT MUST support decentralized data store
-* **`[BB_06__05]`** DVCT SHOULD have access to points/token storage
-* **`[BB_06__06]`** DVCT SHOULD store points/tokens and data-usage-history in immutable database
-* **`[BB_06__07]`** DVCT SHOULD distribute points based on the data output type 
-* **`[BB_06__08]`** DVCT SHOULD provide visualization of data usage history
-* **`[BB_06__09]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
-* **`[BB_06__10]`** DVCT SHOULD interface with the Data Space Connector
-* **`[BB_06__11]`** DVCT MUST support tracking indirect data usage up to 5 level of indirect usage
+* **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage  
+* **`[BB_06__02]`** DVCT MUST interface with the Contract
+* **`[BB_06__03]`** DVCT MUST support decentralized data store
+* **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
+* **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
+* **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type 
+* **`[BB_06__07]`** DVCT SHOULD provide visualization of data usage history
+* **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
+* **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
+* **`[BB_06__10]`** DVCT SHOULD support tracking indirect data usage up to 5 level of indirect usage
 
 
 ## Integrations
 
 ### Direct Integrations with Other BBs
 
-_No direct integrations identified as of yet._
+_Distributed data visualization._
+_contract._
+
 
 
 ### Integrations via Connector
