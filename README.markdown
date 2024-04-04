@@ -11,6 +11,7 @@ The main goal of the DVCT is to solve the problem of uncertainty about the value
 According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or concatenated data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
 
 ![linked-data-value-chain](diagrams/linked-data-value-chain.png)
+Linked data value chain (Latif et al., 2009)
 
 Regardless of your role in the use case, as a data provider individual or organization can provide raw data or concatenated data, but as a data consumer one will always use data and then also produce data, either as concatenated data that can be fed back into the ecosystem/use case or as final data in the form of result visualization analysis.  
 
