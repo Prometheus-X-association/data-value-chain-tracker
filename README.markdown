@@ -19,16 +19,24 @@ To encourage data sharing, digital incentives should be provided to the ecosyste
 
 The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem. In addition, by tracking the use of data in the ecosystem, the DVCT can also incentivize the organizations that participate in the value creation of the data. 
 
-Example of technical usage scenarios could be skills gap analytics, 
+Example of technical usage scenarios could be skills gap analytics, where an organization that would like to improve the skills gap analytics by combining external data with internal skill data.
 
+| Process                                                                                                                                                  | DVCT role                                                                                                                                            |
+|----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Use Case Orchestrator defines the use case (data flow, point distribution, data/AI requirements)    | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points  |
+| Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector, generation of nodes and the chain after data consumption/usage                                                              |
+| Data consumers/AI providers who consume raw data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
+| Use Case Orchestrator sets incentives for data providers and data consumers based on the contract                                                                   | Interaction with the contract, the digital wallet of the use case orchestrator and distribution of the digital incentive                                                 |
+| Data providers want to know where their data is used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |
+|                                                                                                                                                          |                                                                                                                                                     
 
-visualization of value tracking for DP1:
+_visualization of value tracking for DP1:_
 ![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
 
-Visualization of value tracking for DP2/DC1
+_Visualization of value tracking for DP2/DC1:_
 ![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
 
-visualization of value tracking for DC2
+_Visualization of value tracking for DC2:_
 ![data-chain-visualization-participant 3](diagrams/dvct-viz-3.png)
 
 ### Features/Main Functionalities
