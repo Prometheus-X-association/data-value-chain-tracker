@@ -16,11 +16,21 @@ Regardless of your role in the use case, as a data provider individual or organi
 
 ![data-type-usage](diagrams/data-type.png)
 
-### Example
-
-![Example Instance Model](diagrams/dva-concept-instance.png)
+To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus X ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
 ## Technical Usage Scenarios & Features
+
+Example of technical usage scenarios could be skills gap analytics, 
+
+
+visualization of value tracking for DP1:
+![data-type-usage](diagrams/dvct-viz-1.png)
+
+Visualization of value tracking for DP2/DC1
+![data-type-usage](diagrams/dvct-viz-2.png)
+
+visualization of value tracking for DC2
+![data-type-usage](diagrams/dvct-viz-3.png)
 
 ### Features/Main Functionalities
 
