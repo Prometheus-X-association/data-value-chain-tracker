@@ -54,7 +54,7 @@ _To be validated with use case partners & pool of experts_
 * **`[BB_06__07]`** DVCT SHOULD provide visualization of data usage history
 * **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 * **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
-* **`[BB_06__10]`** DVCT SHOULD support tracking indirect data usage up to 5 level of indirect usage
+* **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
 
 
 ## Integrations
