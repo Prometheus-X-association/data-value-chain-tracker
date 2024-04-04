@@ -2,18 +2,23 @@
 
 The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and incentivizes data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data
 
-Example of use case, ...
-
 **DVCT objectives**
+
+The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem. In addition, by tracking the use of data in the ecosystem, the DVCT can also incentivize the organizations that participate in the value creation of the data. 
 
 ## Conceptual Overview
 
-![Metamodel](diagrams/dva-concept-meta.png)
+According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or concatenated data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
+
+![linked-data-value-chain](diagrams/linked-data-value-chain.png)
+
+Regardless of your role in the use case, as a data provider individual or organization can provide raw data or concatenated data, but as a data consumer one will always use data and then also produce data, either as concatenated data that can be fed back into the ecosystem/use case or as final data in the form of result visualization analysis.  
+
+![data-type-usage](diagrams/data-type.png)
 
 ### Example
 
 ![Example Instance Model](diagrams/dva-concept-instance.png)
-
 
 ## Technical Usage Scenarios & Features
 
@@ -22,7 +27,7 @@ Example of use case, ...
 Key functionalities:
 1. Track the history of direct and indirect data usage
 2. Provides digital incentives (in term of points, badges or label) for data usage
-3. Distribution of points or digital incentive based on the contribution to data usage
+3. Distribution of points or digital incentives based on the contribution to data usage
 4. Provide an overview of data usage within the ecosystem
 
 DVCT also potentially enables proving/verifying such properties about the shared data that are related to additional, sensitive (eg due to GDPR) data, without disclosing them (possibly using zero-knowledge proofs).
@@ -178,3 +183,8 @@ sequenceDiagram
 ### Unit tests
 
 ### Integration Tests
+
+### Reference
+
+1. Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575).
+2. 
