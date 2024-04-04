@@ -27,18 +27,7 @@ Example of technical usage scenarios could be skills gap analytics, where an org
 | Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector, generation of nodes and the chain after data consumption/usage                                                              |
 | Data consumers/AI providers who consume raw data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
 | Use Case Orchestrator sets incentives for data providers and data consumers based on the contract                                                                   | Interaction with the contract, the digital wallet of the use case orchestrator and distribution of the digital incentive                                                 |
-| Data providers want to know where their data is used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |
-|                                                                                                                                                          |                                                                                                                                                     
-
-_visualization of value tracking for DP1:_
-![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
-
-_Visualization of value tracking for DP2/DC1:_
-![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
-
-_Visualization of value tracking for DC2:_
-![data-chain-visualization-participant 3](diagrams/dvct-viz-3.png)
-
+| Data providers want to know where their data is used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                                                                                          
 ### Features/Main Functionalities
 
 Key functionalities:
@@ -98,6 +87,20 @@ Input data:
 
 The output of data type is inform of JSON format:
 ![node-data](diagrams/node-data.png)
+
+### Data Value Chain Tracker visualization
+
+- visualization of value tracking for DP1:
+
+![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
+
+- Visualization of value tracking for DP2/DC1:
+
+![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
+
+- Visualization of value tracking for DC2:
+
+![data-chain-visualization-participant 3](diagrams/dvct-viz-3.png)
 
 ### Data Value Chain Tracker points distribution
 
