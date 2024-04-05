@@ -1,6 +1,8 @@
 # Data Value Chain Tracker BB Design Document
 
-The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data
+The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data.
+
+As data provider or data owner, organization and individual can use DVCT to find out when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (concatenated data or visualization data).
 
 ## Conceptual Overview
 
@@ -72,21 +74,27 @@ The DVCT needs access to the points/token holders of the orchestrators that prov
 * DVCT will likely need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain. 
 
 ## Relevant Standards
-* 
+- [Decentralized identifiers](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
+- [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
 
 ### Data Format Standards
-
-<!-- TODO -->
+- [JSON-LD](https://json-ld.org/)
+- [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) for Date and time format
 
 ### Mapping to Data Space Reference Architecture Models
 
-<!-- TODO -->
+**DSSC:** see the [Provenance & Traceability](https://dssc.eu/space/BVE/357075283/Provenance+%26+Traceability) building block and [Data Provenance Tracking](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control#data-provenance-tracking)
+
+**DSSC:** see the [Value-Added Services](https://dssc.eu/space/BVE/357076468/Value-Added+Services) building block.
+
+**IDS Data Sharing and data exchange:** see [2.4 Data Exchange and Data Sharing](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/context-of-the-international-data-spaces/2_1_data-driven-business_ecosystems/2_4_data_exchange_and_data_sharing).
 
 
 ## Input / Output Data
-Input data:
+Input data:\
 
-The output of data type is inform of JSON format:
+
+The output of data type is inform of JSON format:\
 ![node-data](diagrams/node-data.png)
 
 ### Data Value Chain Tracker visualization
