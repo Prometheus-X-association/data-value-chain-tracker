@@ -43,7 +43,7 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 
 * **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage  
 * **`[BB_06__02]`** DVCT MUST interface with the Contract
-* **`[BB_06__03]`** DVCT MUST support decentralized data store
+* **`[BB_06__03]`** DVCT MUST support distributed data for value chain tracking
 * **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
 * **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
 * **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type 
@@ -127,7 +127,7 @@ The distribution of digital incentives distribution should be based on the contr
 
 ## Dynamic Behaviour
 
-The sequence diagrams below describe possible DVA additions to the basic Connector flows.
+The sequence diagrams below describe possible DVCT to the basic B2B Connector flows.
 
 _To be discussed with Félix and Robin_
 
@@ -140,14 +140,18 @@ sequenceDiagram
     participant o as Orchestrator
     participant dp1 as Data provider 1
     participant pc1 as Connector of Data provider 1
-    participant dvct1 as DVCT of Data provider 1
-    participant p as Provider
-    participant pc as Provider Connector
-    participant con as Contract Service
+    participant dvct-p1 as DVCT of Data provider 1
+    participant dp2 as Data provider 2
+    participant pc2 as Connector of Data provider 2
+    participant dvct-p2 as DVCT of Data provider 2
     participant evs as External Veracity Attestation Service
     participant cat as Catalogue Service
-    participant cc as Consumer Connector
-    participant c as Consumer
+    participant cc1 as Consumer Connector 1
+    participant dvct-c1 as DVCT of Data consumer/AI provider 1
+    participant c1 as Consumer/AI provider 1
+    participant cc2 as Consumer Connector 2
+    participant dvct-c2 as DVCT of Data consumer/AI provider 2
+    participant c2 as Consumer/AI provider 2
 
     p -) cat: Trigger data exchange
     cat -) cc: data exchange info (w/ veracity level agreement)
