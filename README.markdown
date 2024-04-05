@@ -2,8 +2,6 @@
 
 The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data.
 
-As data provider or data owner, organization and individual can use DVCT to find out when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (concatenated data or visualization data).
-
 ## Conceptual Overview
 
 According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or concatenated data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
@@ -15,7 +13,9 @@ Regardless of one's role in the use case, as a data provider (individual or orga
 
 ![data-type-usage](diagrams/data-type.png)
 
-To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus X ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
+To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
+
+As data provider or data owner, organization and individual can use DVCT to find out when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (concatenated data or visualization data).
 
 ## Technical Usage Scenarios & Features
 
