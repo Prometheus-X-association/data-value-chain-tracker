@@ -1,6 +1,6 @@
 # Data Value Chain Tracker BB Design Document
 
-The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and incentivizes data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data
+The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data
 
 ## Conceptual Overview
 
@@ -17,9 +17,9 @@ To encourage data sharing, digital incentives should be provided to the ecosyste
 
 ## Technical Usage Scenarios & Features
 
-The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem. In addition, by tracking the use of data in the ecosystem, the DVCT can also incentivize the organizations that participate in the value creation of the data. 
+The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage. 
 
-Example of technical usage scenarios could be skills gap analytics, where an organization that would like to improve the skills gap analytics by combining external data with internal skill data.
+An example of a use case is skills gap analytics, in which an organization as the use case orchestrator defines the use case including the data flow and digital incentives that will be distributed to use case participants in the contract. The services required for the skill gap analytics will include different data providers and AI providers who aim to improve the skills gap analytics by combining external data with internal skill data. Based on the use case, some technical usage scenario and role of the DVCT can be described in the table below:
 
 | Process                                                                                                                                                  | DVCT role                                                                                                                                            |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -30,17 +30,14 @@ Example of technical usage scenarios could be skills gap analytics, where an org
 | Data providers want to know where their data is used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                                                                                          
 ### Features/Main Functionalities
 
-Key functionalities:
+Based on the DVCT objective and technical usage scenario, there are three key functionalities for the BB, the key functionalities are:
 1. Track the history of direct and indirect data usage of shared data
 2. Handle the distribution of digital incentives (in terms of points, tokens, badges, or labels) based on the contract.
 3. Provide a map/overview of data-usage of shared data within the ecosystem.
 
-DVCT also potentially enables proving/verifying such properties about the shared data that are related to additional, sensitive (eg due to GDPR) data, without disclosing them (possibly using zero-knowledge proofs).
-
 ## Requirements
 
-_To be discussed with Félix and Robin_
-_To be validated with use case partners & pool of experts_
+Some requirements for the DVCT are based on the DVCT objectives, the technical usage scenario, the initial conceptual overview and GAIA-X and IDSA, including*:
 
 * **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage  
 * **`[BB_06__02]`** DVCT MUST interface with the Contract
@@ -53,25 +50,29 @@ _To be validated with use case partners & pool of experts_
 * **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
 * **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
 
+_*To be further discussed with Félix and Robin_\
+_*To be validated with use case partners & pool of experts_\
+
 
 ## Integrations
+In order to make the BB function, the integration with other BB is expected:
 
 ### Direct Integrations with Other BBs
+* _Contract._\
+The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
 
-_Distributed data visualization._
-_contract._
+* _Distributed data visualization._\
+The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space.
 
-
+* _Billing or Digital wallet._\
+The DVCT needs access to the points/token holders of the orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
 
 ### Integrations via Connector
 
-* DVCT will likely have to directly integrate with the **Connector** itself to extend data exchange flows with veracity assurance steps
-* As veracity level agreements are similar to contracts (or will become part of the contracts), DVCT will have interactions with the **Contract** component
-* Potential integrations with **Consent** as well (?)
-* The _point_ is strongly related to data usage
-
+* DVCT will likely need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain. 
 
 ## Relevant Standards
+* 
 
 ### Data Format Standards
 
