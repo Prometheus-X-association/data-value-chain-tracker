@@ -28,7 +28,7 @@ An example of a use case is skills gap analytics, in which an organization as t
 | Use Case Orchestrator defines the use case (data flow, point distribution, data/AI requirements)    | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points  |
 | Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector, generation of nodes and the chain after data consumption/usage                                                              |
 | Data consumers/AI providers who consume raw data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
-| Use Case Orchestrator sets incentives for data providers and data consumers based on the contract                                                                   | Interaction with the contract, the digital wallet of the use case orchestrator and distribution of the digital incentive                                                 |
+| Use Case Orchestrator sets incentives for data providers and data consumers based on the contract                                                                   | Interaction with the contract, the digital wallet of the point/token giver and distribution of the digital incentive based on the contract                                                |
 | Data providers want to know where their data is used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                                                                                          
 ### Features/Main Functionalities
 
@@ -67,7 +67,7 @@ The DVCT needs to get data from the contract about the contract identifier, the 
 The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space.
 
 * _Billing or Digital wallet._\
-The DVCT needs access to the points/token holders of the orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
+The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
 
 ### Integrations via Connector
 
