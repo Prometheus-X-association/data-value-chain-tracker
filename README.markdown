@@ -35,7 +35,7 @@ An example of a use case is skills gap analytics, in which an organization as t
 Based on the DVCT objective and technical usage scenario, there are three key functionalities for the BB, the key functionalities are:
 1. Track the history of direct and indirect data usage of shared data
 2. Handle the distribution of digital incentives (in terms of points, tokens, badges, or labels) based on the contract.
-3. Provide a map/overview of data-usage for monitoring data-usage distribution within the ecosystem.
+3. Provide a map/overview of value chain tracking for monitoring data-usage distribution within the ecosystem.
 
 ## Requirements
 
