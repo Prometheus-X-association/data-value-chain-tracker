@@ -74,7 +74,7 @@ The DVCT needs access to the points/token holders of the orchestrators that prov
 * DVCT will likely need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain. 
 
 ## Relevant Standards
-- [Decentralized identifiers](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
+- [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
 - [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
 
 ### Data Format Standards
@@ -83,35 +83,42 @@ The DVCT needs access to the points/token holders of the orchestrators that prov
 
 ### Mapping to Data Space Reference Architecture Models
 
-**DSSC:** see the [Provenance & Traceability](https://dssc.eu/space/BVE/357075283/Provenance+%26+Traceability) building block and [Data Provenance Tracking](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control#data-provenance-tracking)
-
-**DSSC:** see the [Value-Added Services](https://dssc.eu/space/BVE/357076468/Value-Added+Services) building block.
+**DSSC:** see:
+- [Data Provenance Tracking](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control#data-provenance-tracking) architecture model
+- the [Provenance & Traceability](https://dssc.eu/space/BVE/357075283/Provenance+%26+Traceability) building block 
+- [Value-Added Services](https://dssc.eu/space/BVE/357076468/Value-Added+Services) building block.
+- [GAIA-X: Technical Architecture](https://www.bmwk.de/Redaktion/EN/Publikationen/gaia-x-technical-architecture.pdf?__blob=publicationFile&v=7) regarding data ecosystem in section 4.2 
 
 **IDS Data Sharing and data exchange:** see [2.4 Data Exchange and Data Sharing](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/context-of-the-international-data-spaces/2_1_data-driven-business_ecosystems/2_4_data_exchange_and_data_sharing).
 
 
 ## Input / Output Data
 Input data:\
-
+- ContractID
+- Incentive-distributions
+- DataId
+- PrevRoot
+- DataType
 
 The output of data type is inform of JSON format:\
 ![node-data](diagrams/node-data.png)
 
 ### Data Value Chain Tracker visualization
 
-- visualization of value tracking for DP1:
+- visualization of value tracking for provider of raw data:
 
 ![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
 
-- Visualization of value tracking for DP2/DC1:
+- Visualization of value tracking for provider of concatenated data:
 
 ![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
 
-- Visualization of value tracking for DC2:
+- Visualization of value tracking for provider of final data:
 
 ![data-chain-visualization-participant 3](diagrams/dvct-viz-3.png)
 
-### Data Value Chain Tracker points distribution
+### Data Value Chain Tracker digital incentives distribution
+The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator. 
 
 ## Architecture
 
