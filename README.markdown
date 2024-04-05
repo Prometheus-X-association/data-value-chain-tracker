@@ -43,7 +43,7 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 
 * **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage  
 * **`[BB_06__02]`** DVCT MUST interface with the Contract
-* **`[BB_06__03]`** DVCT MUST support distributed data for value chain tracking
+* **`[BB_06__03]`** DVCT MUST support distributed data storing the value chain data (data-usage history)
 * **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
 * **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
 * **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type 
