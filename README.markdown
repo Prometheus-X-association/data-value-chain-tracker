@@ -2,20 +2,20 @@
 
 The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data.
 
+As data provider or data owner, organization and individual can use DVCT to find out which use case(s), when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (chain data or visualization data).
+
 ## Conceptual Overview
 
-According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or concatenated data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
+According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
 
 ![linked-data-value-chain](diagrams/linked-data-value-chain.png)
 Linked data value chain (Latif et al., 2009)
 
-Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or concatenated data, but as a data consumer one will always use data and then also produce data, either as concatenated data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
+Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or chain data, but as a data consumer one will always use data and then also produce data, either as chain data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
 
 ![data-type-usage](diagrams/data-type.png)
 
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
-
-As data provider or data owner, organization and individual can use DVCT to find out when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (concatenated data or visualization data).
 
 ## Technical Usage Scenarios & Features
 
@@ -35,7 +35,7 @@ An example of a use case is skills gap analytics, in which an organization as t
 Based on the DVCT objective and technical usage scenario, there are three key functionalities for the BB, the key functionalities are:
 1. Track the history of direct and indirect data usage of shared data
 2. Handle the distribution of digital incentives (in terms of points, tokens, badges, or labels) based on the contract.
-3. Provide a map/overview of value chain tracking for monitoring data-usage distribution within the ecosystem.
+3. Provide data for visualization of value chain tracking (forward and backward tracking).
 
 ## Requirements
 
@@ -46,7 +46,7 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 * **`[BB_06__03]`** DVCT MUST support distributed data storing the value chain data (data-usage history)
 * **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
 * **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
-* **`[BB_06__06]`** DVCT SHOULD distribute points based on the data output type 
+* **`[BB_06__06]`** DVCT SHOULD distribute points based on the contract 
 * **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
 * **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 * **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
@@ -109,7 +109,7 @@ The output of data type is inform of JSON format:\
 
 ![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
 
-- Visualization of value tracking for provider of concatenated data:
+- Visualization of value tracking for provider of chain data:
 
 ![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
 
@@ -138,42 +138,40 @@ title: Data Exchange for Data Value Chain Tracker
 
 sequenceDiagram
     participant o as Orchestrator
-    participant dp1 as Data provider 1
-    participant pc1 as Connector of Data provider 1
-    participant dvct-p1 as DVCT of Data provider 1
-    participant dp2 as Data provider 2
-    participant pc2 as Connector of Data provider 2
-    participant dvct-p2 as DVCT of Data provider 2
-    participant evs as External Veracity Attestation Service
-    participant cat as Catalogue Service
-    participant cc1 as Consumer Connector 1
-    participant dvct-c1 as DVCT of Data consumer/AI provider 1
-    participant c1 as Consumer/AI provider 1
-    participant cc2 as Consumer Connector 2
-    participant dvct-c2 as DVCT of Data consumer/AI provider 2
-    participant c2 as Consumer/AI provider 2
+    participant dw1 as Orchestrator wallet
 
-    p -) cat: Trigger data exchange
+    participant dp1 as Data provider 1
+    participant dw-p1 as Provider 1 wallet
+    participant pc1 as Connector provider 1
+    participant dvct-p1 as DVCT provider 1
+
+    participant dp1 as Data provider 2
+    participant dw-p2 as Provider 2 wallet
+    participant pc1 as Connector provider 2
+    participant dvct-p1 as DVCT provider 2
+
+    participant cot as Contract Service
+    participant wal as Billing/Wallet Service
+    participant cat as Catalogue Service
+
+    participant dvct-c1 as DVCT consumer/AI provider 1
+    participant cc1 as Consumer Connector 1
+    participant dw-c1 as Consumer 1 wallet
+    participant c1 as Consumer/AI provider 1
+
+    participant dvct-c2 as DVCT consumer/AI provider 2
+    participant cc2 as Consumer Connector 2
+    participant dw-c2 as Consumer 2 wallet
+    participant c2 as Consumer/AI provider 2
+    
+    o -) cat: Trigger data exchange, trigger data exchange, define the use case, data flow & points distribution
+    Note over cat: use case
     cat -) cc: data exchange info (w/ veracity level agreement)
     cc -) pc: data request (w/ contract + veracity level agreement)
     pc -) con: Verify contract & policies + veracity agreement
     Note over pc: Policy verification & Access control
     pc -) p: Get data
     p -) pc: data
-
-    alt self-attestation
-        pc -) pc: Get attestation of veracity
-        pc -) cc: data + attestation
-    else third-party attestation
-        pc -) evs: Get attestation of veracity
-        evs -) pc: attestation
-        pc -) cc: data + attestation
-    else no agreement / attestation
-        pc -) cc: data
-    end
-
-    Note over cc: Policy verification & Access control
-    cc -) c: data
 ```
 
 
