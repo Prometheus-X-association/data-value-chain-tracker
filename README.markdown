@@ -25,10 +25,10 @@ An example of a use case is skills gap analytics, in which an organization as t
 
 | Process                                                                                                                                                  | DVCT role                                                                                                                                            |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Use Case Orchestrator defines the use case (data flow, point distribution, data/AI requirements)    | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points  |
-| Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector, generation of nodes and the chain after data consumption/usage                                                              |
-| Data consumers/AI providers who consume raw data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
-| Use Case Orchestrator sets incentives for data providers and data consumers based on the contract                                                                   | Interaction with the contract, the digital wallet of the point/token giver and distribution of the digital incentive based on the contract                                                |
+| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements)    | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points  |
+| Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                              |
+| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
+| participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract                                                                   | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute)                                              |
 | Data providers want to know where their data is used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                                                                                          
 ### Features/Main Functionalities
 
@@ -313,11 +313,16 @@ sequenceDiagram
 
 ### Test Plan
 
+<!-- TODO -->
+
 ### Unit tests
+
+<!-- TODO -->
 
 ### Integration Tests
 
+<!-- TODO -->
+
 ### Reference
 
-1. Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575).
-2. 
+- Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575). 
