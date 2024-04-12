@@ -9,7 +9,8 @@ As data provider or data owner, organization and individual can use DVCT to find
 According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
 
 <img src="diagrams/linked-data-value-chain.png" width="500">
-Linked data value chain (Latif et al., 2009)
+source: Linked data value chain (Latif et al., 2009)
+
 
 Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or chain data, but as a data consumer one will always use data and then also produce data, either as chain data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
 
@@ -29,7 +30,8 @@ An example of a use case is skills gap analytics, in which an organization as t
 | Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                              |
 | Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
 | participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract                                                                   | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute)                                              |
-| Data providers want to know where their data was used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                                                                                          
+| Data providers want to know where their data was used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                    | AI Provider join a use case                                                                                         | Read use case contract to get information about incetives for AI provider to join a use case 
+
 ### Features/Main Functionalities
 
 Based on the DVCT objective and technical usage scenario, there are three key functionalities for the BB, the key functionalities are:
