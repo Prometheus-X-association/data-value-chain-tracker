@@ -121,9 +121,86 @@ The output of data type is inform of JSON format:\
 The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator. 
 
 ## Architecture
+### Component Descriptions:
+1. **DataProvider:** Entities that supply data to the system.
+2. **DataConsumer:** Entities that use data provided by DataProviders.
+3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains, and distributes digital incentives.
+4. **Blockchain or any immutable database:** Ensures data immutability and transaction verification.
+5. **Database:** Stores non-blockchain data records and manages queries.
+6. **UserInterface:** Provides visualizations of data lineage and manages user interactions.
+7. **ContractManagement:** Manages digital contracts that define terms for data use and incentive models.
+8. **API_Gateway:** Manages all incoming and outgoing API requests and handles user authentication.
+9. **Incentive Engine:** Handles the calculation and distribution of tokens or points as per contractual agreements.
+10. **Logging and Monitoring:** Records system activities and monitors performance to ensure optimal operation and aid in troubleshooting.
+11. **Error Handling and Recovery:** Implements strategies to manage system errors and restore normal operations after failures, ensuring system resilience and reliability.
 
-<!-- TODO -->
+```mermaid
+---
+title: Architecture components
+---
+classDiagram
+    class DataProvider {
+        +Provide data()
+        +Update data()
+    }
+    class DataConsumer {
+        +Request data()
+        +Receive data()
+    }
+    class DVCT_Core {
+        +Track data usage()
+        +Create data nodes()
+        +Create chains()
+    }
+    class Blockchain {
+        +Store immutable records()
+        +Verify transactions()
+        +Handle token transactions()
+    }
+    class Database {
+        +Store data records()
+        +Query data()
+    }
+    class UserInterface {
+        +Display data lineage()
+        +Manage user accounts()
+    }
+    class ContractManagement {
+        +Manage contracts()
+        +Define incentive models()
+    }
+    class IncentiveEngine {
+        +Calculate incentives()
+        +Distribute tokens or points
+    }
+    class API_Gateway {
+        +Route requests()
+        +Authenticate users()
+    }
+    class LoggingMonitoring {
+        +Log operations()
+        +Monitor system performance()
+    }
+    class ErrorHandlingRecovery {
+        +Handle system errors()
+        +Recover from failures()
+    }
 
+    DataProvider --|> DVCT_Core : provides data to
+    DataConsumer --|> DVCT_Core : consumes data from
+    DVCT_Core --|> Blockchain : uses
+    DVCT_Core --|> Database : uses
+    DVCT_Core --|> UserInterface : outputs to
+    DVCT_Core --|> ContractManagement : interacts with
+    DVCT_Core --|> IncentiveEngine : uses
+    API_Gateway --|> DVCT_Core : interfaces with
+    UserInterface --|> API_Gateway : connects through
+    ContractManagement --|> Blockchain : records contracts on
+    IncentiveEngine --|> ContractManagement : gets rules from
+    IncentiveEngine --|> Blockchain : records transactions on
+    DVCT_Core --|> LoggingMonitoring : uses for logging
+    DVCT_Core --|> ErrorHandlingRecovery : uses for managing errors
+```
 
 ## Dynamic Behaviour
 
@@ -288,13 +365,29 @@ sequenceDiagram
 
 
 ## Configuration & Deployment Settings
-
-<!-- TODO -->
+The configuration and deployment setting for Data Value Chain Tracker (DVCT), consist of:
+1. Repository Setup: the source code will be hosted on GitHub or GitLab, allowing for version control and collaborative development.
+2. Configuration Management: Environment variables for sensitive or environment-specific settings (e.g., database credentials) should be centralized in specific files, employ configuration files (like config.json, .env, or YAML files) to manage application settings, which can be easily adjusted without changing the code.
+3. Dependency Management: Utilize a package manager such as npm for JavaScript or pip for Python to manage libraries and their versions. a requirements.txt or package.json file should be included to automate the installation of dependencies.
+4. Database Configuration: Set up a relational or NoSQL database with scripts for initialization and migration. Tools like Docker can be used to containerize database environments, enhancing portability and consistency across development, testing, and production environments.
+6. Deployment:Use continuous integration/continuous deployment (CI/CD) pipelines via GitHub Actions, to automate testing and deployment. Use container orchestration tools like Kubernetes or Docker Swarm.
+7. Monitoring and Maintenance: Implement logging and monitoring using tools like Prometheus, Grafana, or ELK Stack to keep track of the system’s health and performance. Regular updates and security patches to dependencies should be managed through the chosen package managers and monitored via the CI/CD pipeline.
 
 
 ## Third Party Components & Licenses
 
-<!-- TODO -->
+- Immutable Database:
+Component: Use an immutable database like Apache Cassandra or a blockchain-based storage solution.
+License: Apache Cassandra is available under the Apache License 2.0, which allows commercial use, modification, distribution, and private use.
+
+- MongoDB Node.js Library:
+Component: MongoDB Node.js driver for database operations.
+License: The MongoDB Node.js library is released under the Apache License 2.0.
+
+- Open Source Blockchain:
+Component: Hyperledger Fabric or Ethereum for blockchain functionalities.
+License: Hyperledger Fabric: Available under the Apache License 2.0.
+Ethereum: Most tools and libraries in the Ethereum ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
 
 
 ## Implementation Details
@@ -309,19 +402,19 @@ sequenceDiagram
 
 ## Test Specification
 
-<!-- TODO -->
-
 ### Test Plan
+The test plan for the Data Value Chain Tracker (DVCT) aims to ensure the system's integrity and performance through a comprehensive approach. It includes correctness tests for accurate data representation, reliability tests for system stability and data integrity, tests data immutability and scalability, back and forward tracking tests to verify accurate data lineage, and incentives distribution tests to ensure compliance and fairness based on contractual agreements.
 
-<!-- TODO -->
+### back and forward chain tracking
+Back and forward chain tracking in the context of the Data Value Chain Tracker (DVCT) refers to the system's ability to trace data usage throughout its lifecycle. Forward tracking enables monitoring of how data is used, transformed, or combined from its initial state to subsequent states, including indirect usages in various use cases. It helps determine where, when, and in which use case the data was utilized.
 
-### Unit tests
-
-<!-- TODO -->
+Backward tracking, on the other hand, allows tracing back to the data's origin up to three levels, identifying the primary source and any intermediate stages it has passed through. This feature ensures transparency and accountability in data handling, allowing stakeholders to see both the downstream implications of data they provide and the upstream origins of data they use. This capability is critical for auditability, compliance, and verifying the integrity of data transformations and linkages in complex systems.
 
 ### Integration Tests
+These tests will check the interactions between DVCT and external systems like the Data Space Connector and Contract Service to ensure data flows correctly through the system and meets all business requirements.
 
-<!-- TODO -->
+### Incentives Distribution Tests:
+Test the logic and execution of digital incentives distribution to ensure it complies with the contractual agreement. Simulate various contractual scenarios to ensure incentives are calculated and distributed accurately and transparently.
 
 ### Reference
 
