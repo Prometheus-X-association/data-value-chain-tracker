@@ -366,7 +366,79 @@ sequenceDiagram
     end
 
 ```
+To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we devided the process into different main processes:
 
+- **Part 1:** Initiating Data Exchange and Basic Data Handling
+```mermaid
+sequenceDiagram
+    participant o as Orchestrator
+    participant cat as Catalogue Service
+    participant dp1 as Data provider 1
+    participant dp2 as Data provider 2
+    participant pc1 as Connector provider 1
+    participant pc2 as Connector provider 2
+    participant cc1 as Connector Consumer 1
+    participant cc2 as Connector Consumer 2
+    participant c1 as Consumer/AI provider 1
+    participant c2 as Consumer/AI provider 2
+
+    activate cat
+    o ->>+ cat: Define use case, data flow & points distribution
+    dp1 ->>+ cat: Join use case
+    dp2 ->>+ cat: Join use case
+    c1 ->>+ cat: Join use case
+    c2 ->>+ cat: Join use case
+    cat -->>- pc1: Provide contract and data exchange information
+    cat -->>- pc2: Provide contract and data exchange information
+    cat -->>- cc1: Provide contract and data exchange information
+    cat -->>- cc2: Provide contract and data exchange information
+    deactivate cat
+
+```
+
+- **Part 2:** Data Usage and Node Creation
+```mermaid
+sequenceDiagram
+    participant pc1 as Connector provider 1
+    participant dp1 as Data provider 1
+    participant cc1 as Connector Consumer 1
+    participant c1 as Consumer/AI provider 1
+    participant dvct-c1 as DVCT consumer/AI provider 1
+    participant cot as Contract Service
+
+    cc1 ->> pc1: Data request (with contract)
+    pc1 ->> cot: Verify contract
+    cot -->> pc1: Verified contract & policies
+    pc1 ->> dp1: Request data
+    dp1 -->> pc1: Provide raw data DP1
+    pc1 -->> cc1: Transfer data DP1
+    cc1 ->> c1: Consume data DP1
+    cc1 ->>+ dvct-c1: Trigger data consume DVCT
+    cc1 ->> dvct-c1: Get DP1 metadata info
+    dvct-c1 ->> dvct-c1: Create Node based on DP1 metadata
+
+```
+
+- **Part 3:** Incentive Distribution and Chain Update
+```mermaid
+sequenceDiagram
+    participant dvct-c1 as DVCT consumer/AI provider 1
+    participant dw1 as Orchestrator wallet
+    participant dw-c1 as Wallet Consumer 1
+    participant dw-p1 as Wallet Provider 1
+    participant dp1 as Data provider 1
+    participant dvct-p1 as DVCT provider 1
+    participant cc1 as Connector Consumer 1
+
+    dvct-c1 ->> dw1: Request point(s) based on contract
+    dw1 -->> dvct-c1: Provide point(s)
+    dvct-c1 ->> dw-c1: Distribute point(s)
+    dvct-c1 ->> dw-p1: Distribute point(s)
+    dvct-c1 ->> cc1: Request update to prevRoot based on data output
+    cc1 ->> dp1: Send request and prevRoot node(s) data
+    dp1 ->> dvct-p1: Update chain data, check existence
+    dvct-p1 ->> dvct-p1: Handle Node creation or update
+```
 
 ## Configuration & Deployment Settings
 The configuration and deployment setting for Data Value Chain Tracker (DVCT), consist of:
