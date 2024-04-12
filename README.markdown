@@ -8,7 +8,7 @@ As data provider or data owner, organization and individual can use DVCT to find
 
 According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
 
-![linked-data-value-chain](diagrams/linked-data-value-chain.png)
+![linked-data-value-chain](diagrams/linked-data-value-chain.png =100x)
 Linked data value chain (Latif et al., 2009)
 
 Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or chain data, but as a data consumer one will always use data and then also produce data, either as chain data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
