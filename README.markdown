@@ -80,7 +80,7 @@ The DVCT needs access to the points/token holders of the point/token givers defi
 - [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
 
 ### Data Format Standards
-- [JSON-LD](https://json-ld.org/)
+- [JSON-LD](https://json-ld.org/) for data interconnection
 - [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) for Date and time format
 
 ### Mapping to Data Space Reference Architecture Models
@@ -97,12 +97,12 @@ The DVCT needs access to the points/token holders of the point/token givers defi
 ## Input / Output Data
 Input data:
 - ContractID
-- Incentive-distributions
+- IncentiveDistributions
 - DataId
 - PrevRoot
 - DataType
 
-The output of data type is inform of JSON format:
+**The output of data type is inform of JSON format:**
 ![node-data](diagrams/node-data.png)
 
 ### Data Value Chain Tracker visualization
