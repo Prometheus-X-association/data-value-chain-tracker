@@ -108,16 +108,13 @@ The output of data type is inform of JSON format:
 ### Data Value Chain Tracker visualization
 
 - visualization of value tracking for provider of raw data:
-
-![data-chain-visualization-participant 1](diagrams/dvct-viz-1.png)
+<img src="diagrams/dvct-viz-1.png" width="350">
 
 - Visualization of value tracking for provider of chain data:
-
-![data-chain-visualization-participant 2](diagrams/dvct-viz-2.png)
+<img src="diagrams/dvct-viz-2.png" width="350">
 
 - Visualization of value tracking for provider of final data:
-
-![data-chain-visualization-participant 3](diagrams/dvct-viz-3.png)
+<img src="diagrams/dvct-viz-3.png" width="350">
 
 ### Data Value Chain Tracker digital incentives distribution
 The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator. 
