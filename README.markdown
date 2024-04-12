@@ -103,7 +103,7 @@ Input data:
 - DataType
 
 **The output of data type is inform of JSON format:**
-![node-data](diagrams/node-data.png)
+<img src="diagrams/node-data.png" width="350">
 
 ### Data Value Chain Tracker visualization
 
