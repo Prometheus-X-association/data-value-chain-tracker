@@ -83,7 +83,7 @@ The DVCT needs access to the points/token holders of the point/token givers defi
 
 ### Mapping to Data Space Reference Architecture Models
 
-**DSSC:** see:
+**DSSC** - based on DSSC, this Building block is part:
 - [Data Provenance Tracking](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control#data-provenance-tracking) architecture model
 - the [Provenance & Traceability](https://dssc.eu/space/BVE/357075283/Provenance+%26+Traceability) building block 
 - [Value-Added Services](https://dssc.eu/space/BVE/357076468/Value-Added+Services) building block.
@@ -93,14 +93,14 @@ The DVCT needs access to the points/token holders of the point/token givers defi
 
 
 ## Input / Output Data
-Input data:\
+Input data:
 - ContractID
 - Incentive-distributions
 - DataId
 - PrevRoot
 - DataType
 
-The output of data type is inform of JSON format:\
+The output of data type is inform of JSON format:
 ![node-data](diagrams/node-data.png)
 
 ### Data Value Chain Tracker visualization
@@ -121,14 +121,17 @@ The output of data type is inform of JSON format:\
 The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator. 
 
 ## Architecture
+
+_To be discussed with Félix and Robin_
+
 ### Component Descriptions:
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
 3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains, and distributes digital incentives.
 4. **Blockchain or any immutable database:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
-6. **UserInterface:** Provides visualizations of data lineage and manages user interactions.
-7. **ContractManagement:** Manages digital contracts that define terms for data use and incentive models.
+6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
+7. **ContractManagement:** Manages digital contracts that define incentive models.
 8. **API_Gateway:** Manages all incoming and outgoing API requests and handles user authentication.
 9. **Incentive Engine:** Handles the calculation and distribution of tokens or points as per contractual agreements.
 10. **Logging and Monitoring:** Records system activities and monitors performance to ensure optimal operation and aid in troubleshooting.
@@ -201,6 +204,7 @@ classDiagram
     DVCT_Core --|> LoggingMonitoring : uses for logging
     DVCT_Core --|> ErrorHandlingRecovery : uses for managing errors
 ```
+for the initial implementation, immutable database non-blockchain will be used before the wallet BB is ready.
 
 ## Dynamic Behaviour
 
