@@ -102,7 +102,7 @@ Input data:
 - PrevRoot
 - DataType
 
-**The output of data type is inform of JSON format:**
+### **The output of data type is inform of JSON format:** ###
 <img src="diagrams/node-data.png" width="350">
 
 ### Data Value Chain Tracker visualization
