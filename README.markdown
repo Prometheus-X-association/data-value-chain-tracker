@@ -11,7 +11,6 @@ According to Latif et al. (2009), there are three different types of data that c
 <img src="diagrams/linked-data-value-chain.png" width="500">
 source: Linked data value chain (Latif et al., 2009)
 
-
 Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or chain data, but as a data consumer one will always use data and then also produce data, either as chain data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
 
 ![data-type-usage](diagrams/data-type.png)
@@ -20,110 +19,119 @@ To encourage data sharing, digital incentives should be provided to the ecosyste
 
 ## Technical Usage Scenarios & Features
 
-The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage. 
+The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage.
 
 An example of a use case is skills gap analytics, in which an organization as the use case orchestrator defines the use case including the data flow and digital incentives that will be distributed to use case participants in the contract. The services required for the skill gap analytics will include different data providers and AI providers who aim to improve the skills gap analytics by combining external data with internal skill data. Based on the use case, some technical usage scenario and role of the DVCT can be described in the table below:
 
-| Process                                                                                                                                                  | DVCT role                                                                                                                                            |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements)    | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points  |
-| Data providers share data with data consumers/AI providers on the basis of the contract                                                                            | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                              |
-| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
-| Participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract                                                                   | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute)                                              |
-| Data providers want to know where their data was used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three                                                                |                                    | AI Provider join a use case                                                                                         | Read use case contract to get information about incetives for AI provider to join a use case    |  
+| Process                                                                                                                                                               | DVCT role                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------- | -------------------------------------------------------------------------------------------- |
+| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements) | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points                                              |
+| Data providers share data with data consumers/AI providers on the basis of the contract                                                                               | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                                         |
+| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data                         | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                                                                  |
+| Participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract                                                           | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute) |
+| Data providers want to know where their data was used                                                                                                                 | Read the json data node, interact with the data visualization to create the value chain three                                                                                                         |     | AI Provider join a use case | Read use case contract to get information about incetives for AI provider to join a use case |
 
 ### Features/Main Functionalities
 
 Based on the DVCT objective and technical usage scenario, there are three key functionalities for the BB, the key functionalities are:
+
 1. Track the history of direct and indirect data usage of shared data
 2. Handle the distribution of digital incentives (in terms of points, tokens, badges, or labels) based on the contract.
 3. Provide data for visualization of value chain tracking (forward and backward tracking).
 
 ## Requirements
 
-Some requirements for the DVCT are based on the DVCT objectives, the technical usage scenario, the initial conceptual overview and GAIA-X and IDSA, including*:
+Some requirements for the DVCT are based on the DVCT objectives, the technical usage scenario, the initial conceptual overview and GAIA-X and IDSA, including\*:
 
-* **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage  
-* **`[BB_06__02]`** DVCT MUST interface with the Contract
-* **`[BB_06__03]`** DVCT MUST support distributed data storing the value chain data (data-usage history)
-* **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
-* **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
-* **`[BB_06__06]`** DVCT SHOULD distribute points based on the contract 
-* **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
-* **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
-* **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
-* **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
+-   **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage
+-   **`[BB_06__02]`** DVCT MUST interface with the Contract
+-   **`[BB_06__03]`** DVCT MUST support distributed data storing the value chain data (data-usage history)
+-   **`[BB_06__04]`** DVCT SHOULD have access to points/token storage
+-   **`[BB_06__05]`** DVCT MUST store points/tokens and data-usage-history in immutable database
+-   **`[BB_06__06]`** DVCT SHOULD distribute points based on the contract
+-   **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
+-   **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
+-   **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
+-   **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
 
-_*To be further discussed with Félix and Robin_\
-_*To be validated with use case partners & pool of experts_\
-
+_\*To be further discussed with Félix and Robin_\
+_\*To be validated with use case partners & pool of experts_\
 
 ## Integrations
+
 In order to make the BB function, the integration with other BB is expected:
 
 ### Direct Integrations with Other BBs
-* _Contract._\
-The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
 
-* _Distributed data visualization._\
-The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space.
+-   _Contract._\
+    The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
 
-* _Billing or Digital wallet._\
-The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
+-   _Distributed data visualization._\
+    The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space.
+
+-   _Billing or Digital wallet._\
+    The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
 
 ### Integrations via Connector
 
-* DVCT will likely need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain. 
+-   DVCT will likely need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain.
 
 ## Relevant Standards
-- [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
-- [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
+
+-   [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
+-   [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
 
 ### Data Format Standards
-- [JSON-LD](https://json-ld.org/) for data interconnection
-- [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) for Date and time format
+
+-   [JSON-LD](https://json-ld.org/) for data interconnection
+-   [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) for Date and time format
 
 ### Mapping to Data Space Reference Architecture Models
 
 **DSSC** - based on DSSC, this Building block is part:
-- [Data Provenance Tracking](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control#data-provenance-tracking) architecture model
-- the [Provenance & Traceability](https://dssc.eu/space/BVE/357075283/Provenance+%26+Traceability) building block 
-- [Value-Added Services](https://dssc.eu/space/BVE/357076468/Value-Added+Services) building block.
-- [GAIA-X: Technical Architecture](https://www.bmwk.de/Redaktion/EN/Publikationen/gaia-x-technical-architecture.pdf?__blob=publicationFile&v=7) regarding data ecosystem in section 4.2 
+
+-   [Data Provenance Tracking](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/perspectives-of-the-reference-architecture-model/4_perspectives/4_1_security_perspective/4_1_6_usage_control#data-provenance-tracking) architecture model
+-   the [Provenance & Traceability](https://dssc.eu/space/BVE/357075283/Provenance+%26+Traceability) building block
+-   [Value-Added Services](https://dssc.eu/space/BVE/357076468/Value-Added+Services) building block.
+-   [GAIA-X: Technical Architecture](https://www.bmwk.de/Redaktion/EN/Publikationen/gaia-x-technical-architecture.pdf?__blob=publicationFile&v=7) regarding data ecosystem in section 4.2
 
 **IDS Data Sharing and data exchange:** see [2.4 Data Exchange and Data Sharing](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/context-of-the-international-data-spaces/2_1_data-driven-business_ecosystems/2_4_data_exchange_and_data_sharing).
 
-
 ## Input / Output Data
-Input data:
-- ContractID
-- IncentiveDistributions
-- DataId
-- PrevRoot
-- DataType
 
-### **The output of data type is inform of JSON format:** ###
+Input data:
+
+-   ContractID
+-   IncentiveDistributions
+-   DataId
+-   PrevRoot
+-   DataType
+
+### **The output of data type is inform of JSON format:**
+
 <img src="diagrams/node-data.png" width="350">
 
 ### Data Value Chain Tracker visualization
 
-- visualization of value tracking for provider of raw data:
-<img src="diagrams/dvct-viz-1.png" width="350">
+-   visualization of value tracking for provider of raw data:
+    <img src="diagrams/dvct-viz-1.png" width="350">
 
-- Visualization of value tracking for provider of chain data:
-<img src="diagrams/dvct-viz-2.png" width="350">
+-   Visualization of value tracking for provider of chain data:
+    <img src="diagrams/dvct-viz-2.png" width="350">
 
-- Visualization of value tracking for provider of final data:
-<img src="diagrams/dvct-viz-3.png" width="350">
+-   Visualization of value tracking for provider of final data:
+    <img src="diagrams/dvct-viz-3.png" width="350">
 
 ### Data Value Chain Tracker digital incentives distribution
-The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator. 
+
+The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator.
 
 ## Architecture
 
 _To be discussed with Félix and Robin_
 
 ### Component Descriptions:
+
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
 3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains, and distributes digital incentives.
@@ -203,6 +211,7 @@ classDiagram
     DVCT_Core --|> LoggingMonitoring : uses for logging
     DVCT_Core --|> ErrorHandlingRecovery : uses for managing errors
 ```
+
 for the initial implementation, immutable database non-blockchain will be used before the wallet BB is ready.
 
 ## Dynamic Behaviour
@@ -221,7 +230,7 @@ sequenceDiagram
     participant dw1 as Orchestrator wallet
 
     participant dp1 as Data provider 1
-    participant dw-p1 as Wallet Provider 1 
+    participant dw-p1 as Wallet Provider 1
     participant pc1 as Connector provider 1
     participant dvct-p1 as DVCT provider 1
 
@@ -241,9 +250,9 @@ sequenceDiagram
 
     participant dvct-c2 as DVCT consumer/AI provider 2
     participant cc2 as Connector Consumer 2
-    participant dw-c2 as Wallet consumer 2 
+    participant dw-c2 as Wallet consumer 2
     participant c2 as Consumer/AI provider 2
-    
+
     Note over dw1: points/token available
     Note over dw-c1: points/token available
     Note over dw-c2: points/token available
@@ -365,9 +374,11 @@ sequenceDiagram
     end
 
 ```
+
 To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we devided the process into different main processes:
 
-- **Part 1:** Initiating Data Exchange and Basic Data Handling
+-   **Part 1:** Initiating Data Exchange and Basic Data Handling
+
 ```mermaid
 sequenceDiagram
     participant o as Orchestrator
@@ -395,7 +406,8 @@ sequenceDiagram
 
 ```
 
-- **Part 2:** Data Usage and Node Creation
+-   **Part 2:** Data Usage and Node Creation
+
 ```mermaid
 sequenceDiagram
     participant pc1 as Connector provider 1
@@ -418,7 +430,8 @@ sequenceDiagram
 
 ```
 
-- **Part 3:** Incentive Distribution and Chain Update
+-   **Part 3:** Incentive Distribution and Chain Update
+
 ```mermaid
 sequenceDiagram
     participant dvct-c1 as DVCT consumer/AI provider 1
@@ -439,58 +452,132 @@ sequenceDiagram
     dvct-p1 ->> dvct-p1: Handle Node creation or update
 ```
 
+## Nomad incentive distribution (possibly DAO)
+
+### Decentralized governance protocol
+
+The decentralized governance protocol will govern how the network of data providers and consumers operates, ensuring fairness, transparency, and security in data transactions. It will largely operate based on contracts provided by use-case orchestrators.
+The protocol will define how decisions are made, including the addition of new members (providers, consumers, orchestrators), approval of data sharing contracts, and most importantly allocation of incentives.
+We will incorporate mechanisms for vote delegation and statistically significant majority, to ensure effective decision-making even in cases of low participation.
+
+### Incentives for network participants
+
+We will incentivize providers, consumers and orchestrators to join the network by offering them ownership in the network and governance power.
+Data providers can earn governance tokens by contributing valuable data to the network, thereby increasing its value. Governance tokens grant voting rights and access to network resources.
+We want the value proposition for joining the network to outweigh the alternatives for potential participants.
+
+### Smart contracts for data transactions
+
+We will develop smart contracts to facilitate data transactions between providers and consumers, ensuring secure and transparent exchanges. Implement peer-to-peer contracts where data consumers can engage data providers for specific datasets based on predefined terms and conditions. Integrate mechanisms for payment and incentive distribution directly into the smart contracts, ensuring fair compensation for data providers based on the value of their contributions.
+
+### Data agreement smart contract
+
+This smart contract will facilitate the sharing of data based on some use case defined by a use-case orchestrator. Some of its parameters will be defined from the contract bb, where we get information about a participant’s role, data usage terms, type of data usage and the distribution of points. This ensures consistency and interoperability across the prometheus-x ecosystem. We might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case. Data providers and data consumers will communicate with this contract so that we can keep track of data sharing and distribute incentives in a fair and transparent manner.
+
+### Tokenomics and economic model
+
+We want to align incentives and reward participants for contributing valuable data to the network. Issue tokens based on contract incentive distribution representing governance rights and access to network resources. Ensure sufficient liquidity in the token economy to enable trading and incentivize participation (this will probably not be our responsibility).
+
+### Governance and treasury management
+
+We should have a decentralized treasury to manage the network’s assets and allocate resources for network development and growth. This treasury will be governed by network participants, and they will make collective decisions regarding resource allocation, investments, and incentives. This has to be a transparent process which includes accountability, with mechanisms for auditing and reporting on fund utilization.
+
+### On-chain verification (a possibility)
+
+We want to validate the quality and reliability of data shared by providers. To do that we can store metadata about data contributors, including their reputation, previous contributions etc, on the blockchain. Maybe implement a system of verification where both data providers and consumers must approve the data before it is deployed on-chain. Ensuring trustworthiness and quality. The network will consist of many providers and many consumers.
+
+### Model (generic)
+
+1. All inflation is cash backed by committed capital at the free market price of cash flow rights.
+2. We have to types of tokens - one representing governance and access to internal services, and one representing cash flow rights.
+3. There is a one-to-one relationship in issued governance tokens and tokens representing cash flow rights.
+4. Governance tokens are non-transferable
+5. Governance Tokens must be burned to be able to sell cash flow tokens in the open market
+6. Recruitment is governed by the same same economic game as all other governance processes.
+
+So, how does this effectively govern a restricted network in an efficient manner?\
+• By i, all inflation is backed by cash =⇒ All tokens are backed by capital at the open market price at the time of issuance =⇒ All contributors always capture their fair share of inflation.\
+• By ii − v , 2 Holds because you can never own more governance rights than cash flow rights by definition, where there is a one-to-one relationship between cash flow rights and risk in issuance.\
+• By iv, 3 holds by definition. In addition, every participant has incentive to only select candidates contributing to positive network effects, thus implying that the incentive of joining the organiza- tion is always at least as large as the alternative except for the mandatory cash commitment. So the only requirement for ensuring 1 holds is that the value of voting power, access to the internal services and expected return on investments are higher than a risk-equivalent investment - a requirement always present in any investment (if you solved this problem with a model, that model is an infinite money machine =⇒ it is impossible).\
+• Now, given our stated requirements, the only thing left to prove is 4 -i.e. that everyone is more incentivized to contribute than to attack the network. Now, assume some member m has an incentive to attack, that is, that (4) does not hold. Then m must have a larger risk-adjusted payoff from attacking than the expected cash flow given that m does not decide to attack the network. Now, by attacking and succeeding, you receive a maximum payoff of cash(DAO)t since the network is worthless in that case, so we have
+cash(DAO)t ≥ E[Um(DAO|G)] + cost(attack)\
+• Now, to attack the network, m needs to control a supermajority (>> 50%) of the governance token, which cannot be obtained by anything else than committing capital to the network - meaning that m needs to own > 50% of cash(DAOt) to be successful, so
+cost(attack) > (1/2)cash(DAO)t\
+• Thus, we have:
+cash(DAO)t ≥ E[Um(DAO|Game)]+cost(attack) > E[Um(DAO|Game)+(1/2)cash(DAO)t ≡
+(1/2)cash(DAO)t > E[Um(DAO|Game)\
+Now, note that E[Um(DAO|Game)] > E[Um((1/2)cash(DAO)t)], so we are left with the claim (1/2)cash(DAO)t > E[Um((1/2)cash(DAO)t)]
+implying that the expected payoff from the committed cash flow in the network is negative - but then m would never have an incentive to commit capital in the first place, so it must be that the network is secure if people are willing to commit capital in the first place (meaning that the DAO is non-existing) ad absurdum.
+Thus, by implementing this decentralized governance model, one only has to consider the value of the governance rights and the access to internal services/market - why not also design this part as well? In short, we have proposed a governance model for restricted-access DAOs in which we impose no binary rules internally and incorporate recruitment in the same economic game as that of the DAO in general - effectively creating a frictionless decentralized governance model also imposing trust between its members and the outside world (because the outside world knows that recruitment is done with proper skin in the game).
+
+### Tokenomics (generic)
+
+Now, we have some additional criteria to add to ensure an even stronger model for our application:\
+• "Governance is owned completely by the orchestrators, data providers, and data consumers, ensuring that all committed resources originate from their respective roles. Only recruited members within each category can assert their governance rights, and no entity can wield more voting power than its stake in the ecosystem."\
+• Sufficient liquidity in the monetary rights of the network members - Their rights can be traded freely in an open market or p2p\
+• Lock-in effect: An extra incentive to buy and hold - an implicit discount when committing capital and a corresponding cost when liquidating your holdings.\
+Now, a very important (and hard) problem is to define the economic game with as few rules as possible. Now, let ́s say you have two tokens - one non-transferable token that represents economic claims as well as voting power and access to the internal market. At the same time, you have another, freely transferable ERC20-token that only represents economic ownership - and a price oracle.
+What happens if you then make the following set of rules?\
+• All governance tokens are issued at the open market price of the ERC20-token.\
+• Cash flow tokens can only be obtained by a 1-to-1 trade with the governance token - where the governance token is deleted in the process\
+• All ERC20-tokens can be sold or transferred freely.\
+Then, we can ensure that all governance tokens are owned by contributors, who has already been recruited by the DAO. We also trivially enable free trade of economic rights. Now, since all recruited members have a higher value of the governance token than the other, capital commitment happens at a discount, since the price oracle tracks the freely traded token which represents no such rights. However, this is reversed when you sell: Then you have to give up voting power and (at least partly) access to the internal market to be able to trade the economic rights. Thus, we create a lock-in effect, i.e. an incentive to buy but not sell.
+This is our economic model: All inflation happens at an open market price of cash flow rights (i.e. 100 percent cash backed at time of commitment), and none other than recruited members own the governance.
+
 ## Configuration & Deployment Settings
+
 The configuration and deployment setting for Data Value Chain Tracker (DVCT), consist of:
+
 1. Repository Setup: the source code will be hosted on GitHub or GitLab, allowing for version control and collaborative development.
 2. Configuration Management: Environment variables for sensitive or environment-specific settings (e.g., database credentials) should be centralized in specific files, employ configuration files (like config.json, .env, or YAML files) to manage application settings, which can be easily adjusted without changing the code.
 3. Dependency Management: Utilize a package manager such as npm for JavaScript or pip for Python to manage libraries and their versions. a requirements.txt or package.json file should be included to automate the installation of dependencies.
 4. Database Configuration: Set up a relational or NoSQL database with scripts for initialization and migration. Tools like Docker can be used to containerize database environments, enhancing portability and consistency across development, testing, and production environments.
-6. Deployment:Use continuous integration/continuous deployment (CI/CD) pipelines via GitHub Actions, to automate testing and deployment. Use container orchestration tools like Kubernetes or Docker Swarm.
-7. Monitoring and Maintenance: Implement logging and monitoring using tools like Prometheus, Grafana, or ELK Stack to keep track of the system’s health and performance. Regular updates and security patches to dependencies should be managed through the chosen package managers and monitored via the CI/CD pipeline.
-
+5. Deployment:Use continuous integration/continuous deployment (CI/CD) pipelines via GitHub Actions, to automate testing and deployment. Use container orchestration tools like Kubernetes or Docker Swarm.
+6. Monitoring and Maintenance: Implement logging and monitoring using tools like Prometheus, Grafana, or ELK Stack to keep track of the system’s health and performance. Regular updates and security patches to dependencies should be managed through the chosen package managers and monitored via the CI/CD pipeline.
 
 ## Third Party Components & Licenses
 
-- Immutable Database:
-Component: Use an immutable database like Apache Cassandra or a blockchain-based storage solution.
-License: Apache Cassandra is available under the Apache License 2.0, which allows commercial use, modification, distribution, and private use.
+-   Immutable Database:
+    Component: Use an immutable database like Apache Cassandra or a blockchain-based storage solution.
+    License: Apache Cassandra is available under the Apache License 2.0, which allows commercial use, modification, distribution, and private use.
 
-- MongoDB Node.js Library:
-Component: MongoDB Node.js driver for database operations.
-License: The MongoDB Node.js library is released under the Apache License 2.0.
+-   MongoDB Node.js Library:
+    Component: MongoDB Node.js driver for database operations.
+    License: The MongoDB Node.js library is released under the Apache License 2.0.
 
-- Open Source Blockchain:
-Component: Hyperledger Fabric or Ethereum for blockchain functionalities.
-License: Hyperledger Fabric: Available under the Apache License 2.0.
-Ethereum: Most tools and libraries in the Ethereum ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
-
+-   Open Source Blockchain:
+    Component: Hyperledger Fabric or Ethereum for blockchain functionalities.
+    License: Hyperledger Fabric: Available under the Apache License 2.0.
+    Ethereum: Most tools and libraries in the Ethereum ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
 
 ## Implementation Details
 
 <!-- TODO -->
 
-
 ## OpenAPI Specification
 
 <!-- TODO -->
 
-
 ## Test Specification
 
 ### Test Plan
+
 The test plan for the Data Value Chain Tracker (DVCT) aims to ensure the system's integrity and performance through a comprehensive approach. It includes correctness tests for accurate data representation, reliability tests for system stability and data integrity, tests data immutability and scalability, back and forward tracking tests to verify accurate data lineage, and incentives distribution tests to ensure compliance and fairness based on contractual agreements.
 
 ### back and forward chain tracking
+
 Back and forward chain tracking in the context of the Data Value Chain Tracker (DVCT) refers to the system's ability to trace data usage throughout its lifecycle. Forward tracking enables monitoring of how data is used, transformed, or combined from its initial state to subsequent states, including indirect usages in various use cases. It helps determine where, when, and in which use case the data was utilized.
 
 Backward tracking, on the other hand, allows tracing back to the data's origin up to three levels, identifying the primary source and any intermediate stages it has passed through. This feature ensures transparency and accountability in data handling, allowing stakeholders to see both the downstream implications of data they provide and the upstream origins of data they use. This capability is critical for auditability, compliance, and verifying the integrity of data transformations and linkages in complex systems.
 
 ### Integration Tests
+
 These tests will check the interactions between DVCT and external systems like the Data Space Connector and Contract Service to ensure data flows correctly through the system and meets all business requirements.
 
 ### Incentives Distribution Tests:
+
 Test the logic and execution of digital incentives distribution to ensure it complies with the contractual agreement. Simulate various contractual scenarios to ensure incentives are calculated and distributed accurately and transparently.
 
 ### Reference
 
-- Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575). 
+-   Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575).
