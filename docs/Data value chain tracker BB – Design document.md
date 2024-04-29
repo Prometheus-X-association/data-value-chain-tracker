@@ -500,13 +500,9 @@ The configuration and deployment setting for Data Value Chain Tracker (DVCT), co
     Component: MongoDB Node.js driver for database operations.
     License: The MongoDB Node.js library is released under the Apache License 2.0.
 
--   Open Source Blockchain: Polygon (Ethereum L2 scaling solution) is the preferred blockchain solution as
-    other BBs in the ecosystem have already utilized it.
-    -   Alternatives: Hyperledger Fabric or Ethereum.
-    -   License:
-        -   Polygon: Most tools and libraries in the Polygon ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
-        -   Ethereum: Most tools and libraries in the Ethereum ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
-        -   Hyperledger Fabric: Available under the Apache License 2.0.
+-   Open Source Blockchain:
+    -   Component: Polygon (Ethereum L2 scaling solution) is the preferred blockchain solution as other BBs in the ecosystem have already utilized it.
+    -   License: Most tools and libraries in the Polygon ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
 
 ## Implementation Details
 
