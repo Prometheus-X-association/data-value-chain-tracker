@@ -61,7 +61,7 @@ _\*To be validated with use case partners & pool of experts_\
 
 The objective of the distribution of incentives in the DVCT is to design and
 implement a system for distributing incentives within a data value chain tracker
-using smart contracts. The orchestrator wallet will provide the tokens/points
+using smart contracts. The orchestrator or other entity wallet will provide the tokens/points based on the contract
 and the DVCT smart contracts will distribute the tokens/points to providers and consumers.
 
 ### Incentive for network participants
