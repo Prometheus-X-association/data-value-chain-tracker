@@ -155,8 +155,6 @@ The distribution of digital incentives distribution should be based on the contr
 
 ## Architecture
 
-_To be discussed with Félix and Robin_
-
 ### Component Descriptions:
 
 1. **DataProvider:** Entities that supply data to the system.
@@ -531,6 +529,14 @@ These tests will check the interactions between DVCT and external systems like t
 ### Incentives Distribution Tests:
 
 Test the logic and execution of digital incentives distribution to ensure it complies with the contractual agreement. Simulate various contractual scenarios to ensure incentives are calculated and distributed accurately and transparently.
+
+## Partners & roles
+- imc AG ([website](https://www.im-c.com)), As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Promotheus-X and other Dataspaces standards such as IDSA and GAIA-X.
+- Visiontrust ([website](https://visionspol.eu/)), Responsible in the implementation phase, preparing the development environment for the DVCT, ensuring smooth communication and interaction of the DVCT with the corresponding building blocks and the PTX dataspace connector. Identification of data processing input and output.  
+- Nomadlabs ([website](https://nomadlabs.no/)), Responsible in the implementation phase for incentivizing data usage, integration of smartcontract, value-chain and blockchain technology within the DVCT.
+
+## Usage in the dataspace
+DVCT is useful for data provenance and traceability of data usage and can thus provide greater value to dataspace members. It not only helps them to recognize the value of their data for the community, but also to be incentivized. 
 
 ### Reference
 
