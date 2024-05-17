@@ -137,18 +137,18 @@ Input data:
 
 ### **The output of data type is inform of JSON format:**
 
-<img src="diagrams/node-data.png" width="350">
+<img style="float: left;" src="diagrams/node-data.png" width="350">
 
 ### Data Value Chain Tracker visualization
 
 -   visualization of value tracking for provider of raw data:
-    <img src="diagrams/dvct-viz-1.png" width="350">
+    <img src="diagrams/dvct-viz-1.png" style="float: left;" width="350">
 
 -   Visualization of value tracking for provider of chain data:
-    <img src="diagrams/dvct-viz-2.png" width="350">
+    <img src="diagrams/dvct-viz-2.png" style="float: left;" width="350">
 
 -   Visualization of value tracking for provider of final data:
-    <img src="diagrams/dvct-viz-3.png" width="350">
+    <img src="diagrams/dvct-viz-3.png" style="float: left;" width="350">
 
 ### Data Value Chain Tracker digital incentives distribution
 
