@@ -537,7 +537,7 @@ Test the logic and execution of digital incentives distribution to ensure it com
 - Nomadlabs ([website](https://nomadlabs.no/)), Responsible in the implementation phase for incentivizing data usage, integration of smartcontract, value-chain and blockchain technology within the DVCT.
 
 ## Usage in the dataspace
-DVCT is useful for data provenance and traceability of data usage and can thus provide greater value to dataspace members. It not only helps them to recognize the value of their data for the community, but also to be incentivized. 
+DVCT is useful for tracking data usage and can thus provide greater benefit to members of the data space. DVCT will support the skills service chain and not only help data providers recognize the value of their data to society, but also distribute incentives across the network.
 
 ### Reference
 
