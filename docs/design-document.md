@@ -588,9 +588,9 @@ Back and forward chain tracking in the context of the Data Value Chain Tracker (
 
 Backward tracking, on the other hand, allows tracing back to the data's origin up to three levels, identifying the primary source and any intermediate stages it has passed through. This feature ensures transparency and accountability in data handling, allowing stakeholders to see both the downstream implications of data they provide and the upstream origins of data they use. This capability is critical for auditability, compliance, and verifying the integrity of data transformations and linkages in complex systems.
 
-For backend and forward tracking testing, user can check the origin of the data:
+- For backend and forward tracking testing, user can check the origin of the data:
 <img src="diagrams/dvct-viz-3.png" style="float: left;" width="350">
-The output json file will contain prevNode that list all parent node, each parent node will also contain the same node metadata to track the parent node. Also, the forward tracking can show where the data is already being used based on the child node:
+- The output json file will contain prevNode that list all parent node, each parent node will also contain the same node metadata to track the parent node. Also, the forward tracking can show where the data is already being used based on the child node:
 <img src="diagrams/dvct-viz-1.png" style="float: left;" width="350">
 
 ### Integration Tests
