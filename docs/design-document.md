@@ -125,34 +125,63 @@ In order to make the BB function, the integration with other BB is expected:
 
 **IDS Data Sharing and data exchange:** see [2.4 Data Exchange and Data Sharing](https://docs.internationaldataspaces.org/ids-knowledgebase/v/ids-ram-4/context-of-the-international-data-spaces/2_1_data-driven-business_ecosystems/2_4_data_exchange_and_data_sharing).
 
-## Input / Output Data
+## Input
 
-Input data:
-
--   ContractID
--   IncentiveDistributions
--   DataId
--   PrevRoot
--   DataType
-
-### **The output of data type is inform of JSON format:**
-
-<img style="float: left;" src="diagrams/node-data.png" width="350">
+### Input data:
+```json
+{
+    "dvctId":"connector_id",
+    "usecaseContractId":"use_case_contract_id",
+    "usecaseContractTitle": "use_case_contract_title",
+    "extraIncentiveForAIProvider": {
+        "numPoints":10, 
+        "factor":1, 
+        "factorCheck":false,
+    },
+    "contractId": "contract_id",
+    "dataId": "data_id",
+    "dataProviderId":"data_provider_id",
+    "dataConsumerId":"data_consumer_id",
+    "dataConsumerIsAIProvider":false,
+    "prevDataId": "data_id",
+    "incentiveForDataProvider": {
+        "numPoints":5,
+        "factor":1,
+        "factorCheck":false,
+    }
+}
+```
 
 ### Data Value Chain Tracker visualization
-
--   visualization of value tracking for provider of raw data:  
-<img src="diagrams/dvct-viz-1.png" style="float: left;" width="350">
 
 -   Visualization of value tracking for provider of chain data:  
 <img src="diagrams/dvct-viz-2.png" style="float: left;" width="350">
 
--   Visualization of value tracking for provider of final data:  
-<img src="diagrams/dvct-viz-3.png" style="float: left;" width="350">
-
 ### Data Value Chain Tracker digital incentives distribution
 
-The distribution of digital incentives distribution should be based on the contract defined by the use case orchestrator.
+The distribution of digital incentives distribution should be based on the contract, defined by the use case orchestrator or between data provider and data consumer. Example of incentives json input defined within the contract:
+
+**incentive for AI provider**
+```json
+{
+    "extraIncentiveForAIProvider": {
+        "numPoints":10, 
+        "factor":1.0, 
+        "factorCheck":false,
+    }
+}
+```
+**incentive from data consumer to data provider**
+```json
+{
+    "incentiveForDataProvider": {
+        "numPoints":5,
+        "factor":1.0,
+        "factorCheck":false
+    }
+}
+```
+To further develop the integration of other aspects (e.g. data quality) for the incentive mechanism, the factor percentage (0.0 to 1.0) and the factorCheck object are added. By default, the incentive points are awarded in full (factor = 1,0) and without further checking of the incentive effect.
 
 ## Architecture
 
@@ -160,7 +189,7 @@ The distribution of digital incentives distribution should be based on the contr
 
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
-3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains, and distributes digital incentives.
+3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains between data usage nodes.
 4. **Blockchain or any immutable database:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
 6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
@@ -515,13 +544,54 @@ The configuration and deployment setting for Data Value Chain Tracker (DVCT), co
 
 ### Test Plan
 
-The test plan for the Data Value Chain Tracker (DVCT) aims to ensure the system's integrity and performance through a comprehensive approach. It includes correctness tests for accurate data representation, reliability tests for system stability and data integrity, tests data immutability and scalability, back and forward tracking tests to verify accurate data lineage, and incentives distribution tests to ensure compliance and fairness based on contractual agreements.
+The test plan for the Data Value Chain Tracker (DVCT) aims to ensure the system's integrity and performance through a comprehensive approach. It includes correctness tests for accurate data representation, reliability tests for system stability and data integrity, tests data immutability and scalability, back and forward tracking tests to verify accurate data lineage, and incentives distribution tests to ensure compliance and fairness based on contractual agreements. 
+
+To check the result of the value chain creation, the DVCT should create a node for the data usage in **output data** json format after the data is used on the data consumer side (PDC consumer will trigger DVCT). Each time information about the prevDataId is present in the input data, the DVCT checks whether the prevDataId already exists (as a nodeId) within the value chain node. If this is the case, the childNode of the prevDataId is updated with the new dataId as a child node.
+
+**Output data:**
+```json
+{
+    "nodeId":"node_id",
+    "dataId": "data_id",
+    "nodeMetadata":{
+        "dvctId":"connector_id",
+        "usecaseContractId":"use_case_contract_id",
+        "dataProviderId":"data_provider_id",
+        "dataConsumerId":"data_consumer_id",
+        "incentiveReceivedFrom":[
+            {
+                "organizationId":"organization_id",
+                "numPoints":5,
+                "contractId":"contract_id"
+            },
+            {
+                "organizationId":"organization_id",
+                "numPoints":5,
+                "contractId":"contract_id"
+            },
+        ]
+    },
+    "prevNode": [
+        {"nodeId":"node_id", "@nodeUrl":"https://url-to-nodeId/nodeId"},
+        {"nodeId":"node_id", "@nodeUrl":"https://url-to-nodeId/nodeId"}
+    ],
+    "childNode": [
+        {"nodeId":"node_id", "@nodeUrl":"https://url-to-nodeId/nodeId"},
+        {"nodeId":"node_id", "@nodeUrl":"https://url-to-nodeId/nodeId"}
+    ]
+}
+```
 
 ### back and forward chain tracking
 
 Back and forward chain tracking in the context of the Data Value Chain Tracker (DVCT) refers to the system's ability to trace data usage throughout its lifecycle. Forward tracking enables monitoring of how data is used, transformed, or combined from its initial state to subsequent states, including indirect usages in various use cases. It helps determine where, when, and in which use case the data was utilized.
 
 Backward tracking, on the other hand, allows tracing back to the data's origin up to three levels, identifying the primary source and any intermediate stages it has passed through. This feature ensures transparency and accountability in data handling, allowing stakeholders to see both the downstream implications of data they provide and the upstream origins of data they use. This capability is critical for auditability, compliance, and verifying the integrity of data transformations and linkages in complex systems.
+
+For backend and forward tracking testing, user can check the origin of the data:
+<img src="diagrams/dvct-viz-3.png" style="float: left;" width="350">
+The output json file will contain prevNode that list all parent node, each parent node will also contain the same node metadata to track the parent node. Also, the forward tracking can show where the data is already being used based on the child node:
+<img src="diagrams/dvct-viz-1.png" style="float: left;" width="350">
 
 ### Integration Tests
 
@@ -532,12 +602,28 @@ These tests will check the interactions between DVCT and external systems like t
 Test the logic and execution of digital incentives distribution to ensure it complies with the contractual agreement. Simulate various contractual scenarios to ensure incentives are calculated and distributed accurately and transparently.
 
 ## Partners & roles
-- imc AG ([website](https://www.im-c.com)), As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Promotheus-X and other Dataspaces standards such as IDSA and GAIA-X.
-- Visiontrust ([website](https://visionspol.eu/)), Responsible in the implementation phase, preparing the development environment for the DVCT, ensuring smooth communication and interaction of the DVCT with the corresponding building blocks and the PTX dataspace connector. Identification of data processing input and output.  
-- Nomadlabs ([website](https://nomadlabs.no/)), Responsible in the implementation phase for incentivizing data usage, integration of smartcontract, value-chain and blockchain technology within the DVCT.
+**imc AG ([website](https://www.im-c.com)):**
+As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Promotheus-X and other Dataspaces standards such as IDSA and GAIA-X. imc AG is responsible for these components:
+- DVCT_Core 
+- Data usage history
+- API_Gateway (together with Vision)
+
+**Visiontrust ([website](https://visionspol.eu/)):**
+Responsible in the implementation phase, preparing the development environment for the DVCT, ensuring smooth communication and interaction of the DVCT with the corresponding building blocks and the PTX dataspace connector. Identification of data processing input and output. Visiontrust will take the lead in developing these components for the DVCT:
+- API_Gateway (together with imc AG)
+- Logging and Monitoring
+- Contract Management
+- User Interface
+
+**Nomadlabs ([website](https://nomadlabs.no/)):**
+Responsible in the implementation phase for incentivizing data usage, integration of smartcontract, value-chain and blockchain technology within the DVCT. Overall, Nomadlabs will manage the development of these components for the DVCT:
+- Blockchain interaction
+- Incentive Engine
+
+Each partner is responsible for error handling and correction within the developed components.
 
 ## Usage in the dataspace
-DVCT is useful for tracking data usage and can thus provide greater benefit to members of the data space. DVCT will support the skills service chain and not only help data providers recognize the value of their data to society, but also distribute incentives across the network.
+DVCT is useful for tracking data usage and can thus provide greater benefit to members of the data space. DVCT will support the skills service chain and not only help data providers recognize the value of their data to business and society, but also distribute incentives across the network.
 
 ### Reference
 
