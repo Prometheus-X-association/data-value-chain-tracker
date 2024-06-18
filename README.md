@@ -1,3 +1,3 @@
 # Data value chain tracker BB
 
-See the documentation [here](docs/).
+See the design document [here](docs/design-document.md).
