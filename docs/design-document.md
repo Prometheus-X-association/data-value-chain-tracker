@@ -601,7 +601,7 @@ Backward tracking, on the other hand, allows tracing back to the data's origin u
 - The output json file will contain prevNode that list all parent node, each parent node will also contain the same node metadata to track the parent node. Also, the forward tracking can show where the data is already being used based on the child node:
 <img src="diagrams/dvct-viz-1.png" style="float: left;" width="350">
 
-### Integration Tests
+### Component-level testing
 
 These tests will check the interactions between DVCT and external systems like the Data Space Connector and Contract Service to ensure data flows correctly through the system and meets all business requirements.
 
