@@ -23,14 +23,18 @@ The main goal of the DVCT is to solve the problem of uncertainty about the value
 
 An example of a use case is skills gap analytics, in which an organization as the use case orchestrator defines the use case including the data flow and digital incentives that will be distributed to use case participants in the contract. The services required for the skill gap analytics will include different data providers and AI providers who aim to improve the skills gap analytics by combining external data with internal skill data. Based on the use case, some technical usage scenario and role of the DVCT can be described in the table below:
 
-| Process                                                                                                                                                  | DVCT role                                                                                                                                            |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements)    | Extracting information from the contract about the data flow (participant's role, data usage and data type of data usage) and the distribution of points  |
-| Data providers share data with data consumers/AI providers on the basis of the contract       | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                              |
-| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                |
-| Participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract                                                                   | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute)                                              |
-| Data providers want to know where their data was used                                                                                         | Read the json data node, interact with the data visualization to create the value chain three  |  
-|  AI Provider join a use case      | Read use case contract to get information about incetives for AI provider to join a use case    | 
+| Process | DVCT role | Scenario for Incentive mechanism |
+| ------- | --------- | -------------------------------- |
+| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements) | Extracting information from the contract about the data flow (participant's role, data usage and type of data usage) and the distribution of points | As a use case leader, I can offer points/incentives to service providers who join my use case in order to expand my network. |
+| Data providers share data with data consumers/AI providers on the basis of the contract | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage | As a provider, I can define in the catalog how many points/incentives I would expect for using my data or using my services |
+| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children | As a data consumer, I can offer points or incentives for data and AI providers to improve combine, and improve my raw data. As an AI provider, I can offer points for data providers in order to improve my AI model. |
+| Participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract and catalog | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute) | Use case participants will get incentive information about the use case on the catalog, and the use case leader can define the value exchange items: are organizations paid, do they receive tokens, or both? |
+| Data providers want to know where their data was used | Read the json data node, interact with the data visualization to create the value chain. |  |
+| AI Provider join a use case | Read use case contract to get information about incentives for AI provider to join a use case | As an AI provider, I can offer points for data providers in order to improve my AI model. |
+
+Incentive should be define in the catalog, similar to the business model for the offering, Where we can define the price for each offering. There should be additional input fields related to the points/tokens for the offering and use case.
+
+In relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring *transparency* and *accountability* through an immutable database and tracking of data usage.
 
 ### Features/Main Functionalities
 
@@ -83,19 +87,23 @@ In order to make the BB function, the integration with other BB is expected:
 
 ### Direct Integrations with Other BBs
 
+-   _Catalog._\
+    The DVCT requires input fields in the catalog so that providers can enter the number of points they offer/expect for their data/services. These input fields are additional information to the price defined in the catalog and in the contract.
+
 -   _Contract._\
     The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
 
 -   _Distributed data visualization._\
-    The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space.
+    The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space. The visualization can be shown in different places for example in the catalog.
 
 -   _Billing or Digital wallet._\
     The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
+
 -   _Data veracity assurance._\
     The data veracity BB will focus on the data quality. Even though the DVCT
     will not access the data that is being shared between participants, it will
     work with metadata. It might be relevant to assess the quality of the
-    metadata itself by some common criterias like completeness, timeliness etc.
+    metadata itself by some common criterias like completeness, data anonymity, timeliness etc.
     We should also consider the possibility of automating this process if this
     falls within the scope of this BB.
 
