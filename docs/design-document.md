@@ -36,6 +36,8 @@ Incentive should be define in the catalog, similar to the business model for the
 
 In relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring *transparency* and *accountability* through an immutable database and tracking of data usage.
 
+DVCT does not include rules on how the initial tokens are generated as this is outside the scope of building blocks, the data space that determines how DVCT can acquire tokens. Also, regarding the amount of incentives to be distributed, this is at the use case level, which will be determined by the use case participants in their business model.
+
 ### Features/Main Functionalities
 
 Based on the DVCT objective and technical usage scenario, there are three key functionalities for the BB, the key functionalities are:
