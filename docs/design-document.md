@@ -97,7 +97,7 @@ In order to make the BB function, the integration with other BB is expected:
     The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space. The visualization can be shown in different places for example in the catalog.
 
 -   _Billing or Digital wallet._\
-    The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators that provide digital incentives to their use case participants. The DVCT is not responsible for generating the digital incentives and storing the digital incentives, but for distributing and storing the value or percentage of the distribution for each node in an immutable database.
+    The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators/contract participants that provide digital incentives to their use case. The DVCT will get information about the incentives from the contract, and responsible for distributing the points in an immutable database (Blockchain and Digital Wallet).
 
 -   _Data veracity assurance._\
     The data veracity BB will focus on the data quality. Even though the DVCT
