@@ -113,8 +113,8 @@ Information stored on the blockchain includes transaction records, token balance
 ### Example Incentives
 
 To better understand how points can be distributed in the ecosystem, let's take a look at example incentives that could be used
-* As a use case leader, I can provide X points to the Data Provider when they join my use case
-* As a use case leader, I can provide X points to a Data Provider after a successful transaction
+* As a use case orchestrator, I can provide X points to the Data or Service Provider when they join my use case
+* As a use case orchestrator, I can provide X points to a Data Provider after a successful transaction
 * As a Data Provider, I can provide X points to a Service Provider after a successful response from their service
 
 > These are only a sample of all the incentives that could be used for token distribution with the DVCT
