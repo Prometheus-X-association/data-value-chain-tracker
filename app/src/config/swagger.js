@@ -34,7 +34,10 @@ const swaggerOptions = {
             dataProviderId: { type: 'string' },
             dataConsumerId: { type: 'string' },
             dataConsumerIsAIProvider: { type: 'boolean' },
-            prevDataId: { type: 'string' },
+            prevDataId: {
+              type: 'array',
+              items: { type: 'string' }
+            },
             incentiveForDataProvider: {
               type: 'object',
               properties: {
