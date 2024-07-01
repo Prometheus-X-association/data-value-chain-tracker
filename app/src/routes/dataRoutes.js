@@ -81,17 +81,23 @@ router.post('/data', async (req, res) => {
     const inputData = req.body;
     const jsonLdData = await generateJsonLdData(inputData);
 
-    // If input data contains prevNode information, update the childNode of the existing node
-    if (inputData.prevDataId) {
-      const existingNode = await Data.findOne({ nodeId: inputData.prevDataId });
-      if (existingNode) {
-        const childNodeData = {
-          "nodeId": jsonLdData.nodeId,
-          "@nodeUrl": `https://url-to-childNode/${jsonLdData.nodeId}`
-        };
-        await updateChildNode(inputData.prevDataId, childNodeData);
-      } else {
-        await generateNewNodeForPrevDataId(inputData.prevDataId);
+    if (inputData.prevDataId && inputData.prevDataId.length > 0) {
+      for (const prevId of inputData.prevDataId) {
+        const existingNode = await Data.findOne({ nodeId: prevId });
+        if (existingNode) {
+          const childNodeData = {
+            "nodeId": jsonLdData.nodeId,
+            "@nodeUrl": `https://url-to-childNode/${jsonLdData.nodeId}`
+          };
+          await updateChildNode(prevId, childNodeData);
+        } else {
+          const newNode = await generateNewNodeForPrevDataId(prevId);
+          const childNodeData = {
+            "nodeId": jsonLdData.nodeId,
+            "@nodeUrl": `https://url-to-childNode/${jsonLdData.nodeId}`
+          };
+          await updateChildNode(prevId, childNodeData);
+        }
       }
     }
 

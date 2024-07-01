@@ -46,12 +46,10 @@ const generateJsonLdData = async (inputData) => {
   };
 
   if (inputData.prevDataId) {
-    jsonLdData.prevNode = [
-      {
-        "nodeId": inputData.prevDataId,
-        "@nodeUrl": `https://url-to-prevNode/${inputData.prevDataId}`
-      }
-    ];
+    jsonLdData.prevNode = inputData.prevDataId.map(prevId => ({
+      "nodeId": prevId,
+      "@nodeUrl": `https://url-to-prevNode/${prevId}`
+    }));
   }
 
   return jsonld.compact(jsonLdData, context);
