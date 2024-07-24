@@ -22,7 +22,7 @@ app.use('/api', dataRoutes);
 
 // Home route
 app.get('/', (req, res) => {
-  res.send('Welcome to the JSON API');
+  res.send('Welcome to the PTX - Data Value Chain Tracker');
 });
 
 // Start the server

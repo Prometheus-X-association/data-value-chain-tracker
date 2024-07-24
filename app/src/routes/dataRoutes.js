@@ -7,9 +7,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/data:
+ * /api/node:
  *   post:
- *     summary: Receive JSON data and save as JSON-LD format to MongoDB
+ *     summary: Post node data and save as JSON-LD format to MongoDB
  *     requestBody:
  *       required: true
  *       content:
@@ -76,7 +76,7 @@ const router = express.Router();
  */
 
 // API to receive JSON data and save as JSON-LD format to MongoDB
-router.post('/data', async (req, res) => {
+router.post('/node', async (req, res) => {
   try {
     const inputData = req.body;
     const jsonLdData = await generateJsonLdData(inputData);
