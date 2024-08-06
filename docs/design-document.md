@@ -1,6 +1,6 @@
 # Data value chain tracker BB – Design Document
 
-The Data Value Chain Tracker (hereafter DVCT) is a service that monitors the direct and indirect use of data and distributes digital incentives for data usage. DVCT ensures traceability and accountability of data usage, as well as enables organizations and individuals to realize the value of their data.
+The Data Value Chain Tracker (hereafter DVCT) is a service that monitors and distributes digital incentives for data usage. DVCT ensures traceability and accountability of data usage, as well as enables organizations and individuals to realize the value of their data.
 
 As data provider or data owner, organization and individual can use DVCT to find out which use case(s), when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items. 
 
@@ -17,9 +17,9 @@ flowchart TD
 %% Nodes
     A("fa:fa-database Data Provider A (Node 1)")
     B("fa:fa-database Data Provider B (Node 2)")
-    C("fa:fa-gears Data Processing 1 (Node 3)")
-    D("fa:fa-gears Data Processing 2 (Node 4)")
-    E("fa:fa-gears Data Processing 3 (Node 5)")
+    C("fa:fa-gears Service Data Processing 1 (Node 3)")
+    D("fa:fa-gears Service Data Processing 2 (Node 4)")
+    E("fa:fa-gears Service Data Processing 3 (Node 5)")
     F("... (Node n)")
     G("fa:fa-cart-arrow-down Data Consumer (Node n+1)")
 
@@ -32,8 +32,42 @@ flowchart TD
     E -- Node 5 is parent node for Node n --> F
     F -- Node n is parent node for Node n+1 --> G
     D -- Node 4 is parent node for Node n+1 --> G
+
+%% Add legend
+    subgraph Legend
+      direction LR
+      start1[ ] --->|Analytics 1| stop1[ ]
+      style start1 height:0px;
+      style stop1 height:0px;
+      start2[ ] --->|Analytics 2| stop2[ ]
+      style start2 height:0px;
+      style stop2 height:0px;
+      start3[ ] --->|Analytics 1 and 2| stop3[ ]
+      style start3 height:0px;
+      style stop3 height:0px; 
+    end
+
+%% Styling the arrow to fit with the legend
+    linkStyle 0 stroke:red;
+    linkStyle 1 stroke:red;
+    linkStyle 2 stroke:Blue;
+    linkStyle 3 stroke:red;
+    linkStyle 4 stroke:red;
+    linkStyle 5 stroke:red;
+    linkStyle 6 stroke:red;
+    linkStyle 7 stroke:orange;
+    %% arrow legend
+    linkStyle 8 stroke:red;
+    linkStyle 9 stroke:orange;
+    linkStyle 10 stroke:Blue;
 ```
+From the "tracking node chain" image, a use case has for example two analytics functionalities, each of this functionalities requires different Data and AI Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
+
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
+
+For incentives distribution, the prerequisites are:
+1. The number of points to be distributed for data and service providers must be predefined in the contract.
+2. As a default, points will be awarded in full (factor = 1, factor will be between 0.0 - 1.0), unless specified in the contract to check data quality (factorCheck = false). Here, the factor will be calculated with the support of the Data Correctness Assurance building block.
 
 ## Technical Usage Scenarios & Features
 
