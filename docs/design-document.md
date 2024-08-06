@@ -11,7 +11,7 @@ As a parent node, a data provider offers raw data, which is then processed by on
 
 ```mermaid
 ---
-title: Tracking chain nodes
+title: Tracking node chain
 ---
 flowchart TD
 %% Nodes
@@ -67,11 +67,15 @@ To encourage data sharing, digital incentives should be provided to the ecosyste
 
 For incentives distribution, the prerequisites are:
 1. The number of points to be distributed for data and service providers must be predefined in the contract.
-2. As a default, points will be awarded in full (factor = 1, factor will be between 0.0 - 1.0), unless specified in the contract to check data quality (factorCheck = false). Here, the factor will be calculated with the support of the Data Correctness Assurance building block.
+2. As a default, points will be awarded in full (factor = 1, factor will be between 0.0 - 1.0), unless specified in the contract to check data quality (factorCheck = false). Here, the factor will be calculated with the support of the Data Veracity Assurance building block.
+3. If the data being processed to build the node is not raw data directly from the data provider, information about earlier processing (contract) should be included.
+
+Example of incentive distribution:
+
 
 ## Technical Usage Scenarios & Features
 
-The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). 
+One of the main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). 
 
 Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage.
 
