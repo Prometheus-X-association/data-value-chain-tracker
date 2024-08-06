@@ -1,25 +1,45 @@
 # Data value chain tracker BB – Design Document
 
-The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data.
+The Data Value Chain Tracker (hereafter DVCT) is a service that monitors the direct and indirect use of data and distributes digital incentives for data usage. DVCT ensures traceability and accountability of data usage, as well as enables organizations and individuals to realize the value of their data.
 
-As data provider or data owner, organization and individual can use DVCT to find out which use case(s), when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (chain data or visualization data). 
+As data provider or data owner, organization and individual can use DVCT to find out which use case(s), when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items. 
 
 ## Conceptual Overview
 
-According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
+A node represents the data processing or the activity that takes place from data provision to visualization. To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
+As a parent node, a data provider offers raw data, which is then processed by one or more child nodes before being transmitted to the data consumer.
 
-<img src="diagrams/linked-data-value-chain.png" width="500">
-source: Linked data value chain (Latif et al., 2009)
+```mermaid
+---
+title: Tracking chain nodes
+---
+flowchart TD
+%% Nodes
+    A("fa:fa-database Data Provider A (Node 1)")
+    B("fa:fa-database Data Provider B (Node 2)")
+    C("fa:fa-gears Data Processing 1 (Node 3)")
+    D("fa:fa-gears Data Processing 2 (Node 4)")
+    E("fa:fa-gears Data Processing 3 (Node 5)")
+    F("... (Node n)")
+    G("fa:fa-cart-arrow-down Data Consumer (Node n+1)")
 
-Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or chain data, but as a data consumer one will always use data and then also produce data, either as chain data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
-
-![data-type-usage](diagrams/data-type.png)
-
+%% Edge connections between nodes
+    A -- Node 1 is parent node for Node 3 --> C
+    A -- Node 1 is parent node for Node 4 --> D
+    B -- Node 2 is parent node for Node 4 --> D
+    C -- Node 3 is parent node for Node 5 --> E
+    D -- Node 4 is parent node for Node 5 --> E
+    E -- Node 5 is parent node for Node n --> F
+    F -- Node n is parent node for Node n+1 --> G
+    D -- Node 4 is parent node for Node n+1 --> G
+```
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
 ## Technical Usage Scenarios & Features
 
-The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage.
+The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). 
+
+Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage.
 
 An example of a use case is skills gap analytics, in which an organization as the use case orchestrator defines the use case including the data flow and digital incentives that will be distributed to use case participants in the contract. The services required for the skill gap analytics will include different data providers and AI providers who aim to improve the skills gap analytics by combining external data with internal skill data. Based on the use case, some technical usage scenario and role of the DVCT can be described in the table below:
 
