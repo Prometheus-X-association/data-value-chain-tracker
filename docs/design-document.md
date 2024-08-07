@@ -74,7 +74,7 @@ flowchart TD
     linkStyle 9 stroke:orange;
     linkStyle 10 stroke:Blue;
 ```
-From the "tracking node chain" image, a use case has for example two analytics functionalities, each of this functionalities requires different Data and AI Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
+From the "tracking node chain" image, a use case has for example two analytics functionalities, each of this functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
 
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
@@ -82,20 +82,16 @@ For incentives distribution, the prerequisites are:
 1. The number of points (as representative of the data value) to be distributed for data and service providers must be predefined in the contract.
 2. As a default, points will be awarded in full (factor = 1, factor will be between 0.0 - 1.0), unless specified in the contract to check data quality (factorCheck = false). Here, the factor will be calculated with the support of the Data Veracity Assurance building block.
 3. Except for raw data, information regarding previous service data processing (based on a contract) or data origin (from dataspace catalog) must be included.
-4. Incentives should be defined in a catalog, similar to the business model for offers, where organizations can specify prices for their offers (additional input fields related to points/tokens for offers and use cases).
+4. Incentives should be defined in a catalog, similar to the business model for dataspace offerings, where organizations can specify prices for their offers (additional input fields related to points/tokens for offers and use cases).
+5. Initial points for testing purpose will be generated and given to dataspace participants.
 
 ## Technical Usage Scenarios & Features
 
-One of the DVCT's goals is to address the issue of data value ambiguity by giving an overview of data utilization, both direct and indirect. Technical usage scenario and role of the DVCT can be described in the table below:
-
-| Process                                                                                                                                                               | DVCT role                                                                                                                                                                                             | Scenario for Incentive mechanism                                                                                                                                                                                      |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements) | Extracting information from the contract about the data flow (participant's role, data usage and type of data usage) and the distribution of points                                                   | As a use case leader, I can offer points/incentives to service providers who join my use case in order to expand my network.                                                                                          |
-| Data providers share data with data consumers/AI providers on the basis of the contract                                                                               | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                                         | As a provider, I can define in the catalog how many points/incentives I would expect for using my data or using my services                                                                                           |
-| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data                         | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                                                                  | As a data consumer, I can offer points or incentives for data and AI providers to improve combine, and improve my raw data. As an AI provider, I can offer points for data providers in order to improve my AI model. |
-| Participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract and catalog                                               | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute) | Use case participants will get incentive information about the use case on the catalog, and the use case leader can define the value exchange items: are organizations paid, do they receive tokens, or both?         |
-| Data providers want to know where their data was used                                                                                                                 | Read the json data node, interact with the data visualization to create the value chain.                                                                                                              |                                                                                                                                                                                                                       |
-| AI Provider join a use case                                                                                                                                           | Read use case contract to get information about incentives for AI provider to join a use case                                                                                                         | As an AI provider, I can offer points for data providers in order to improve my AI model.                                                                                                                             |
+Technical usage scenario and role of the DVCT can be described to address the issue of data value ambiguity by giving an overview of data utilization, both direct and indirect:                                                                                                   
+- As a use case leader, I can offer points/incentives to service providers who join my use cases to expand my network.
+- As a data consumer, I can offer points or incentives to data and AI providers to get better recommendations and data-driven decisions.
+- As an AI provider, I can offer points to data providers to improve my AI models.
+- As a data provider, I want to know where my data is being used and what overall value I am getting from the use of my data.
 
 In relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
 
@@ -122,10 +118,6 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 - **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
 - **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 - **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
-- **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
-
-_\*To be further discussed with Félix and Robin_\
-_\*To be validated with use case partners & pool of experts_\
 
 ## Distribution of incentives in DVCT
 
