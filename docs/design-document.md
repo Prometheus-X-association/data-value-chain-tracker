@@ -84,6 +84,7 @@ For incentives distribution, the prerequisites are:
 3. Except for raw data, information regarding previous service data processing (based on a contract) or data origin (from dataspace catalog) must be included.
 4. Incentives should be defined in a catalog, similar to the business model for dataspace offerings, where organizations can specify prices for their offers (additional input fields related to points/tokens for offers and use cases).
 5. Initial points for testing purpose will be generated and given to dataspace participants.
+6. Service or AI Providers should provide log data file regarding usage event, or log file about the dataset usage, training sessions, and performance the models trained with (each) dataset.
 
 ## Technical Usage Scenarios & Features
 
@@ -93,7 +94,63 @@ Technical usage scenario and role of the DVCT can be described to address the is
 - As an AI provider, I can offer points to data providers to improve my AI models.
 - As a data provider, I want to know where my data is being used and what overall value I am getting from the use of my data.
 
-In relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
+Let's consider three data providers: Provider A, Provider B, and Provider C. Each provides datasets used to train an AI model for Skills gap analytics.
+
+use case orchestrator define the weighting for impact and usage frequency
+example:
+impact: 70%
+usage frequency: 30%
+
+Data Providers and Their Contributions
+Provider A: Provides a large dataset of skills on organizational level from one large organization.
+Provider B: Offers a specialized dataset focusing on a digital skills.
+Provider C: Supplies a diverse dataset from different industry.
+
+Step-by-Step Process
+1. Data Registration and Usage
+
+2. All datasets are registered in the tracker with unique identifiers 
+3. During model training, the tracker logs each dataset's usage frequency.
+
+4. The AI model's performance is evaluated by the AI provider before and after incorporating each dataset.
+5. The contribution to performance metrics (e.g., accuracy improvement) is measured.
+
+6. Each dataset is analyzed for its usage frequency and impact.
+Provider B's dataset, focusing on digital skills, scores high in performance.
+
+7. Contribution Score Calculation
+
+Provider A:
+Usage Frequency: 50 times
+Impact on Model Performance: +5% accuracy
+
+Provider B:
+Usage Frequency: 20 times
+Impact on Model Performance: +7% accuracy
+
+Provider C:
+Usage Frequency: 40 times
+Impact on Model Performance: +4% accuracy
+
+8. Weighted contribution scores:
+
+Provider A: (5 * 0.7) + (3 * 0.3) = 3.5 + 0.9 = 4.4
+Provider B: (7 * 0.7) + (5 * 0.3) = 4.9 + 1.5 = 6.4
+Provider C: (4 * 0.7) + (3 * 0.3) = 2.8 + 0.9 = 3.7
+
+9. Reward Distribution
+
+Assume the total reward pool for the use case is 100 points.
+Total contribution scores: 4.4 + 6.4 + 3.7 = 14.5
+Provider A's reward: (4.4 / 14.5) * 100 = 30,4
+Provider B's reward: (6.4 / 14.5) * 100 = 44,1
+Provider C's reward: (3.7 / 14.5) * 100 = 25,5
+
+10. Data provider visualization of usage history
+
+Each data provider has access to a visualization showing detailed reports on their data's usage, impact, and earned rewards.
+
+Moreover, in relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
 
 DVCT does not include rules on how the initial tokens are generated as this is outside the scope of building blocks, the data space that determines how DVCT can acquire tokens. Also, regarding the amount of incentives to be distributed, this is at the use case level, which will be determined by the use case participants in their business model.
 
