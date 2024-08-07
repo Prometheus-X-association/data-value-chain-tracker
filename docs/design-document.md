@@ -6,8 +6,13 @@ As data provider or data owner, organization and individual can use DVCT to find
 
 ## Conceptual Overview
 
+According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and consumer data (human readable). By identifying these three types of data, the DVCT can create the chain based on the parent and child nodes.
+
+<img src="diagrams/linked-data-value-chain.png" width="500">
+source: Linked data value chain (Latif et al., 2009)
+
 A node represents the data processing or the activity that takes place from data provision to visualization. To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
-As a parent node, a data provider offers raw data, which is then processed by one or more child nodes before being transmitted to the data consumer.
+As a parent node, a data provider offers raw data, which is then processed by one or more child nodes before being delivered to the data consumer.
 
 ```mermaid
 ---
@@ -15,13 +20,19 @@ title: Tracking node chain
 ---
 flowchart TD
 %% Nodes
-    A("fa:fa-database Data Provider A (Node 1)")
-    B("fa:fa-database Data Provider B (Node 2)")
-    C("fa:fa-gears Service Data Processing 1 (Node 3)")
-    D("fa:fa-gears Service Data Processing 2 (Node 4)")
-    E("fa:fa-gears Service Data Processing 3 (Node 5)")
+    A("fa:fa-database Raw Data 
+    from Provider A (Node 1)")
+    B("fa:fa-database Raw Data 
+    from Provider B (Node 2)")
+    C("fa:fa-gears Chain Data 1 from 
+    Service Provider 1 (Node 3)")
+    D("fa:fa-gears Chain Data 2 from 
+    Service Provider 2 (Node 4)")
+    E("fa:fa-gears Chain Data 3 from 
+    Service Provider 3 (Node 5)")
     F("... (Node n)")
-    G("fa:fa-cart-arrow-down Data Consumer (Node n+1)")
+    G("fa:fa-cart-arrow-down Final Data 
+    for Data Consumer (Node n+1)")
 
 %% Edge connections between nodes
     A -- Node 1 is parent node for Node 3 --> C
@@ -36,13 +47,13 @@ flowchart TD
 %% Add legend
     subgraph Legend
       direction LR
-      start1[ ] --->|Analytics 1| stop1[ ]
+      start1[ ] --->|Function 1| stop1[ ]
       style start1 height:0px;
       style stop1 height:0px;
-      start2[ ] --->|Analytics 2| stop2[ ]
+      start2[ ] --->|Function 2| stop2[ ]
       style start2 height:0px;
       style stop2 height:0px;
-      start3[ ] --->|Analytics 1 and 2| stop3[ ]
+      start3[ ] --->|Function 1 and 2| stop3[ ]
       style start3 height:0px;
       style stop3 height:0px; 
     end
