@@ -90,11 +90,11 @@ For incentives distribution, the prerequisites are:
 
 Technical usage scenario and role of the DVCT can be described to address the issue of data value ambiguity by giving an overview of data utilization, both direct and indirect:                                                                                                   
 - As a use case leader, I can offer points/incentives to service providers who join my use cases to expand my network.
-- As a data consumer, I can offer points or incentives to data and AI providers to get better recommendations and data-driven decisions.
-- As an AI provider, I can offer points to data providers to improve my AI models.
+- As a data consumer, I can offer points or incentives to data and service (AI/building-block) providers to get better recommendations and data-driven decisions.
+- As an AI service provider, I can offer points to data providers to improve my AI models.
 - As a data provider, I want to know where my data is being used and what overall value I am getting from the use of my data.
 
-Let's consider three data providers: Provider A, Provider B, and Provider C. Each provides datasets used to train an AI model for Skills gap analytics.
+Let's consider two data providers: Provider A and Provider B. Each provides datasets used to train an AI model for Skills gap analytics.
 
 use case orchestrator define the weighting for impact and usage frequency
 example:
@@ -148,7 +148,7 @@ Provider C's reward: (3.7 / 14.5) * 100 = 25,5
 
 10. Data provider visualization of usage history
 
-Each data provider has access to a visualization showing detailed reports on their data's usage, impact, and earned rewards.
+Each data provider has access to a visualization showing detailed reports on their data's usage and earned rewards.
 
 Moreover, in relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
 
