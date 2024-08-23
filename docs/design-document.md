@@ -13,7 +13,7 @@ According to Latif et al. (2009), there are three different types of data that c
 <img src="diagrams/linked-data-value-chain.png" width="500">
 source: Linked data value chain (Latif et al., 2009)
 
-A node represents the data processing or the activity that takes place from data provision to visualization. To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
+A node represents the data processing or the activity that takes place from data provision, refinement, aggregartion to end user (e.g., visualization). To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
 As a parent node, a data provider offers raw data, which is then processed by one or more child nodes before being delivered to the data consumer.
 
 ```mermaid
@@ -94,63 +94,121 @@ Technical usage scenario and role of the DVCT can be described to address the is
 - As an AI service provider, I can offer points to data providers to improve my AI models.
 - As a data provider, I want to know where my data is being used and what overall value I am getting from the use of my data.
 
-Let's consider two data providers: Provider A and Provider B. Each provides datasets used to train an AI model for Skills gap analytics.
+There are various approaches to incentive mechanisms, including calculating the impact of data on data output (Shapley value, leave-one-out, Banzhaf value, reinforcement learning and Stackelberg game), auctions and contracts (Zeng et al., 2021). However, calculating the impact of data has its limitations: Access to the data is required, data privacy could be compromised, and high resources are required to compute and run the algorithm. This can hinder the early adoption of data spaces and building blocks. Therefore, DVCT will use contracts that do not require access to the shared data and let the market decide the value of the data.
 
-use case orchestrator define the weighting for impact and usage frequency
-example:
-impact: 70%
-usage frequency: 30%
+To help Dataspace participants determine the distribution of incentives, the following are some rules that can be used as reference in the contract:
 
-Data Providers and Their Contributions
-Provider A: Provides a large dataset of skills on organizational level from one large organization.
-Provider B: Offers a specialized dataset focusing on a digital skills.
-Provider C: Supplies a diverse dataset from different industry.
+- Role-based distribution: 
+    - Data providers: They receive a base percentage of incentives for providing data, with the exact percentage depending on the data relevancy to the use case, uniqness, and size of data providers involved.
+    - AI/Service Providers: receive incentives based on their role in processing, analyzing or enhancing the data, with a distribution model that takes into account the complexity and criticality of their services.
+    - Use case orchestrator: Incentivized to manage and coordinate the project and ensure successful collaboration and integration between all stakeholders.
+    - Data consumer: Generally receives no direct incentives, but benefits from the end product or solution.	
 
-Step-by-Step Process
-1. Data Registration and Usage
+ 
+- Proportional distribution: 
+    - AI/service provider: Receives a fixed number of incentive points from the use case orchestrator when joining a use case.
+    - Use case orchestrator: Receives a fixed percentage of the total incentives (e.g. 10-20%), with the remaining points distributed proportionally among data providers and AI/service providers based on their number and role.
 
-2. All datasets are registered in the tracker with unique identifiers 
-3. During model training, the tracker logs each dataset's usage frequency.
+- Fixed percentage distribution: 
+    - Data providers: 30-50% of total incentives.
+    - AI/service provider: 30-40% of total incentives, split between providers based on their roles and contributions.
+    - Use case orchestrator: 10-20% of total incentives for coordination and management.”   
 
-4. The AI model's performance is evaluated by the AI provider before and after incorporating each dataset.
-5. The contribution to performance metrics (e.g., accuracy improvement) is measured.
+- Quality of data input (can be also assessment from Data Veracity Assurance Building Block):
+    - High: 40-50% of the data provider's share (size/volume, uniqueness, completeness, etc.).
+    - Medium: 25-35% of the data provider's share.
+    - Low: 15-25% of the data provider's share.
+		
+- Allocation of incentives based on the complexity and impact of each participant's contribution using predefined categories (AI provider roles):  
+    - High impact/expected features/complexity: 40-50% of AI/service provider's share.
+    - Medium impact/expected features/complexity: 25-35% of the AI/service provider's share.
+    - Low impact/expected characteristics/complexity: 15-25% of the share of the AI/service provider”.		
 
-6. Each dataset is analyzed for its usage frequency and impact.
-Provider B's dataset, focusing on digital skills, scores high in performance.
+To simulate the incentive distribution, let's consider three different scenario and apply different incentive distribution rules to scenarios related to training and skills management, where participants include data providers, AI/service providers, and use case orchestrators. In these scenarios, the focus is on how data and AI services are utilized to enhance training programs and manage skills development, with 100 points to be distributed among the participants (points are provided by data consumer).
 
-7. Contribution Score Calculation
+**Scenario 1: One Data Provider and One AI/Service Provider**
+Scenario Overview:
 
-Provider A:
-Usage Frequency: 50 times
-Impact on Model Performance: +5% accuracy
+- Data Provider: An educational institution providing historical training data, including course completion rates, exam results, and student feedback.
+- AI/Service Provider: A company that uses the data to develop a personalized learning algorithm to enhance the training program.
 
-Provider B:
-Usage Frequency: 20 times
-Impact on Model Performance: +7% accuracy
+Incentive Distribution:
 
-Provider C:
-Usage Frequency: 40 times
-Impact on Model Performance: +4% accuracy
+- Data Provider: 60 points (60% of the total points).
+Rationale: The educational institution's data is critical for developing the personalized learning algorithm. Since they are the sole provider of the data, they receive the majority share.
+- AI/Service Provider: 40 points (40% of the total points).
+Rationale: The AI/service provider’s role in developing the personalized algorithm is crucial, but since they rely on the provided data, they receive a smaller share than the data provider.
 
-8. Weighted contribution scores:
+**Scenario 2: One Data Provider, Several AI/Service Providers, and One Use Case Orchestrator**
+Scenario Overview:
 
-Provider A: (5 * 0.7) + (3 * 0.3) = 3.5 + 0.9 = 4.4
-Provider B: (7 * 0.7) + (5 * 0.3) = 4.9 + 1.5 = 6.4
-Provider C: (4 * 0.7) + (3 * 0.3) = 2.8 + 0.9 = 3.7
+- Data Provider: A corporate training department provides employee performance data, including training history, skills assessments, and feedback scores.
+- AI/Service Providers:
+    - AI Provider 1: Develops a predictive model to identify employees at risk of skill gaps.
+    - AI Provider 2: Builds a recommendation engine for personalized training paths.
+    - Service/Building block Provider: Refine and prepare the result of AI models into the company’s Learning Management System (LMS).
+- Use Case Orchestrator: An HR consulting firm defines the project, coordinates the providers, and ensures the solution aligns with corporate goals.
 
-9. Reward Distribution
+Incentive Distribution:
 
-Assume the total reward pool for the use case is 100 points.
-Total contribution scores: 4.4 + 6.4 + 3.7 = 14.5
-Provider A's reward: (4.4 / 14.5) * 100 = 30,4
-Provider B's reward: (6.4 / 14.5) * 100 = 44,1
-Provider C's reward: (3.7 / 14.5) * 100 = 25,5
+- Data Provider: 30 points (30% of the total points).
+Rationale: The corporate training department’s data is foundational for the AI models. However, since there are multiple contributors, the data provider receives a smaller share.
+- AI Provider 1: 20 points (20% of the total points).
+Rationale: The predictive model is essential in identifying skill gaps, earning a significant share.
+- AI Provider 2: 20 points (20% of the total points).
+Rationale: The recommendation engine adds substantial value by tailoring training paths, thus sharing an equal portion with AI Provider 1.
+- Service Provider: 15 points (15% of the total points).
+Rationale: The integration work is critical for implementation but less complex than the AI models, so it receives a slightly smaller share.
+- Use Case Orchestrator: 15 points (15% of the total points).
+Rationale: The orchestrator plays a vital role in ensuring the success of the project, justifying this share.
 
-10. Data provider visualization of usage history
+**Scenario 3: Multiple Data Providers and One Use Case Orchestrator**
+
+Scenario Overview:
+
+- Data Providers:
+    - Data Provider 1: An online learning platform provides data on user engagement, including course completion rates and time spent on each module.
+    - Data Provider 2: A corporate HR department provides employee skills assessments and training records.
+    - Data Provider 3: A certification body provides data on professional certifications and exams passed by employees.
+- Use Case Orchestrator: A professional development consulting firm integrates the datasets to create a comprehensive skills management platform for a large corporation.
+
+Incentive Distribution:
+
+- Data Provider 1: 25 points (25% of the total points).
+Rationale: The online learning platform’s engagement data is vital for understanding how users interact with training content, earning a significant share.
+
+- Data Provider 2: 20 points (20% of the total points).
+Rationale: The HR department’s data is crucial for correlating training with performance, justifying this share.
+
+- Data Provider 3: 15 points (15% of the total points).
+Rationale: The certification data adds value by validating the skills learned, though it plays a somewhat supporting role.
+
+- Use Case Orchestrator: 40 points (40% of the total points).
+Rationale: The orchestrator’s role in integrating diverse datasets and ensuring the platform meets the corporation’s needs is highly complex and critical, warranting the largest share.
+
+**Summary of Distribution in Points:**
+*Scenario 1 (One Data Provider, One AI/Service Provider):*
+- Data Provider: 60 points
+- AI/Service Provider: 40 points
+
+*Scenario 2 (One Data Provider, Several AI/Service Providers, Use Case Orchestrator):*
+- Data Provider: 30 points
+- AI Provider 1: 20 points
+- AI Provider 2: 20 points
+- Service/BB Provider: 15 points
+- Use Case Orchestrator: 15 points
+
+*Scenario 3 (Multiple Data Providers, One Use Case Orchestrator):*
+- Data Provider 1: 25 points
+- Data Provider 2: 20 points
+- Data Provider 3: 15 points
+- Use Case Orchestrator: 40 points
+
+These examples show how the 100 points can be distributed in training and skills management scenarios, ensuring that each participant is fairly rewarded based on their role and contribution.
 
 Each data provider has access to a visualization showing detailed reports on their data's usage and earned rewards.
 
-Moreover, in relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
+Moreover, based on the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), Contract should be clearly stated how much incentive points will be distributed among participants. The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
 
 DVCT does not include rules on how the initial tokens are generated as this is outside the scope of building blocks, the data space that determines how DVCT can acquire tokens. Also, regarding the amount of incentives to be distributed, this is at the use case level, which will be determined by the use case participants in their business model.
 
@@ -836,3 +894,4 @@ DVCT is useful for tracking data usage and can thus provide greater benefit to m
 ### Reference
 
 - Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575).
+- Zeng, R., Zeng, C., Wang, X., Li, B., & Chu, X. (2021). A comprehensive survey of incentive mechanism for federated learning. arXiv preprint arXiv:2106.15406. https://arxiv.org/pdf/2106.15406
