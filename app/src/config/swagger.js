@@ -4,9 +4,9 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: 'JSON-LD API',
-      version: '1.0.0',
-      description: 'API for managing JSON-LD data',
+      title: 'Data Value Chain Tracker',
+      version: '0.0.1',
+      description: 'API for managing Value Chain Tracker',
     },
     servers: [
       {
