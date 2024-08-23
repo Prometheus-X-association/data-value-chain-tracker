@@ -124,88 +124,6 @@ To help Dataspace participants determine the distribution of incentives, the fol
     - Medium impact/expected features/complexity: 25-35% of the AI/service provider's share.
     - Low impact/expected characteristics/complexity: 15-25% of the share of the AI/service provider”.		
 
-To simulate the incentive distribution, let's consider three different scenario and apply different incentive distribution rules to scenarios related to training and skills management, where participants include data providers, AI/service providers, and use case orchestrators. In these scenarios, the focus is on how data and AI services are utilized to enhance training programs and manage skills development, with 100 points to be distributed among the participants (points are provided by data consumer).
-
-**Scenario 1: One Data Provider and One AI/Service Provider**
-Scenario Overview:
-
-- Data Provider: An educational institution providing historical training data, including course completion rates, exam results, and student feedback.
-- AI/Service Provider: A company that uses the data to develop a personalized learning algorithm to enhance the training program.
-
-Incentive Distribution:
-
-- Data Provider: 60 points (60% of the total points).
-Rationale: The educational institution's data is critical for developing the personalized learning algorithm. Since they are the sole provider of the data, they receive the majority share.
-- AI/Service Provider: 40 points (40% of the total points).
-Rationale: The AI/service provider’s role in developing the personalized algorithm is crucial, but since they rely on the provided data, they receive a smaller share than the data provider.
-
-**Scenario 2: One Data Provider, Several AI/Service Providers, and One Use Case Orchestrator**
-Scenario Overview:
-
-- Data Provider: A corporate training department provides employee performance data, including training history, skills assessments, and feedback scores.
-- AI/Service Providers:
-    - AI Provider 1: Develops a predictive model to identify employees at risk of skill gaps.
-    - AI Provider 2: Builds a recommendation engine for personalized training paths.
-    - Service/Building block Provider: Refine and prepare the result of AI models into the company’s Learning Management System (LMS).
-- Use Case Orchestrator: An HR consulting firm defines the project, coordinates the providers, and ensures the solution aligns with corporate goals.
-
-Incentive Distribution:
-
-- Data Provider: 30 points (30% of the total points).
-Rationale: The corporate training department’s data is foundational for the AI models. However, since there are multiple contributors, the data provider receives a smaller share.
-- AI Provider 1: 20 points (20% of the total points).
-Rationale: The predictive model is essential in identifying skill gaps, earning a significant share.
-- AI Provider 2: 20 points (20% of the total points).
-Rationale: The recommendation engine adds substantial value by tailoring training paths, thus sharing an equal portion with AI Provider 1.
-- Service Provider: 15 points (15% of the total points).
-Rationale: The integration work is critical for implementation but less complex than the AI models, so it receives a slightly smaller share.
-- Use Case Orchestrator: 15 points (15% of the total points).
-Rationale: The orchestrator plays a vital role in ensuring the success of the project, justifying this share.
-
-**Scenario 3: Multiple Data Providers and One Use Case Orchestrator**
-
-Scenario Overview:
-
-- Data Providers:
-    - Data Provider 1: An online learning platform provides data on user engagement, including course completion rates and time spent on each module.
-    - Data Provider 2: A corporate HR department provides employee skills assessments and training records.
-    - Data Provider 3: A certification body provides data on professional certifications and exams passed by employees.
-- Use Case Orchestrator: A professional development consulting firm integrates the datasets to create a comprehensive skills management platform for a large corporation.
-
-Incentive Distribution:
-
-- Data Provider 1: 25 points (25% of the total points).
-Rationale: The online learning platform’s engagement data is vital for understanding how users interact with training content, earning a significant share.
-
-- Data Provider 2: 20 points (20% of the total points).
-Rationale: The HR department’s data is crucial for correlating training with performance, justifying this share.
-
-- Data Provider 3: 15 points (15% of the total points).
-Rationale: The certification data adds value by validating the skills learned, though it plays a somewhat supporting role.
-
-- Use Case Orchestrator: 40 points (40% of the total points).
-Rationale: The orchestrator’s role in integrating diverse datasets and ensuring the platform meets the corporation’s needs is highly complex and critical, warranting the largest share.
-
-**Summary of Distribution in Points:**
-*Scenario 1 (One Data Provider, One AI/Service Provider):*
-- Data Provider: 60 points
-- AI/Service Provider: 40 points
-
-*Scenario 2 (One Data Provider, Several AI/Service Providers, Use Case Orchestrator):*
-- Data Provider: 30 points
-- AI Provider 1: 20 points
-- AI Provider 2: 20 points
-- Service/BB Provider: 15 points
-- Use Case Orchestrator: 15 points
-
-*Scenario 3 (Multiple Data Providers, One Use Case Orchestrator):*
-- Data Provider 1: 25 points
-- Data Provider 2: 20 points
-- Data Provider 3: 15 points
-- Use Case Orchestrator: 40 points
-
-These examples show how the 100 points can be distributed in training and skills management scenarios, ensuring that each participant is fairly rewarded based on their role and contribution.
-
 Each data provider has access to a visualization showing detailed reports on their data's usage and earned rewards.
 
 Moreover, based on the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), Contract should be clearly stated how much incentive points will be distributed among participants. The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
@@ -243,7 +161,7 @@ and the DVCT smart contracts will distribute the tokens/points to providers and 
 
 ### Incentive for network participants
 
-We will incentivize data providers, AI providers and contributing consumers based on their contribution to the use case. It will largely operate based on contracts provided by use-case orchestrators. Using smart contracts we will ensure fairness, transparency and security in the distribution of tokens. We also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
+DVCT will incentivize data providers, AI providers and contributing consumers based on predefined distribution mechanism among participants. DVCT will disrtibute the incentive based on contracts provided by use-case orchestrators. Using smart contracts we will ensure fairness, transparency and security in the distribution of tokens. We also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
 
 ### Smart contracts
 
@@ -251,7 +169,7 @@ The smart contracts will facilitate the distribution of tokens. Some of its para
 
 ### DVCT Responsibilities
 
-The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed.
+The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed, validate the distribution and ensure that incentive are distributed correctly based on the contract.
 It is responsible for the component that listen to events that signifies a reward should be distributed, and then contacts the smart contract for the actual distribution.
 It is responsible for the smart contract that handles distribution and communication with wallets as described in the section above.
 It is responsible for the wallets in the ecosystem. We will provide every relevant actor with a wallet and some points/tokens to play with.
@@ -259,6 +177,33 @@ This will be a limited wallet implementation meant to serve the purpose of the D
 However, the DVCT is not responsible for adjustments needed in the dataspace contract creation.
 Here, the contract creator will need to be able to connect his wallet, and sign a message making some tokens available for the DVCT smart contract.
 The contract BB will handle this.
+
+**Error handling**
+DVCT also responsible for handling error, particularly regarding the incentive distribution. The following procedure of error Handling is to ensure the incentive is distributed correctly.
+
+**Key Features of the Error Handling Algorithm:**
+ 
+- Validation and verification: Ensures that only valid data and rules are used for distribution.
+- Error detection: Automated detection of anomalies through threshold checks and exception handling.
+- Logging and notification: Errors are logged for audit purposes and participants are notified if required.
+- Rollback and correction: Mechanism to undo incorrect distributions and correct them either automatically or manually.
+- Continuous improvement: Feedback is used to improve the algorithm over time and reduce the likelihood of similar errors.
+
+This approach ensures that the incentive distribution process is robust, transparent, and able to handle errors efficiently while maintaining fairness and accuracy.
+
+Example scenario: An error is discovered in which an AI service provider receives 10 points less than intended due to an incorrect calculation of its point contribution.
+
+**Steps Taken:**
+
+1 **Detection:** Automated threshold alerts identify the discrepancy immediately after the distribution (compare points on participat side with expected points to receive; compare number of points to distribute with total distributed points).
+2 **Rollback:** The initial incorrect distribution is rolled back.
+3 **Automatic Review:** A automatically review by the point based on the contract. If required, manual review should be performed by the building block provider and identifies that the error was due to incorrect data input regarding the miss calculation metrics.
+4 **Correction:** The metrics are corrected, and the incentive distribution is recalculated.
+5 **Re-distribution:** The correct points (10 additional points) are allocated to the AI/Service Provider.
+6 **Notification:** All participants are informed of the error, the cause, and the correction process.
+7 **Feedback and Improvement (optional):** The process is reviewed, and the rule validation system is updated to prevent similar errors in the future.
+
+By applying these error handling mechanisms, the incentive distribution process ensures that it is fair, transparent, and resilient to discrepancies, ensuring that all participants are appropriately rewarded for their contributions to the data and the data end-result.
 
 ### Additional points
 
@@ -282,12 +227,95 @@ Information stored on the blockchain includes transaction records, token balance
 
 ### Example Incentives
 
-To better understand how points can be distributed in the ecosystem, let's take a look at example incentives that could be used
+To better understand how points can be distributed in the ecosystem, let's take a look at example incentives that could be used.
 * As a use case orchestrator, I can provide X points to the Data or Service Provider when they join my use case
 * As a use case orchestrator, I can provide X points to a Data Provider after a successful transaction
 * As a Data Provider, I can provide X points to a Service Provider after a successful response from their service
 
 > These are only a sample of all the incentives that could be used for token distribution with the DVCT
+
+To simulate the incentive distribution, let's consider three different scenario and apply different incentive distribution rules to scenarios related to training and skills management, where participants include data providers, AI/service providers, and use case orchestrators. In these scenarios, the focus is on how data and AI services are utilized to enhance training programs and manage skills development, with 100 points to be distributed among the participants (points are provided by data consumer).
+
+**Scenario 1: One Data Provider and One AI/Service Provider**
+Scenario Overview:
+
+- Data Provider: An educational institution providing historical training data, including course completion rates, exam results, and student feedback.
+- AI/Service Provider: A company that uses the data to develop a personalized learning algorithm to enhance the training program.
+
+Incentive Distribution:
+
+- Data Provider: 60 points (60% of the total points).
+Rationale: The educational institution's data is critical for developing the personalized learning algorithm. Since they are the sole provider of the data, they receive the majority share.
+- AI/Service Provider: 40 points (40% of the total points).
+Rationale: The AI/service provider’s role in developing the personalized algorithm is crucial, but since they rely on the provided data, they receive a smaller share than the data provider.
+
+**Scenario 2: One Data Provider, Several AI/Service Providers, and Use Case Orchestrator**
+Scenario Overview:
+
+- Data Provider: A corporate training department provides employee performance data, including training history, skills assessments, and feedback scores.
+- AI/Service Providers:
+    - AI Provider 1: Develops a predictive model to identify employees at risk of skill gaps.
+    - AI Provider 2: Builds a recommendation engine for personalized training paths.
+    - Service/Building block Provider: Refine and prepare the result of AI models into the company’s Learning Management System (LMS).
+- Use Case Orchestrator: An HR consulting firm defines the project, coordinates the providers, and ensures the solution aligns with corporate goals.
+
+Incentive Distribution:
+
+- Data Provider: 30 points (30% of the total points).
+Rationale: The corporate training department’s data is foundational for the AI models. However, since there are multiple contributors, the data provider receives a smaller share.
+- AI Provider 1: 20 points (20% of the total points).
+Rationale: The predictive model is essential in identifying skill gaps, earning a significant share.
+- AI Provider 2: 20 points (20% of the total points).
+Rationale: The recommendation engine adds substantial value by tailoring training paths, thus sharing an equal portion with AI Provider 1.
+- Service Provider: 15 points (15% of the total points).
+Rationale: The integration work is critical for implementation but less complex than the AI models, so it receives a slightly smaller share.
+- Use Case Orchestrator: 15 points (15% of the total points).
+Rationale: The orchestrator plays a vital role in ensuring the success of the project, justifying this share.
+
+**Scenario 3: Multiple Data Providers, One Service Provider**
+
+Scenario Overview:
+
+- Data Providers:
+    - Data Provider 1: An online learning platform provides data on user engagement, including course completion rates and time spent on each module.
+    - Data Provider 2: A corporate HR department provides employee skills assessments and training records.
+    - Data Provider 3: A certification body provides data on professional certifications and exams passed by employees.
+- Service provider: A professional aggregartion service integrates the datasets to create a comprehensive skills dataset.
+
+Incentive Distribution:
+
+Data Provider 80 Points:
+- Data Provider 1: 36 points (45% of the total points for Data provider).
+Rationale: The online learning platform’s engagement data is vital for understanding how users interact with training content, earning a significant share.
+
+- Data Provider 2: 24 points (30% of 80 points).
+Rationale: The HR department’s data is crucial for correlating training with performance, justifying this share.
+
+- Data Provider 3: 20 points (25% of the 80 points).
+Rationale: The certification data adds value by validating the skills learned, though it plays a somewhat supporting role.
+
+- Service provider: 20 points (20% of the total points).
+Rationale: The orchestrator’s role in integrating diverse datasets and ensuring the platform meets the corporation’s needs is highly complex and critical, warranting the largest share.
+
+**Summary of Distribution in Points:**
+*Scenario 1 (One Data Provider, One AI/Service Provider):*
+- Data Provider: 60 points
+- AI/Service Provider: 40 points
+
+*Scenario 2 (One Data Provider, Several AI/Service Providers, Use Case Orchestrator):*
+- Data Provider: 30 points
+- AI Provider 1: 20 points
+- AI Provider 2: 20 points
+- Service/BB Provider: 15 points
+- Use Case Orchestrator: 15 points
+
+*Scenario 3 (Multiple Data Providers, Service provider, Use Case Orchestrator):*
+- Data Provider 1: 36 points
+- Data Provider 2: 24 points
+- Data Provider 3: 20 points
+- Service Provider: 20 points
+
+These examples show how the 100 points can be distributed in training and skills management scenarios, ensuring that each participant is fairly rewarded based on their role and contribution.
 
 ## Integrations
 
@@ -322,8 +350,8 @@ In order to make the BB function, the integration with other BB is expected:
 
 ## Relevant Standards
 
-- [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
-- [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
+- To ensure node uniqueness, universal unique identified (UUID) can be used. It can be UUID based on MD5 hash 128-bit or in case of decentralized services a [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable identity.
+- [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and data immutability (including if needed distributed ledger Blockchain)
 - [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) for incentive distribution
 
 ### Data Format Standards
@@ -494,8 +522,6 @@ for the initial implementation, immutable database non-blockchain will be used b
 ## Dynamic Behaviour
 
 The sequence diagrams below describe possible DVCT to the basic B2B Connector flows.
-
-_To be discussed with Félix and Robin_
 
 ```mermaid
 ---
@@ -793,7 +819,7 @@ As described above, the contract BB will be responsible for wallet connection an
 - **Automated Distribution:** Use oracles or on-chain/off-chain hybrid systems to automate the verification of actions(joining, data provision, service provision).
 - **Gas:** Ensure that the smart contract is designed to handle a large number of transactions efficiently.
   Consider the gas fees and optimize the contract to minimize costs. Even though Polygon gas fees are small, we need to decide whether the sender or receiver will pay for gas fees.
-- **User Interface:** We will need some small user interfaces. For example to manage your wallet, see status and stats, and maybe some smart contract interaction. This has not been finalized.
+- **User Interface:** We will need some small user interfaces. For example to manage your wallet, see status and stats, and some smart contract interaction. This has not been finalized.
 
 ## OpenAPI Specification
 
