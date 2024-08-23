@@ -195,13 +195,13 @@ Example scenario: An error is discovered in which an AI service provider receive
 
 **Steps Taken:**
 
-1 **Detection:** Automated threshold alerts identify the discrepancy immediately after the distribution (compare points on participat side with expected points to receive; compare number of points to distribute with total distributed points).
-2 **Rollback:** The initial incorrect distribution is rolled back.
-3 **Automatic Review:** A automatically review by the point based on the contract. If required, manual review should be performed by the building block provider and identifies that the error was due to incorrect data input regarding the miss calculation metrics.
-4 **Correction:** The metrics are corrected, and the incentive distribution is recalculated.
-5 **Re-distribution:** The correct points (10 additional points) are allocated to the AI/Service Provider.
-6 **Notification:** All participants are informed of the error, the cause, and the correction process.
-7 **Feedback and Improvement (optional):** The process is reviewed, and the rule validation system is updated to prevent similar errors in the future.
+1. **Detection:** Automated threshold alerts identify the discrepancy immediately after the distribution (compare points on participat side with expected points to receive; compare number of points to distribute with total distributed points).
+2. **Rollback:** The initial incorrect distribution is rolled back.
+3. **Automatic Review:** A automatically review by the point based on the contract. If required, manual review should be performed by the building block provider and identifies that the error was due to incorrect data input regarding the miss calculation metrics.
+4. **Correction:** The metrics are corrected, and the incentive distribution is recalculated.
+5. **Re-distribution:** The correct points (10 additional points) are allocated to the AI/Service Provider.
+6. **Notification:** All participants are informed of the error, the cause, and the correction process.
+7. **Feedback and Improvement (optional):** The process is reviewed, and the rule validation system is updated to prevent similar errors in the future.
 
 By applying these error handling mechanisms, the incentive distribution process ensures that it is fair, transparent, and resilient to discrepancies, ensuring that all participants are appropriately rewarded for their contributions to the data and the data end-result.
 
