@@ -59,6 +59,31 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api/data/{nodeId}:
+ *   delete:
+ *     summary: Deletes JSON-LD data based on nodeId
+ *     parameters:
+ *       - in: path
+ *         name: nodeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The nodeId of the data to delete
+ *     responses:
+ *       200:
+ *         description: JSON-LD data deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/JsonLdData'
+ *       404:
+ *         description: Node not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * /api/data:
  *   get:
  *     summary: Retrieve all JSON-LD data
@@ -117,6 +142,20 @@ router.get('/data/:nodeId', async (req, res) => {
     const data = await Data.findOne({ nodeId });
     if (data) {
       res.json(data);
+    } else {
+      res.status(404).json({ message: 'Node not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/data/:nodeId', async (req, res) => {
+  const { nodeId } = req.params;
+  try {
+    const data = await Data.findOneAndDelete({ nodeId });
+    if (data) {
+      res.json({ message: 'Node deleted successfully' });
     } else {
       res.status(404).json({ message: 'Node not found' });
     }
