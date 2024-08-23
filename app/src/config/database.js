@@ -5,6 +5,7 @@ const connectWithRetry = () => {
   mongoose.connect('mongodb://localhost:27017/jsonldDB', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false
   }).then(() => {
     console.log('MongoDB is connected');
   }).catch(err => {
