@@ -1,0 +1,96 @@
+openapi: 3.0.0
+
+info:
+  title: 'Data Value Chain Tracker',
+  version: '0.0.1',
+  description: 'API for managing Value Chain Tracker'
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+
+  /api/node:
+    post:
+      summary: Post node data and save as JSON-LD format to MongoDB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputData'
+      responses:
+        201:
+          description: Data saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/JsonLdData'
+        500:
+          description: Internal server error
+
+  /api/data/{nodeId}:
+    get:
+      summary: Retrieve JSON-LD data based on nodeId
+      parameters:
+        - in: path
+          name: nodeId
+          required: true
+          schema:
+            type: string
+          description: The nodeId of the data to retrieve
+      responses:
+        200:
+          description: JSON-LD data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonLdData'
+        404:
+          description: Node not found
+        500:
+          description: Internal server error
+
+  /api/data/{nodeId}:
+    delete:
+      summary: Deletes JSON-LD data based on nodeId
+      parameters:
+        - in: path
+          name: nodeId
+          required: true
+          schema:
+            type: string
+          description: The nodeId of the data to delete
+      responses:
+        200:
+          description: JSON-LD data deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonLdData'
+        404:
+          description: Node not found
+        500:
+          description: Internal server error
+  
+  /api/data:
+    get:
+      summary: Retrieve all JSON-LD data
+      responses:
+        200:
+          description: All JSON-LD data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JsonLdData'
+       500:
+         description: Internal server error
+
+apis: ['./src/routes/dataRoutes.js'],
