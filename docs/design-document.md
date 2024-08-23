@@ -823,7 +823,7 @@ As described above, the contract BB will be responsible for wallet connection an
 
 ## OpenAPI Specification
 
-<!-- TODO -->
+The current specification can be found in  [a link](/docs/diagrams/OpenAPI.yml).
 
 ## Test Specification
 
