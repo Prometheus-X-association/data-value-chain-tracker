@@ -167,9 +167,8 @@ The secure transaction processing system will facilitate the distribution of tok
 ### DVCT Responsibilities
 
 The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed in the immutable database.
-It is responsible for the component that listens to events that signify a reward should be distributed, and then initiates the secure transaction process for the actual distribution.
-It is responsible for the secure transaction processing system that handles distribution and communication with account balances as described in the section above.
-It is responsible for managing the account balances in the ecosystem.
+- It is responsible for the component that listens to events that signify a reward should be distributed, and then initiates the secure transaction process for the actual distribution.
+- It is responsible for the secure transaction processing system that handles distribution and communication with account balances as described in the section above.
 
 **Error handling**
 DVCT also responsible for handling error, particularly regarding the incentive distribution. The following procedure of error Handling is to ensure the incentive is distributed correctly.
