@@ -423,7 +423,7 @@ To further develop the integration of other aspects (e.g. data quality) for the 
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
 3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains between data usage nodes.
-4. **Blockchain or any immutable database:** Ensures data immutability and transaction verification.
+4. **Immutable database:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
 6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
 7. **ContractManagement:** Manages digital contracts that define incentive models.
@@ -450,10 +450,9 @@ classDiagram
         +Create data nodes()
         +Create chains()
     }
-    class Blockchain {
+    class ImmutableDatabase {
         +Store immutable records()
-        +Verify transactions()
-        +Handle token transactions()
+        +Query records()
     }
     class Database {
         +Store data records()
@@ -499,8 +498,6 @@ classDiagram
     DVCT_Core --|> LoggingMonitoring : uses for logging
     DVCT_Core --|> ErrorHandlingRecovery : uses for managing errors
 ```
-
-for the initial implementation, immutable database non-blockchain will be used before the wallet BB is ready.
 
 ## Dynamic Behaviour
 
