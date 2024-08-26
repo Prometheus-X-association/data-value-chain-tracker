@@ -108,7 +108,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WalletBalance'
+                type: object
+                properties:
+                  walletId:
+                    type: string
+                  balance:
+                    type: number
         404:
           description: Wallet not found
         500:
@@ -144,7 +149,23 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Transaction'
+                  type: object
+                  properties:
+                    transactionId:
+                      type: string
+                    fromWalletId:
+                      type: string
+                    toWalletId:
+                      type: string
+                    points:
+                      type: number
+                    timestamp:
+                      type: string
+                      format: date-time
+                    contractId:
+                      type: string
+                    dataUsageId:
+                      type: string
         404:
           description: Wallet not found
         500:
