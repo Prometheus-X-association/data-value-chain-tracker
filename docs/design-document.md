@@ -154,29 +154,21 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 
 ## Distribution of incentives in DVCT
 
-The objective of the distribution of incentives in the DVCT is to design and
-implement a system for distributing incentives within a data value chain tracker
-using smart contracts. The orchestrator or other entity wallet will provide the tokens/points based on the contract
-and the DVCT smart contracts will distribute the tokens/points to providers and consumers.
+The objective of the distribution of incentives in the DVCT is to design and implement a system for distributing incentives within a data value chain tracker using an immutable database and secure transaction processing. The orchestrator or other entity will provide the tokens/points based on the contract, and the DVCT system will distribute the tokens/points to providers and consumers.
 
 ### Incentive for network participants
 
-DVCT will incentivize data providers, AI providers and contributing consumers based on predefined distribution mechanism among participants. DVCT will disrtibute the incentive based on contracts provided by use-case orchestrators. Using smart contracts we will ensure fairness, transparency and security in the distribution of tokens. We also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
+We will incentivize data providers, AI providers, and contributing consumers based on their contribution to the use case. It will largely operate based on contracts provided by use-case orchestrators. Using an immutable database and secure transaction processing, we will ensure fairness, transparency, and security in the distribution of tokens. We also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
 
-### Smart contracts
+### Secure transaction processing
 
-The smart contracts will facilitate the distribution of tokens. Some of its parameters will be defined from the contract bb, where we get information about a participant’s role, data usage terms, type of data usage and the distribution of points. This ensures consistency and interoperability across the prometheus-x ecosystem. This needs to monitor the direct and indirect use of data for a given use case to be able to distribute tokens correctly. The mechanisms for payment and incentive distributions are integrated directly into the smart contracts, ensuring fair and transparent compensation for data providers based on the value of their contributions. We might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case.
+The secure transaction processing system will facilitate the distribution of tokens. Some of its parameters will be defined from the contract bb, where we get information about a participant's role, data usage terms, type of data usage, and the distribution of points. This ensures consistency and interoperability across the prometheus-x ecosystem. This needs to monitor the direct and indirect use of data for a given use case to be able to distribute tokens correctly. The mechanisms for payment and incentive distributions are integrated directly into the transaction processing system, ensuring fair and transparent compensation for data providers based on the value of their contributions. We might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case.
 
 ### DVCT Responsibilities
 
-The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed, validate the distribution and ensure that incentive are distributed correctly based on the contract.
-It is responsible for the component that listen to events that signifies a reward should be distributed, and then contacts the smart contract for the actual distribution.
-It is responsible for the smart contract that handles distribution and communication with wallets as described in the section above.
-It is responsible for the wallets in the ecosystem. We will provide every relevant actor with a wallet and some points/tokens to play with.
-This will be a limited wallet implementation meant to serve the purpose of the DVCT for testing purposes.
-However, the DVCT is not responsible for adjustments needed in the dataspace contract creation.
-Here, the contract creator will need to be able to connect his wallet, and sign a message making some tokens available for the DVCT smart contract.
-The contract BB will handle this.
+The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed in the immutable database.
+- It is responsible for the component that listens to events that signify a reward should be distributed, and then initiates the secure transaction process for the actual distribution.
+- It is responsible for the secure transaction processing system that handles distribution and communication with account balances as described in the section above.
 
 **Error handling**
 DVCT also responsible for handling error, particularly regarding the incentive distribution. The following procedure of error Handling is to ensure the incentive is distributed correctly.
@@ -209,21 +201,13 @@ By applying these error handling mechanisms, the incentive distribution process 
 
 #### Token Revocation
 
-A mechanism to revoke tokens from actors who violate contract terms or engage in faudulent activities.
-Implemented in incentive component and smart contract.
-For this to be possible the tokens can not be directly transferred to the actors wallet, but rather allocated to them for later verification.
-Assuming user-managed wallets we are not able to access the tokens after sending them.
+A mechanism to revoke tokens from actors who violate contract terms or engage in fraudulent activities.
+Implemented in the incentive component and secure transaction processing system.
+For this to be possible, the tokens cannot be directly transferred to the actors' personal accounts, but rather allocated to them within the DVCT system for later verification.
 
-#### Fiat conversion
-
-The conversion of tokens to fiat is out of scope for the DVCT building block.
-This functionality should be defined by the dataspace, possibly through integration with payment gateways or exchange services.
-
-#### Use of Polygon
-
-Polygon is chosen for its scalability, low transaction costs, and security.
-It is also a good choice as other BBs (Identity, Wallet) have built on Polygon.
-Information stored on the blockchain includes transaction records, token balances, and some metadata.
+#### Use of Immutable Database
+An immutable database is chosen for its ability to maintain an unalterable record of transactions while providing flexibility in implementation.
+Information stored in the immutable database includes transaction records, token balances, and some metadata.
 
 ### Example Incentives
 
@@ -352,7 +336,6 @@ In order to make the BB function, the integration with other BB is expected:
 
 - To ensure node uniqueness, universal unique identified (UUID) can be used. It can be UUID based on MD5 hash 128-bit or in case of decentralized services a [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable identity.
 - [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and data immutability (including if needed distributed ledger Blockchain)
-- [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) for incentive distribution
 
 ### Data Format Standards
 
@@ -440,7 +423,7 @@ To further develop the integration of other aspects (e.g. data quality) for the 
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
 3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains between data usage nodes.
-4. **Blockchain or any immutable database:** Ensures data immutability and transaction verification.
+4. **Immutable database:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
 6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
 7. **ContractManagement:** Manages digital contracts that define incentive models.
@@ -467,10 +450,9 @@ classDiagram
         +Create data nodes()
         +Create chains()
     }
-    class Blockchain {
+    class ImmutableDatabase {
         +Store immutable records()
-        +Verify transactions()
-        +Handle token transactions()
+        +Query records()
     }
     class Database {
         +Store data records()
@@ -516,8 +498,6 @@ classDiagram
     DVCT_Core --|> LoggingMonitoring : uses for logging
     DVCT_Core --|> ErrorHandlingRecovery : uses for managing errors
 ```
-
-for the initial implementation, immutable database non-blockchain will be used before the wallet BB is ready.
 
 ## Dynamic Behaviour
 
@@ -775,51 +755,6 @@ The configuration and deployment setting for Data Value Chain Tracker (DVCT), co
 - MongoDB Node.js Library:
   Component: MongoDB Node.js driver for database operations.
   License: The MongoDB Node.js library is released under the Apache License 2.0.
-
-- Open Source Blockchain:
-  - Component: Polygon (Ethereum L2 scaling solution) is the preferred blockchain solution as other BBs in the ecosystem have already utilized it.
-  - License: Most tools and libraries in the Polygon ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
-
-## Implementation Details
-
-### Incentive distribution
-
-This section describes implementation of the incentive distribution.
-It is subject to change during implementation.
-
-#### Polygon Wallets
-
-- Ensure every participant has a Polygon wallet. This is necessary for interacting with smart contracts and handling ERC20 (or similar) tokens.
-  As described above the DVCT will be responsible for the wallets.
-
-#### Contract Creation
-
-- **Define Incentives:** When the orchestrator creates the dataspace contract he specifies whether the token point incentives are included.
-- **Point Allocation:** During contract creation, the orchestrator can allocate points to three actions: joining the use case, providing data, and providing services.
-  These points should be represented as an ERC20 (or similar) token.
-
-#### Token Allocation
-
-The implementation could include one of the two, or a combination of both.
-As described above, the contract BB will be responsible for wallet connection and signing approval or deposit of tokens during the contract creation process.
-
-- **Initial Deposit:** Require an initial deposit of tokens from the orchestrator's wallet to the smart contract.
-  This ensures that the contract has tokens available for distribution.
-- **Approval Mechanism:** Implement an approval mechanism where the orchestrator grants the smart contract the ability to withdraw a specified number of tokens.
-  This could be done using the ERC20 _approve_ or _transferFrom_ functions.
-
-#### Tracking and Distribution
-
-- **Action Tracking:** Implement a tracking system that monitors the DVCT (or integrate directly into the DVCT core) that identifies when a participant has joined the use case, provided data, or provided a service.
-- **Token Transfer:** Based on the tracked actions, the smart contract will transfer the appropriate number of tokens from the orchestrator's wallet to the relevant participant's wallet.
-  This can be triggered by specific events detected by the tracking system.
-
-#### Key Considerations
-
-- **Automated Distribution:** Use oracles or on-chain/off-chain hybrid systems to automate the verification of actions(joining, data provision, service provision).
-- **Gas:** Ensure that the smart contract is designed to handle a large number of transactions efficiently.
-  Consider the gas fees and optimize the contract to minimize costs. Even though Polygon gas fees are small, we need to decide whether the sender or receiver will pay for gas fees.
-- **User Interface:** We will need some small user interfaces. For example to manage your wallet, see status and stats, and some smart contract interaction. This has not been finalized.
 
 ## OpenAPI Specification
 
