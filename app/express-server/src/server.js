@@ -6,7 +6,7 @@ const connectWithRetry = require('./config/database');
 const dataRoutes = require('./routes/dataRoutes');
 
 const app = express();
-const port = 3000;
+const port = 9081;
 
 // Connect to MongoDB
 connectWithRetry();
@@ -19,6 +19,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Use API routes
 app.use('/api', dataRoutes);
+
+app.use(express.static("./../build"));
 
 // Home route
 app.get('/', (req, res) => {
