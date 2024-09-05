@@ -13,7 +13,7 @@ According to Latif et al. (2009), there are three different types of data that c
 <img src="diagrams/linked-data-value-chain.png" width="500">
 source: Linked data value chain (Latif et al., 2009)
 
-A node represents the data processing or the activity that takes place from data provision, refinement, aggregartion to end user (e.g., visualization). To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
+A node represents the data processing or the activity that takes place from data provision, refinement, aggregation to end user (e.g., visualization). To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
 As a parent node, a data provider offers raw data, which is then processed by one or more child nodes before being delivered to the data consumer.
 
 ```mermaid
@@ -74,7 +74,7 @@ flowchart TD
     linkStyle 9 stroke:orange;
     linkStyle 10 stroke:Blue;
 ```
-From the "tracking node chain" image, a use case has for example two analytics functionalities, each of this functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
+From the "tracking node chain" image, a use case has for example two analytics functionalities, each of these functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
 
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
@@ -154,21 +154,39 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 
 ## Distribution of incentives in DVCT
 
-The objective of the distribution of incentives in the DVCT is to design and implement a system for distributing incentives within a data value chain tracker using an immutable database and secure transaction processing. The orchestrator or other entity will provide the tokens/points based on the contract, and the DVCT system will distribute the tokens/points to providers and consumers.
+The objective of the distribution of incentives in the DVCT is to design and implement a system for distributing incentives within a data value chain tracker using blockchain and smart contracts. The orchestrator or other entity will provide the tokens/points based on the contract, and the DVCT system will distribute the tokens/points to providers and consumers.
 
 ### Incentive for network participants
 
-We will incentivize data providers, AI providers, and contributing consumers based on their contribution to the use case. It will largely operate based on contracts provided by use-case orchestrators. Using an immutable database and secure transaction processing, we will ensure fairness, transparency, and security in the distribution of tokens. We also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
+DVCT will incentivize data providers, AI providers, and contributing consumers based on their contribution to the use case. It will largely operate based on contracts provided by use-case orchestrators. Smart contracts ensure fairness, transparency, and security in the distribution of tokens. The DVCT also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
 
-### Secure transaction processing
+### Smart contracts
 
-The secure transaction processing system will facilitate the distribution of tokens. Some of its parameters will be defined from the contract bb, where we get information about a participant's role, data usage terms, type of data usage, and the distribution of points. This ensures consistency and interoperability across the prometheus-x ecosystem. This needs to monitor the direct and indirect use of data for a given use case to be able to distribute tokens correctly. The mechanisms for payment and incentive distributions are integrated directly into the transaction processing system, ensuring fair and transparent compensation for data providers based on the value of their contributions. We might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case.
+The smart contracts will facilitate the distribution of tokens. Some of its parameters will be defined from the contract bb, which defines information about a participant’s role, data usage terms, type of data usage and the distribution of points. This ensures consistency and interoperability across the Prometheus-X ecosystem. This needs to monitor the direct and indirect use of data for a given use case to be able to distribute tokens correctly. The mechanisms for payment and incentive distributions are integrated directly into the smart contracts, ensuring fair and transparent compensation for data providers based on the value of their contributions. The DVCT might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case.
 
-### DVCT Responsibilities
+### Blockchain
+The DVCT has made the choice to build on an EVM-compatible blockchain. The Ethereum Virtual Machine (EVM) offers the developers significant advantages, especially in terms of familiarity, interoperability, and access to a broad ecosystem. It serves as the backbone of the Ethereum network, where it has been battle-tested, and its compatibility has been widely adopted by numerous other blockchain, creating a standardized environment for decentralized applications. More specifically, the DVCT will be building on Polygon, which is a layer-2 scaling solution for Ethereum. This gives you the security and robustness of Ethereum, whilst enhancing scalability and throughput, and drastically lowering the transaction fees. Since Polygon is fully EVM-compatible you have all the other advantages of building on Ethereum like strong developer tools, ecosystem support, battle-tested contract standards etc. However, since the system is built on an EVM blockchain, it does not suffer a strong lock-in effect, and has the freedom to switch to another EVM-compatible blockchain in the future. This might be needed in the case that another building block decides to use blockchain technologies, need to communicate with the DVCT, and they have some specific requirements leading them to use another blockchain. Communicating between contracts on different blockchains often requires complex bridging solutions and additional layers of coordination. As long as they are on an EVM-compatible blockchain it is possible to coordinate and switch blockchain without much developer cost. 
 
-The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed in the immutable database.
-- It is responsible for the component that listens to events that signify a reward should be distributed, and then initiates the secure transaction process for the actual distribution.
-- It is responsible for the secure transaction processing system that handles distribution and communication with account balances as described in the section above.
+### Data visibility
+
+The DVCT system ensures that data visibility is maintained through transparent and auditable processes. Each data transaction and incentive distribution is recorded on the blockchain, providing an immutable and verifiable ledger of all activities. This transparency helps all participants verify the accuracy and fairness of incentive distribution. To minimize transaction fees you should always store as little information as possible in the actual blockchain. The DVCT will just be storing some metadata from the contract that defines how the incentive will be distributed, and the actual records of distribution. This is not considered sensitive data.
+
+### Incentive Token
+
+The Incentive Token is an ERC-20 token that will be utilized within the DVCT system to reward participants for their contributions. As an ERC-20 token, it adheres to a widely accepted standard on the Ethereum blockchain, ensuring compatibility with various wallets, exchanges, and decentralized applications.
+
+- Standard Compliance: The Incentive Token follows the ERC-20 standard, which defines a common interface for fungible tokens on Ethereum. This ensures interoperability with existing Ethereum-based infrastructure and services, allowing seamless integration and usage across the ecosystem.
+
+- Wallet Compatibility: Being an ERC-20 token, the Incentive Token is compatible with a wide range of Ethereum wallets, including popular options like MetaMask and Trust Wallet. This provides users with flexibility in managing their tokens. 
+
+### Responsibilities
+
+The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed in the blockchain.
+- It is responsible for the component that listens to events that signify a reward should be distributed, and then calls the smart contract for the actual distribution.
+- It is responsible for the smart contract that handles distribution and communication with wallets as described in the section above.
+- However, the DVCT is not responsible for adjustments needed in the dataspace contract creation. 
+  Here, the contract creator will need to be able to connect his wallet, and sign a message making some tokens available for the DVCT smart contract.
+  The contract BB will handle this.
 
 **Error handling**
 DVCT also responsible for handling error, particularly regarding the incentive distribution. The following procedure of error Handling is to ensure the incentive is distributed correctly.
@@ -187,9 +205,9 @@ Example scenario: An error is discovered in which an AI service provider receive
 
 **Steps Taken:**
 
-1. **Detection:** Automated threshold alerts identify the discrepancy immediately after the distribution (compare points on participat side with expected points to receive; compare number of points to distribute with total distributed points).
+1. **Detection:** Automated threshold alerts identify the discrepancy immediately after the distribution (compare points on participant side with expected points to receive; compare number of points to distribute with total distributed points).
 2. **Rollback:** The initial incorrect distribution is rolled back.
-3. **Automatic Review:** A automatically review by the point based on the contract. If required, manual review should be performed by the building block provider and identifies that the error was due to incorrect data input regarding the miss calculation metrics.
+3. **Automatic Review:** A automatic review by the point based on the contract. If required, manual review should be performed by the building block provider and identifies that the error was due to incorrect data input regarding the miss calculation metrics.
 4. **Correction:** The metrics are corrected, and the incentive distribution is recalculated.
 5. **Re-distribution:** The correct points (10 additional points) are allocated to the AI/Service Provider.
 6. **Notification:** All participants are informed of the error, the cause, and the correction process.
@@ -200,14 +218,10 @@ By applying these error handling mechanisms, the incentive distribution process 
 ### Additional points
 
 #### Token Revocation
+A mechanism to revoke tokens from actors who violate contract terms or engage in fraudulent activities. Implemented in incentive component and smart contract. For this to be possible the tokens can not be directly transferred to the actors wallet, but rather allocated to them for later verification.
 
-A mechanism to revoke tokens from actors who violate contract terms or engage in fraudulent activities.
-Implemented in the incentive component and secure transaction processing system.
-For this to be possible, the tokens cannot be directly transferred to the actors' personal accounts, but rather allocated to them within the DVCT system for later verification.
-
-#### Use of Immutable Database
-An immutable database is chosen for its ability to maintain an unalterable record of transactions while providing flexibility in implementation.
-Information stored in the immutable database includes transaction records, token balances, and some metadata.
+#### Fiat conversion
+The conversion of tokens to fiat is out of scope for the DVCT building block. This functionality should be defined by the dataspace, possibly through integration with payment gateways or exchange services.
 
 ### Example Incentives
 
@@ -264,7 +278,7 @@ Scenario Overview:
     - Data Provider 1: An online learning platform provides data on user engagement, including course completion rates and time spent on each module.
     - Data Provider 2: A corporate HR department provides employee skills assessments and training records.
     - Data Provider 3: A certification body provides data on professional certifications and exams passed by employees.
-- Service provider: A professional aggregartion service integrates the datasets to create a comprehensive skills dataset.
+- Service provider: A professional aggregation service integrates the datasets to create a comprehensive skills dataset.
 
 Incentive Distribution:
 
@@ -314,16 +328,13 @@ In order to make the BB function, the integration with other BB is expected:
   The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
 
 - _Distributed data visualization._\
-  The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space. The visualization can be shown in different places for example in the catalog.
-
-- _Billing or Digital wallet._\
-  The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators/contract participants that provide digital incentives to their use case. The DVCT will get information about the incentives from the contract, and responsible for distributing the points in an immutable database (Blockchain and Digital Wallet).
+  The DVCT will provide node and chain data that need to be visualized to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space. The visualization can be shown in different places for example in the catalog.
 
 - _Data veracity assurance._\
   The data veracity BB will focus on the data quality. Even though the DVCT
   will not access the data that is being shared between participants, it will
   work with metadata. It might be relevant to assess the quality of the
-  metadata itself by some common criterias like completeness, data anonymity, timeliness etc.
+  metadata itself by some common criteria like completeness, data anonymity, timeliness etc.
   We should also consider the possibility of automating this process if this
   falls within the scope of this BB.
 
@@ -336,6 +347,7 @@ In order to make the BB function, the integration with other BB is expected:
 
 - To ensure node uniqueness, universal unique identified (UUID) can be used. It can be UUID based on MD5 hash 128-bit or in case of decentralized services a [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable identity.
 - [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and data immutability (including if needed distributed ledger Blockchain)
+- [ERC-20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) for token standards on the Ethereum blockchain. This widely adopted standard ensures compatibility and interoperability of fungible tokens across different applications and platforms within the Ethereum ecosystem.
 
 ### Data Format Standards
 
@@ -423,7 +435,7 @@ To further develop the integration of other aspects (e.g. data quality) for the 
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
 3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains between data usage nodes.
-4. **Immutable database:** Ensures data immutability and transaction verification.
+4. **Blockchain:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
 6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
 7. **ContractManagement:** Manages digital contracts that define incentive models.
@@ -450,7 +462,7 @@ classDiagram
         +Create data nodes()
         +Create chains()
     }
-    class ImmutableDatabase {
+    class Blockchain {
         +Store immutable records()
         +Query records()
     }
@@ -748,9 +760,9 @@ The configuration and deployment setting for Data Value Chain Tracker (DVCT), co
 
 ## Third Party Components & Licenses
 
-- Immutable Database:
-  Component: Use an immutable database like Apache Cassandra or a blockchain-based storage solution.
-  License: Apache Cassandra is available under the Apache License 2.0, which allows commercial use, modification, distribution, and private use.
+- Blockchain:
+  Component: Polygon (Ethereum layer-2 scaling solution).
+  License: Most tools and libraries in the Polygon ecosystem are open-source and are typically licensed under the MIT License or Apache License 2.0. These licenses permit free use, modification, and distribution.
 
 - MongoDB Node.js Library:
   Component: MongoDB Node.js driver for database operations.
@@ -803,7 +815,7 @@ To check the result of the value chain creation, the DVCT should create a node f
 }
 ```
 
-### back and forward chain tracking
+### Back and forward chain tracking
 
 Back and forward chain tracking in the context of the Data Value Chain Tracker (DVCT) refers to the system's ability to trace data usage throughout its lifecycle. Forward tracking enables monitoring of how data is used, transformed, or combined from its initial state to subsequent states, including indirect usages in various use cases. It helps determine where, when, and in which use case the data was utilized.
 
@@ -841,7 +853,7 @@ Responsible in the implementation phase, preparing the development environment f
 - User Interface
 
 **Nomadlabs ([website](https://nomadlabs.no/)):**
-Responsible in the implementation phase for incentivizing data usage, integration of smartcontract, value-chain and blockchain technology within the DVCT. Overall, Nomadlabs will manage the development of these components for the DVCT:
+Responsible in the implementation phase for incentivizing data usage, integration of smart contracts, value-chain and blockchain technology within the DVCT. Overall, Nomadlabs will manage the development of these components for the DVCT:
 
 - Blockchain interaction
 - Incentive Engine
