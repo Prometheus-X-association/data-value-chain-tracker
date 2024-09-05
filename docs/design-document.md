@@ -8,7 +8,7 @@ Data providers (individuals or organizations) get an overview of where their dat
 
 ## Conceptual Overview
 
-According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and consumer data (human readable). By identifying these three types of data, the DVCT can create the chain based on the parent and child nodes.
+According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and consumer data (human-readable). By identifying these three types of data, the DVCT can create the chain based on the parent and child nodes.
 
 <img src="diagrams/linked-data-value-chain.png" width="500">
 source: Linked data value chain (Latif et al., 2009)
@@ -76,7 +76,7 @@ flowchart TD
 ```
 From the "tracking node chain" image, a use case has for example two analytics functionalities, each of these functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
 
-To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
+To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Prometheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
 For incentives distribution, the prerequisites are:
 1. The number of points (as representative of the data value) to be distributed for data and service providers must be predefined in the contract.
@@ -99,7 +99,7 @@ There are various approaches to incentive mechanisms, including calculating the 
 To help Dataspace participants determine the distribution of incentives, the following are some rules that can be used as reference in the contract:
 
 - Role-based distribution: 
-    - Data providers: They receive a base percentage of incentives for providing data, with the exact percentage depending on the data relevancy to the use case, uniqness, and size of data providers involved.
+    - Data providers: They receive a base percentage of incentives for providing data, with the exact percentage depending on the data relevancy to the use case, uniqueness, and size of data providers involved.
     - AI/Service Providers: receive incentives based on their role in processing, analyzing or enhancing the data, with a distribution model that takes into account the complexity and criticality of their services.
     - Use case orchestrator: Incentivized to manage and coordinate the project and ensure successful collaboration and integration between all stakeholders.
     - Data consumer: Generally receives no direct incentives, but benefits from the end product or solution.	
@@ -112,7 +112,7 @@ To help Dataspace participants determine the distribution of incentives, the fol
 - Fixed percentage distribution: 
     - Data providers: 30-50% of total incentives.
     - AI/service provider: 30-40% of total incentives, split between providers based on their roles and contributions.
-    - Use case orchestrator: 10-20% of total incentives for coordination and management.”   
+    - Use case orchestrator: 10-20% of total incentives for coordination and management.
 
 - Quality of data input (can be also assessment from Data Veracity Assurance Building Block):
     - High: 40-50% of the data provider's share (size/volume, uniqueness, completeness, etc.).
@@ -122,7 +122,7 @@ To help Dataspace participants determine the distribution of incentives, the fol
 - Allocation of incentives based on the complexity and impact of each participant's contribution using predefined categories (AI provider roles):  
     - High impact/expected features/complexity: 40-50% of AI/service provider's share.
     - Medium impact/expected features/complexity: 25-35% of the AI/service provider's share.
-    - Low impact/expected characteristics/complexity: 15-25% of the share of the AI/service provider”.		
+    - Low impact/expected characteristics/complexity: 15-25% of the share of the AI/service provider.	
 
 Each data provider has access to a visualization showing detailed reports on their data's usage and earned rewards.
 
@@ -670,7 +670,7 @@ sequenceDiagram
 
 ```
 
-To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we devided the process into different main processes:
+To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we divided the process into different main processes:
 
 - **Part 1:** Initiating Data Exchange and Basic Data Handling
 
@@ -838,7 +838,7 @@ Test the logic and execution of digital incentives distribution to ensure it com
 ## Partners & roles
 
 **imc AG ([website](https://www.im-c.com)):**
-As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Promotheus-X and other Dataspaces standards such as IDSA and GAIA-X. imc AG is responsible for these components:
+As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Prometheus-X and other Dataspaces standards such as IDSA and GAIA-X. imc AG is responsible for these components:
 
 - DVCT_Core
 - Data usage history
