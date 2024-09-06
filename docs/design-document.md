@@ -184,12 +184,10 @@ The Incentive Token is an ERC-20 token that will be utilized within the DVCT sys
 The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed in the blockchain.
 - It is responsible for the component that listens to events that signify a reward should be distributed, and then calls the smart contract for the actual distribution.
 - It is responsible for the smart contract that handles distribution and communication with wallets as described in the section above.
-- However, the DVCT is not responsible for adjustments needed in the dataspace contract creation. 
-  Here, the contract creator will need to be able to connect his wallet, and sign a message making some tokens available for the DVCT smart contract.
-  The contract BB will handle this.
+- The DVCT facilitates the distribution process by working with the contract BB, which handles any adjustments needed in the dataspace contract creation. The contract creator will simply connect their wallet and sign a message to make some tokens available for the DVCT smart contract.
 
 **Error handling**
-DVCT also responsible for handling error, particularly regarding the incentive distribution. The following procedure of error Handling is to ensure the incentive is distributed correctly.
+The DVCT is also responsible for handling errors, particularly in the distribution of incentives. The following error handling mechanisms ensure that the incentives are delivered correctly.
 
 **Key Features of the Error Handling Algorithm:**
  
