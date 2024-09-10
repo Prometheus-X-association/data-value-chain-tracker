@@ -1,4 +1,5 @@
 const express = require('express');
+const winston = require("winston");
 const Data = require('../models/data'); 
 const { generateJsonLdData } = require('./generateJsonLdData');
 const { updateChildNode } = require('./updateChildNode');
@@ -100,6 +101,21 @@ const router = express.Router();
  *         description: Internal server error
  */
 
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(
+      (info) => `${info.timestamp} ${info.level}: ${info.message}`
+    )
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: "logs/ServerApp.log" }),
+  ],
+});
+
 // API to receive JSON data and save as JSON-LD format to MongoDB
 router.post('/node', async (req, res) => {
   try {
@@ -121,7 +137,7 @@ router.post('/node', async (req, res) => {
             "nodeId": jsonLdData.nodeId,
             "@nodeUrl": `https://url-to-childNode/${jsonLdData.nodeId}`
           };
-          await updateChildNode(prevId, childNodeData);
+          await updateChildNode(newNode.nodeId, childNodeData);
         }
       }
     }
