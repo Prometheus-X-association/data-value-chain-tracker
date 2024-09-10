@@ -1,0 +1,200 @@
+openapi: 3.0.0
+
+info:
+  title: 'Data Value Chain Tracker'
+  version: '0.0.1'
+  description: 'API for managing Value Chain Tracker'
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+
+  /api/node:
+    post:
+      summary: Post node data and save as JSON-LD format to MongoDB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputData'
+      responses:
+        201:
+          description: Data saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/JsonLdData'
+        500:
+          description: Internal server error
+
+  /api/data/{nodeId}:
+    get:
+      summary: Retrieve JSON-LD data based on nodeId
+      parameters:
+        - in: path
+          name: nodeId
+          required: true
+          schema:
+            type: string
+          description: The nodeId of the data to retrieve
+      responses:
+        200:
+          description: JSON-LD data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonLdData'
+        404:
+          description: Node not found
+        500:
+          description: Internal server error
+
+    delete:
+      summary: Deletes JSON-LD data based on nodeId
+      parameters:
+        - in: path
+          name: nodeId
+          required: true
+          schema:
+            type: string
+          description: The nodeId of the data to delete
+      responses:
+        200:
+          description: JSON-LD data deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonLdData'
+        404:
+          description: Node not found
+        500:
+          description: Internal server error
+  
+  /api/data:
+    get:
+      summary: Retrieve all JSON-LD data
+      responses:
+        200:
+          description: All JSON-LD data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JsonLdData'
+        500:
+          description: Internal server error
+
+  /api/incentives/balance/{walletId}:
+    get:
+      summary: Get the current balance of a wallet
+      parameters:
+        - in: path
+          name: walletId
+          required: true
+          schema:
+            type: string
+          description: The ID of the wallet to check
+      responses:
+        200:
+          description: Wallet balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  walletId:
+                    type: string
+                  balance:
+                    type: number
+        404:
+          description: Wallet not found
+        500:
+          description: Internal server error
+
+  /api/incentives/history/{walletId}:
+    get:
+      summary: Get the transaction history for a wallet
+      parameters:
+        - in: path
+          name: walletId
+          required: true
+          schema:
+            type: string
+          description: The ID of the wallet to check
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering transactions
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: End date for filtering transactions
+      responses:
+        200:
+          description: Transaction history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    transactionId:
+                      type: string
+                    fromWalletId:
+                      type: string
+                    toWalletId:
+                      type: string
+                    points:
+                      type: number
+                    timestamp:
+                      type: string
+                      format: date-time
+                    contractId:
+                      type: string
+                    dataUsageId:
+                      type: string
+        404:
+          description: Wallet not found
+        500:
+          description: Internal server error
+
+  /api/incentives/audit-log:
+    get:
+      summary: Retrieve a log of all incentive events
+      responses:
+        200:
+          description: Audit log retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    eventId:
+                      type: string
+                    eventType:
+                      type: string
+                    timestamp:
+                      type: string
+                      format: date-time
+                    details:
+                      type: object
+                      description: Additional details about the event.
+        500:
+          description: Internal server error
+
+apis: ['./src/routes/dataRoutes.js']

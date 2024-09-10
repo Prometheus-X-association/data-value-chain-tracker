@@ -1,40 +1,132 @@
 # Data value chain tracker BB – Design Document
 
-The Data Value Chain Tracker (DVCT from now on) building block is a sophisticated system that monitors the direct and indirect use of data and distribute digital incentive for the data usage. it is based on a set of regulations, contractual requirements, and an immutable and distributed database that together form a robust infrastructure for traceable data exchange and value co-creation. DVCT not only ensures auditability and traceability of data usage but also enables organizations and individuals to see the value of their data.
+The Data Value Chain Tracker (hereafter DVCT) is a service that monitors and distributes digital incentives for data usage. DVCT ensures traceability and accountability of data usage, as well as enables organizations and individuals to realize the value of their data.
 
-As data provider or data owner, organization and individual can use DVCT to find out which use case(s), when, how, and by whom their data was used, as well as what other data affected the process of making new data type/items (chain data or visualization data). 
+As a data provider or data owner, DVCT allows providers to determine in which use cases, when, how, and by whom the data was used, what other data was merged together and delivered to the end user.
+
+Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage.
 
 ## Conceptual Overview
 
-According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and human readable data. By identifying these three types of data, the DVCT can create the chain based on the previous root and child nodes of each data type.
+According to Latif et al. (2009), there are three different types of data that contribute to the creation of the value chain. These are raw data, linked or chain data and consumer data (human-readable). By identifying these three types of data, the DVCT can create the chain based on the parent and child nodes.
 
 <img src="diagrams/linked-data-value-chain.png" width="500">
 source: Linked data value chain (Latif et al., 2009)
 
-Regardless of one's role in the use case, as a data provider (individual or organization) can provide raw data or chain data, but as a data consumer one will always use data and then also produce data, either as chain data that can be fed back into the ecosystem/use case partner or as final data in the form of result visualization analysis.
+A node represents the data processing or the activity that takes place from data provision, refinement, aggregation to end user (e.g., visualization). To construct the data usage chain node, the data origin for the data processing must be determined. Each data processing represents a child node that is connected to one or more data sources (parent nodes). A parent node can have several child nodes.
+As a parent node, a data provider offers raw data, which is then processed by one or more child nodes before being delivered to the data consumer.
 
-![data-type-usage](diagrams/data-type.png)
+```mermaid
+---
+title: Tracking node chain
+---
+flowchart TD
+%% Nodes
+    A("fa:fa-database Raw Data 
+    from Provider A (Node 1)")
+    B("fa:fa-database Raw Data 
+    from Provider B (Node 2)")
+    C("fa:fa-gears Chain Data 1 from 
+    Service Provider 1 (Node 3)")
+    D("fa:fa-gears Chain Data 2 from 
+    Service Provider 2 (Node 4)")
+    E("fa:fa-gears Chain Data 3 from 
+    Service Provider 3 (Node 5)")
+    F("... (Node n)")
+    G("fa:fa-cart-arrow-down Final Data 
+    for Data Consumer (Node n+1)")
 
-To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Promotheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
+%% Edge connections between nodes
+    A -- Node 1 is parent node for Node 3 --> C
+    A -- Node 1 is parent node for Node 4 --> D
+    B -- Node 2 is parent node for Node 4 --> D
+    C -- Node 3 is parent node for Node 5 --> E
+    D -- Node 4 is parent node for Node 5 --> E
+    E -- Node 5 is parent node for Node n --> F
+    F -- Node n is parent node for Node n+1 --> G
+    D -- Node 4 is parent node for Node n+1 --> G
+
+%% Add legend
+    subgraph Legend
+      direction LR
+      start1[ ] --->|Function 1| stop1[ ]
+      style start1 height:0px;
+      style stop1 height:0px;
+      start2[ ] --->|Function 2| stop2[ ]
+      style start2 height:0px;
+      style stop2 height:0px;
+      start3[ ] --->|Function 1 and 2| stop3[ ]
+      style start3 height:0px;
+      style stop3 height:0px; 
+    end
+
+%% Styling the arrow to fit with the legend
+    linkStyle 0 stroke:red;
+    linkStyle 1 stroke:red;
+    linkStyle 2 stroke:Blue;
+    linkStyle 3 stroke:red;
+    linkStyle 4 stroke:red;
+    linkStyle 5 stroke:red;
+    linkStyle 6 stroke:red;
+    linkStyle 7 stroke:orange;
+    %% arrow legend
+    linkStyle 8 stroke:red;
+    linkStyle 9 stroke:orange;
+    linkStyle 10 stroke:Blue;
+```
+From the "tracking node chain" image, a use case has for example two analytics functionalities, each of these functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
+
+To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Prometheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
+
+For incentives distribution, the prerequisites are:
+1. The number of points (as representative of the data value) to be distributed for data and service providers must be predefined in the contract.
+2. As a default, points will be awarded in full (factor = 1, factor will be between 0.0 - 1.0), unless specified in the contract to check data quality (factorCheck = false). Here, the factor will be calculated with the support of the Data Veracity Assurance building block.
+3. Except for raw data, information regarding previous service data processing (based on a contract) or data origin (from dataspace catalog) must be included.
+4. Incentives should be defined in a catalog, similar to the business model for dataspace offerings, where organizations can specify prices for their offers (additional input fields related to points/tokens for offers and use cases).
+5. Initial points for testing purpose will be generated and given to dataspace participants.
+6. Service or AI Providers should provide log data file regarding usage event, or log file about the dataset usage, training sessions, and performance the models trained with (each) dataset.
 
 ## Technical Usage Scenarios & Features
 
-The main goal of the DVCT is to solve the problem of uncertainty about the value of data by providing an overview of data use, not only the direct use of data, but also the use of data after it has been refined, combined or analyzed with other data (indirect use). Data providers (individuals or organizations) get an overview of where their data is used and can obtain information about the value of their data in the ecosystem, this can help them to better negotiate their data and service offering. In addition, by tracking the use of data in the ecosystem, the DVCT will handle the distribution of digital incentive to the organizations that participate in the value co-creation of the data usage.
+Technical usage scenario and role of the DVCT can be described to address the issue of data value ambiguity by giving an overview of data utilization, both direct and indirect:                                                                                                   
+- As a use case leader, I can offer points/incentives to service providers who join my use cases to expand my network.
+- As a data consumer, I can offer points or incentives to data and service (AI/building-block) providers to get better recommendations and data-driven decisions.
+- As an AI service provider, I can offer points to data providers to improve my AI models.
+- As a data provider, I want to know where my data is being used and what overall value I am getting from the use of my data.
 
-An example of a use case is skills gap analytics, in which an organization as the use case orchestrator defines the use case including the data flow and digital incentives that will be distributed to use case participants in the contract. The services required for the skill gap analytics will include different data providers and AI providers who aim to improve the skills gap analytics by combining external data with internal skill data. Based on the use case, some technical usage scenario and role of the DVCT can be described in the table below:
+There are various approaches to incentive mechanisms, including calculating the impact of data on data output (Shapley value, leave-one-out, Banzhaf value, reinforcement learning and Stackelberg game), auctions and contracts (Zeng et al., 2021). However, calculating the impact of data has its limitations: Access to the data is required, data privacy could be compromised, and high resources are required to compute and run the algorithm. This can hinder the early adoption of data spaces and building blocks. Therefore, DVCT will use contracts that do not require access to the shared data and let the market decide the value of the data.
 
-| Process                                                                                                                                                               | DVCT role                                                                                                                                                                                             | Scenario for Incentive mechanism                                                                                                                                                                                      |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Use Case Orchestrator defines the use case (data flow, point distribution including where the point coming from, number of point(s) to provide, data/AI requirements) | Extracting information from the contract about the data flow (participant's role, data usage and type of data usage) and the distribution of points                                                   | As a use case leader, I can offer points/incentives to service providers who join my use case in order to expand my network.                                                                                          |
-| Data providers share data with data consumers/AI providers on the basis of the contract                                                                               | Interaction with the dataspace connector and contract service, generation of nodes and the chain after data consumption/usage                                                                         | As a provider, I can define in the catalog how many points/incentives I would expect for using my data or using my services                                                                                           |
-| Data consumers/AI providers who consume data and bring the result of their AI service back into the ecosystem as aggregated data/chained data                         | Create and store immutable json data consisting of nodes that identify prevNode/rawdata and children                                                                                                  | As a data consumer, I can offer points or incentives for data and AI providers to improve combine, and improve my raw data. As an AI provider, I can offer points for data providers in order to improve my AI model. |
-| Participant (Use Case Orchestrator or data consumer) sets number of point(s) for data usage in the contract and catalog                                               | Interaction with the contract, the digital wallet of the point/token giver and distribution of point based on the contract (point sources, who will get the point, and number of point to distribute) | Use case participants will get incentive information about the use case on the catalog, and the use case leader can define the value exchange items: are organizations paid, do they receive tokens, or both?         |
-| Data providers want to know where their data was used                                                                                                                 | Read the json data node, interact with the data visualization to create the value chain.                                                                                                              |                                                                                                                                                                                                                       |
-| AI Provider join a use case                                                                                                                                           | Read use case contract to get information about incentives for AI provider to join a use case                                                                                                         | As an AI provider, I can offer points for data providers in order to improve my AI model.                                                                                                                             |
+To help Dataspace participants determine the distribution of incentives, the following are some rules that can be used as reference in the contract:
 
-Incentive should be define in the catalog, similar to the business model for the offering, Where we can define the price for each offering. There should be additional input fields related to the points/tokens for the offering and use case.
+- Role-based distribution: 
+    - Data providers: They receive a base percentage of incentives for providing data, with the exact percentage depending on the data relevancy to the use case, uniqueness, and size of data providers involved.
+    - AI/Service Providers: receive incentives based on their role in processing, analyzing or enhancing the data, with a distribution model that takes into account the complexity and criticality of their services.
+    - Use case orchestrator: Incentivized to manage and coordinate the project and ensure successful collaboration and integration between all stakeholders.
+    - Data consumer: Generally receives no direct incentives, but benefits from the end product or solution.	
 
-In relation to the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
+ 
+- Proportional distribution: 
+    - AI/service provider: Receives a fixed number of incentive points from the use case orchestrator when joining a use case.
+    - Use case orchestrator: Receives a fixed percentage of the total incentives (e.g. 10-20%), with the remaining points distributed proportionally among data providers and AI/service providers based on their number and role.
+
+- Fixed percentage distribution: 
+    - Data providers: 30-50% of total incentives.
+    - AI/service provider: 30-40% of total incentives, split between providers based on their roles and contributions.
+    - Use case orchestrator: 10-20% of total incentives for coordination and management.
+
+- Quality of data input (can be also assessment from Data Veracity Assurance Building Block):
+    - High: 40-50% of the data provider's share (size/volume, uniqueness, completeness, etc.).
+    - Medium: 25-35% of the data provider's share.
+    - Low: 15-25% of the data provider's share.
+		
+- Allocation of incentives based on the complexity and impact of each participant's contribution using predefined categories (AI provider roles):  
+    - High impact/expected features/complexity: 40-50% of AI/service provider's share.
+    - Medium impact/expected features/complexity: 25-35% of the AI/service provider's share.
+    - Low impact/expected characteristics/complexity: 15-25% of the share of the AI/service provider.	
+
+Each data provider has access to a visualization showing detailed reports on their data's usage and earned rewards.
+
+Moreover, based on the Dataspace Governance Principles defined by IDSA (IDSA applies four core governance principles: Accountability, Transparency, Fairness and Responsibility. Source: [International Dataspace (IDSA)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/idsa-rulebook/idsa-rulebook/2_guiding_principles), Contract should be clearly stated how much incentive points will be distributed among participants. The principles are join work between different BBs, and the DVCT will focus on ensuring _transparency_ and _accountability_ through an immutable database and tracking of data usage.
 
 DVCT does not include rules on how the initial tokens are generated as this is outside the scope of building blocks, the data space that determines how DVCT can acquire tokens. Also, regarding the amount of incentives to be distributed, this is at the use case level, which will be determined by the use case participants in their business model.
 
@@ -59,65 +151,167 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 - **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
 - **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 - **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
-- **`[BB_06__10]`** DVCT SHOULD support tracking history up to 3 level of indirect usage
-
-_\*To be further discussed with Félix and Robin_\
-_\*To be validated with use case partners & pool of experts_\
 
 ## Distribution of incentives in DVCT
 
-The objective of the distribution of incentives in the DVCT is to design and
-implement a system for distributing incentives within a data value chain tracker
-using smart contracts. The orchestrator or other entity wallet will provide the tokens/points based on the contract
-and the DVCT smart contracts will distribute the tokens/points to providers and consumers.
+The objective of the distribution of incentives in the DVCT is to design and implement a system for distributing incentives within a data value chain tracker using blockchain and smart contracts. The orchestrator or other entity will provide the tokens/points based on the contract, and the DVCT system will distribute the tokens/points to providers and consumers.
 
 ### Incentive for network participants
 
-We will incentivize data providers, AI providers and contributing consumers based on their contribution to the use case. It will largely operate based on contracts provided by use-case orchestrators. Using smart contracts we will ensure fairness, transparency and security in the distribution of tokens. We also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
+DVCT will incentivize data providers, AI providers, and contributing consumers based on their contribution to the use case. It will largely operate based on contracts provided by use-case orchestrators. Smart contracts ensure fairness, transparency, and security in the distribution of tokens. The DVCT also hope to see potential for new incentives and business models, exploring novel ways to incentivize and capitalize on existing data flows.
 
 ### Smart contracts
 
-The smart contracts will facilitate the distribution of tokens. Some of its parameters will be defined from the contract bb, where we get information about a participant’s role, data usage terms, type of data usage and the distribution of points. This ensures consistency and interoperability across the prometheus-x ecosystem. This needs to monitor the direct and indirect use of data for a given use case to be able to distribute tokens correctly. The mechanisms for payment and incentive distributions are integrated directly into the smart contracts, ensuring fair and transparent compensation for data providers based on the value of their contributions. We might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case.
+The smart contracts will facilitate the distribution of tokens. Some of its parameters will be defined from the contract bb, which defines information about a participant’s role, data usage terms, type of data usage and the distribution of points. This ensures consistency and interoperability across the Prometheus-X ecosystem. This needs to monitor the direct and indirect use of data for a given use case to be able to distribute tokens correctly. The mechanisms for payment and incentive distributions are integrated directly into the smart contracts, ensuring fair and transparent compensation for data providers based on the value of their contributions. The DVCT might need to collaborate with some use-case orchestrators to define the contract parameters accurately, considering the specific requirements of each use case.
 
-### DVCT Responsibilities
+### Blockchain
+The DVCT has made the choice to build on an EVM-compatible blockchain. The Ethereum Virtual Machine (EVM) offers the developers significant advantages, especially in terms of familiarity, interoperability, and access to a broad ecosystem. It serves as the backbone of the Ethereum network, where it has been battle-tested, and its compatibility has been widely adopted by numerous other blockchain, creating a standardized environment for decentralized applications. More specifically, the DVCT will be building on Polygon, which is a layer-2 scaling solution for Ethereum. This gives you the security and robustness of Ethereum, whilst enhancing scalability and throughput, and drastically lowering the transaction fees. Since Polygon is fully EVM-compatible you have all the other advantages of building on Ethereum like strong developer tools, ecosystem support, battle-tested contract standards etc. However, since the system is built on an EVM blockchain, it does not suffer a strong lock-in effect, and has the freedom to switch to another EVM-compatible blockchain in the future. This might be needed in the case that another building block decides to use blockchain technologies, need to communicate with the DVCT, and they have some specific requirements leading them to use another blockchain. Communicating between contracts on different blockchains often requires complex bridging solutions and additional layers of coordination. As long as they are on an EVM-compatible blockchain it is possible to coordinate and switch blockchain without much developer cost. 
 
-The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed.
-It is responsible for the component that listen to events that signifies a reward should be distributed, and then contacts the smart contract for the actual distribution.
-It is responsible for the smart contract that handles distribution and communication with wallets as described in the section above.
-It is responsible for the wallets in the ecosystem. We will provide every relevant actor with a wallet and some points/tokens to play with.
-This will be a limited wallet implementation meant to serve the purpose of the DVCT for testing purposes.
-However, the DVCT is not responsible for adjustments needed in the dataspace contract creation.
-Here, the contract creator will need to be able to connect his wallet, and sign a message making some tokens available for the DVCT smart contract.
-The contract BB will handle this.
+### Data visibility
+
+The DVCT system ensures that data visibility is maintained through transparent and auditable processes. Each data transaction and incentive distribution is recorded on the blockchain, providing an immutable and verifiable ledger of all activities. This transparency helps all participants verify the accuracy and fairness of incentive distribution. To minimize transaction fees you should always store as little information as possible in the actual blockchain. The DVCT will just be storing some metadata from the contract that defines how the incentive will be distributed, and the actual records of distribution. This is not considered sensitive data.
+
+### Incentive Token
+
+The Incentive Token is an ERC-20 token that will be utilized within the DVCT system to reward participants for their contributions. As an ERC-20 token, it adheres to a widely accepted standard on the Ethereum blockchain, ensuring compatibility with various wallets, exchanges, and decentralized applications.
+
+- Standard Compliance: The Incentive Token follows the ERC-20 standard, which defines a common interface for fungible tokens on Ethereum. This ensures interoperability with existing Ethereum-based infrastructure and services, allowing seamless integration and usage across the ecosystem.
+
+- Wallet Compatibility: Being an ERC-20 token, the Incentive Token is compatible with a wide range of Ethereum wallets, including popular options like MetaMask and Trust Wallet. This provides users with flexibility in managing their tokens. 
+
+### Responsibilities
+
+The DVCT is responsible for distributing the incentives and storing metadata about how the incentives should be distributed in the blockchain.
+- It is responsible for the component that listens to events that signify a reward should be distributed, and then calls the smart contract for the actual distribution.
+- It is responsible for the smart contract that handles distribution and communication with wallets as described in the section above.
+- The DVCT facilitates the distribution process by working with the contract BB, which handles any adjustments needed in the dataspace contract creation. The contract creator will simply connect their wallet and sign a message to make some tokens available for the DVCT smart contract.
+
+**Error handling**
+The DVCT is also responsible for handling errors, particularly in the distribution of incentives. The following error handling mechanisms ensure that the incentives are delivered correctly.
+
+**Key Features of the Error Handling Algorithm:**
+ 
+- Validation and verification: Ensures that only valid data and rules are used for distribution.
+- Error detection: Automated detection of anomalies through threshold checks and exception handling.
+- Logging and notification: Errors are logged for audit purposes and participants are notified if required.
+- Rollback and correction: Mechanism to undo incorrect distributions and correct them either automatically or manually.
+- Continuous improvement: Feedback is used to improve the algorithm over time and reduce the likelihood of similar errors.
+
+This approach ensures that the incentive distribution process is robust, transparent, and able to handle errors efficiently while maintaining fairness and accuracy.
+
+Example scenario: An error is discovered in which an AI service provider receives 10 points less than intended due to an incorrect calculation of its point contribution.
+
+**Steps Taken:**
+
+1. **Detection:** Automated threshold alerts identify the discrepancy immediately after the distribution (compare points on participant side with expected points to receive; compare number of points to distribute with total distributed points).
+2. **Rollback:** The initial incorrect distribution is rolled back.
+3. **Automatic Review:** A automatic review by the point based on the contract. If required, manual review should be performed by the building block provider and identifies that the error was due to incorrect data input regarding the miss calculation metrics.
+4. **Correction:** The metrics are corrected, and the incentive distribution is recalculated.
+5. **Re-distribution:** The correct points (10 additional points) are allocated to the AI/Service Provider.
+6. **Notification:** All participants are informed of the error, the cause, and the correction process.
+7. **Feedback and Improvement (optional):** The process is reviewed, and the rule validation system is updated to prevent similar errors in the future.
+
+By applying these error handling mechanisms, the incentive distribution process ensures that it is fair, transparent, and resilient to discrepancies, ensuring that all participants are appropriately rewarded for their contributions to the data and the data end-result.
 
 ### Additional points
 
 #### Token Revocation
-
-A mechanism to revoke tokens from actors who violate contract terms or engage in faudulent activities.
-Implemented in incentive component and smart contract.
-For this to be possible the tokens can not be directly transferred to the actors wallet, but rather allocated to them for later verification.
-Assuming user-managed wallets we are not able to access the tokens after sending them.
+A mechanism to revoke tokens from actors who violate contract terms or engage in fraudulent activities. Implemented in incentive component and smart contract. For this to be possible the tokens can not be directly transferred to the actors wallet, but rather allocated to them for later verification.
 
 #### Fiat conversion
-
-The conversion of tokens to fiat is out of scope for the DVCT building block.
-This functionality should be defined by the dataspace, possibly through integration with payment gateways or exchange services.
-
-#### Use of Polygon
-
-Polygon is chosen for its scalability, low transaction costs, and security.
-It is also a good choice as other BBs (Identity, Wallet) have built on Polygon.
-Information stored on the blockchain includes transaction records, token balances, and some metadata.
+The conversion of tokens to fiat is out of scope for the DVCT building block. This functionality should be defined by the dataspace, possibly through integration with payment gateways or exchange services.
 
 ### Example Incentives
 
-To better understand how points can be distributed in the ecosystem, let's take a look at example incentives that could be used
+To better understand how points can be distributed in the ecosystem, let's take a look at example incentives that could be used.
 * As a use case orchestrator, I can provide X points to the Data or Service Provider when they join my use case
 * As a use case orchestrator, I can provide X points to a Data Provider after a successful transaction
 * As a Data Provider, I can provide X points to a Service Provider after a successful response from their service
 
 > These are only a sample of all the incentives that could be used for token distribution with the DVCT
+
+To simulate the incentive distribution, let's consider three different scenario and apply different incentive distribution rules to scenarios related to training and skills management, where participants include data providers, AI/service providers, and use case orchestrators. In these scenarios, the focus is on how data and AI services are utilized to enhance training programs and manage skills development, with 100 points to be distributed among the participants (points are provided by data consumer).
+
+**Scenario 1: One Data Provider and One AI/Service Provider**
+Scenario Overview:
+
+- Data Provider: An educational institution providing historical training data, including course completion rates, exam results, and student feedback.
+- AI/Service Provider: A company that uses the data to develop a personalized learning algorithm to enhance the training program.
+
+Incentive Distribution:
+
+- Data Provider: 60 points (60% of the total points).
+Rationale: The educational institution's data is critical for developing the personalized learning algorithm. Since they are the sole provider of the data, they receive the majority share.
+- AI/Service Provider: 40 points (40% of the total points).
+Rationale: The AI/service provider’s role in developing the personalized algorithm is crucial, but since they rely on the provided data, they receive a smaller share than the data provider.
+
+**Scenario 2: One Data Provider, Several AI/Service Providers, and Use Case Orchestrator**
+Scenario Overview:
+
+- Data Provider: A corporate training department provides employee performance data, including training history, skills assessments, and feedback scores.
+- AI/Service Providers:
+    - AI Provider 1: Develops a predictive model to identify employees at risk of skill gaps.
+    - AI Provider 2: Builds a recommendation engine for personalized training paths.
+    - Service/Building block Provider: Refine and prepare the result of AI models into the company’s Learning Management System (LMS).
+- Use Case Orchestrator: An HR consulting firm defines the project, coordinates the providers, and ensures the solution aligns with corporate goals.
+
+Incentive Distribution:
+
+- Data Provider: 30 points (30% of the total points).
+Rationale: The corporate training department’s data is foundational for the AI models. However, since there are multiple contributors, the data provider receives a smaller share.
+- AI Provider 1: 20 points (20% of the total points).
+Rationale: The predictive model is essential in identifying skill gaps, earning a significant share.
+- AI Provider 2: 20 points (20% of the total points).
+Rationale: The recommendation engine adds substantial value by tailoring training paths, thus sharing an equal portion with AI Provider 1.
+- Service Provider: 15 points (15% of the total points).
+Rationale: The integration work is critical for implementation but less complex than the AI models, so it receives a slightly smaller share.
+- Use Case Orchestrator: 15 points (15% of the total points).
+Rationale: The orchestrator plays a vital role in ensuring the success of the project, justifying this share.
+
+**Scenario 3: Multiple Data Providers, One Service Provider**
+
+Scenario Overview:
+
+- Data Providers:
+    - Data Provider 1: An online learning platform provides data on user engagement, including course completion rates and time spent on each module.
+    - Data Provider 2: A corporate HR department provides employee skills assessments and training records.
+    - Data Provider 3: A certification body provides data on professional certifications and exams passed by employees.
+- Service provider: A professional aggregation service integrates the datasets to create a comprehensive skills dataset.
+
+Incentive Distribution:
+
+Data Provider 80 Points:
+- Data Provider 1: 36 points (45% of the total points for Data provider).
+Rationale: The online learning platform’s engagement data is vital for understanding how users interact with training content, earning a significant share.
+
+- Data Provider 2: 24 points (30% of 80 points).
+Rationale: The HR department’s data is crucial for correlating training with performance, justifying this share.
+
+- Data Provider 3: 20 points (25% of the 80 points).
+Rationale: The certification data adds value by validating the skills learned, though it plays a somewhat supporting role.
+
+- Service provider: 20 points (20% of the total points).
+Rationale: The orchestrator’s role in integrating diverse datasets and ensuring the platform meets the corporation’s needs is highly complex and critical, warranting the largest share.
+
+**Summary of Distribution in Points:**
+*Scenario 1 (One Data Provider, One AI/Service Provider):*
+- Data Provider: 60 points
+- AI/Service Provider: 40 points
+
+*Scenario 2 (One Data Provider, Several AI/Service Providers, Use Case Orchestrator):*
+- Data Provider: 30 points
+- AI Provider 1: 20 points
+- AI Provider 2: 20 points
+- Service/BB Provider: 15 points
+- Use Case Orchestrator: 15 points
+
+*Scenario 3 (Multiple Data Providers, Service provider, Use Case Orchestrator):*
+- Data Provider 1: 36 points
+- Data Provider 2: 24 points
+- Data Provider 3: 20 points
+- Service Provider: 20 points
+
+These examples show how the 100 points can be distributed in training and skills management scenarios, ensuring that each participant is fairly rewarded based on their role and contribution.
 
 ## Integrations
 
@@ -132,16 +326,13 @@ In order to make the BB function, the integration with other BB is expected:
   The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
 
 - _Distributed data visualization._\
-  The DVCT will provide node and chain data that need to be visualize to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space. The visualization can be shown in different places for example in the catalog.
-
-- _Billing or Digital wallet._\
-  The DVCT needs access to the points/token holders of the point/token givers defined by orchestrators/contract participants that provide digital incentives to their use case. The DVCT will get information about the incentives from the contract, and responsible for distributing the points in an immutable database (Blockchain and Digital Wallet).
+  The DVCT will provide node and chain data that need to be visualized to the data owner, this will help data owner to get overview regarding the value/usefulness of their data within different use case or PTX data space. The visualization can be shown in different places for example in the catalog.
 
 - _Data veracity assurance._\
   The data veracity BB will focus on the data quality. Even though the DVCT
   will not access the data that is being shared between participants, it will
   work with metadata. It might be relevant to assess the quality of the
-  metadata itself by some common criterias like completeness, data anonymity, timeliness etc.
+  metadata itself by some common criteria like completeness, data anonymity, timeliness etc.
   We should also consider the possibility of automating this process if this
   falls within the scope of this BB.
 
@@ -152,9 +343,9 @@ In order to make the BB function, the integration with other BB is expected:
 
 ## Relevant Standards
 
-- [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable, decentralized digital identity.
-- [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and immutability of distributed ledger including Blockchain
-- [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) for incentive distribution
+- To ensure node uniqueness, universal unique identified (UUID) can be used. It can be UUID based on MD5 hash 128-bit or in case of decentralized services a [Decentralized identifiers (DIDs)](https://w3c.github.io/did-core/) to allow verifiable identity.
+- [ISO 8000-117](https://www.iso.org/standard/81208.html) for data quality and data immutability (including if needed distributed ledger Blockchain)
+- [ERC-20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) for token standards on the Ethereum blockchain. This widely adopted standard ensures compatibility and interoperability of fungible tokens across different applications and platforms within the Ethereum ecosystem.
 
 ### Data Format Standards
 
@@ -242,7 +433,7 @@ To further develop the integration of other aspects (e.g. data quality) for the 
 1. **DataProvider:** Entities that supply data to the system.
 2. **DataConsumer:** Entities that use data provided by DataProviders.
 3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains between data usage nodes.
-4. **Blockchain or any immutable database:** Ensures data immutability and transaction verification.
+4. **Blockchain:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
 6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
 7. **ContractManagement:** Manages digital contracts that define incentive models.
@@ -271,8 +462,7 @@ classDiagram
     }
     class Blockchain {
         +Store immutable records()
-        +Verify transactions()
-        +Handle token transactions()
+        +Query records()
     }
     class Database {
         +Store data records()
@@ -319,13 +509,9 @@ classDiagram
     DVCT_Core --|> ErrorHandlingRecovery : uses for managing errors
 ```
 
-for the initial implementation, immutable database non-blockchain will be used before the wallet BB is ready.
-
 ## Dynamic Behaviour
 
 The sequence diagrams below describe possible DVCT to the basic B2B Connector flows.
-
-_To be discussed with Félix and Robin_
 
 ```mermaid
 ---
@@ -482,7 +668,7 @@ sequenceDiagram
 
 ```
 
-To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we devided the process into different main processes:
+To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we divided the process into different main processes:
 
 - **Part 1:** Initiating Data Exchange and Basic Data Handling
 
@@ -572,62 +758,17 @@ The configuration and deployment setting for Data Value Chain Tracker (DVCT), co
 
 ## Third Party Components & Licenses
 
-- Immutable Database:
-  Component: Use an immutable database like Apache Cassandra or a blockchain-based storage solution.
-  License: Apache Cassandra is available under the Apache License 2.0, which allows commercial use, modification, distribution, and private use.
+- Blockchain:
+  Component: Polygon (Ethereum layer-2 scaling solution).
+  License: Most tools and libraries in the Polygon ecosystem are open-source and are typically licensed under the MIT License or Apache License 2.0. These licenses permit free use, modification, and distribution.
 
 - MongoDB Node.js Library:
   Component: MongoDB Node.js driver for database operations.
   License: The MongoDB Node.js library is released under the Apache License 2.0.
 
-- Open Source Blockchain:
-  - Component: Polygon (Ethereum L2 scaling solution) is the preferred blockchain solution as other BBs in the ecosystem have already utilized it.
-  - License: Most tools and libraries in the Polygon ecosystem are open-source, typically under the MIT License, which allows for free use, modification, and distribution.
-
-## Implementation Details
-
-### Incentive distribution
-
-This section describes implementation of the incentive distribution.
-It is subject to change during implementation.
-
-#### Polygon Wallets
-
-- Ensure every participant has a Polygon wallet. This is necessary for interacting with smart contracts and handling ERC20 (or similar) tokens.
-  As described above the DVCT will be responsible for the wallets.
-
-#### Contract Creation
-
-- **Define Incentives:** When the orchestrator creates the dataspace contract he specifies whether the token point incentives are included.
-- **Point Allocation:** During contract creation, the orchestrator can allocate points to three actions: joining the use case, providing data, and providing services.
-  These points should be represented as an ERC20 (or similar) token.
-
-#### Token Allocation
-
-The implementation could include one of the two, or a combination of both.
-As described above, the contract BB will be responsible for wallet connection and signing approval or deposit of tokens during the contract creation process.
-
-- **Initial Deposit:** Require an initial deposit of tokens from the orchestrator's wallet to the smart contract.
-  This ensures that the contract has tokens available for distribution.
-- **Approval Mechanism:** Implement an approval mechanism where the orchestrator grants the smart contract the ability to withdraw a specified number of tokens.
-  This could be done using the ERC20 _approve_ or _transferFrom_ functions.
-
-#### Tracking and Distribution
-
-- **Action Tracking:** Implement a tracking system that monitors the DVCT (or integrate directly into the DVCT core) that identifies when a participant has joined the use case, provided data, or provided a service.
-- **Token Transfer:** Based on the tracked actions, the smart contract will transfer the appropriate number of tokens from the orchestrator's wallet to the relevant participant's wallet.
-  This can be triggered by specific events detected by the tracking system.
-
-#### Key Considerations
-
-- **Automated Distribution:** Use oracles or on-chain/off-chain hybrid systems to automate the verification of actions(joining, data provision, service provision).
-- **Gas:** Ensure that the smart contract is designed to handle a large number of transactions efficiently.
-  Consider the gas fees and optimize the contract to minimize costs. Even though Polygon gas fees are small, we need to decide whether the sender or receiver will pay for gas fees.
-- **User Interface:** We will need some small user interfaces. For example to manage your wallet, see status and stats, and maybe some smart contract interaction. This has not been finalized.
-
 ## OpenAPI Specification
 
-<!-- TODO -->
+The current specification can be found [here](/docs/diagrams/OpenAPI.yml).
 
 ## Test Specification
 
@@ -672,7 +813,7 @@ To check the result of the value chain creation, the DVCT should create a node f
 }
 ```
 
-### back and forward chain tracking
+### Back and forward chain tracking
 
 Back and forward chain tracking in the context of the Data Value Chain Tracker (DVCT) refers to the system's ability to trace data usage throughout its lifecycle. Forward tracking enables monitoring of how data is used, transformed, or combined from its initial state to subsequent states, including indirect usages in various use cases. It helps determine where, when, and in which use case the data was utilized.
 
@@ -695,7 +836,7 @@ Test the logic and execution of digital incentives distribution to ensure it com
 ## Partners & roles
 
 **imc AG ([website](https://www.im-c.com)):**
-As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Promotheus-X and other Dataspaces standards such as IDSA and GAIA-X. imc AG is responsible for these components:
+As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Prometheus-X and other Dataspaces standards such as IDSA and GAIA-X. imc AG is responsible for these components:
 
 - DVCT_Core
 - Data usage history
@@ -710,7 +851,7 @@ Responsible in the implementation phase, preparing the development environment f
 - User Interface
 
 **Nomadlabs ([website](https://nomadlabs.no/)):**
-Responsible in the implementation phase for incentivizing data usage, integration of smartcontract, value-chain and blockchain technology within the DVCT. Overall, Nomadlabs will manage the development of these components for the DVCT:
+Responsible in the implementation phase for incentivizing data usage, integration of smart contracts, value-chain and blockchain technology within the DVCT. Overall, Nomadlabs will manage the development of these components for the DVCT:
 
 - Blockchain interaction
 - Incentive Engine
@@ -724,3 +865,4 @@ DVCT is useful for tracking data usage and can thus provide greater benefit to m
 ### Reference
 
 - Latif, A., Saeed, A. U., Hoefler, P., Stocker, A., & Wagner, C. (2009, September). The Linked Data Value Chain: A Lightweight Model for Business Engineers. In I-SEMANTICS (pp. 568-575).
+- Zeng, R., Zeng, C., Wang, X., Li, B., & Chu, X. (2021). A comprehensive survey of incentive mechanism for federated learning. arXiv preprint arXiv:2106.15406. https://arxiv.org/pdf/2106.15406
