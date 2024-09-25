@@ -4,5 +4,6 @@ dist
 .env
 !.env.sample
 
+node_modules/
 out/
 cache/
