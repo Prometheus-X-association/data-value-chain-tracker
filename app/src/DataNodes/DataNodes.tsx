@@ -45,7 +45,12 @@ export const  DataNodes = () => {
                     array.push({id: child.nodeId, position: {x : posX, y: posY +40 }, data: {label: child.nodeId}});
                     posX = posX - 180;
                 }
-                arrayEdges.push({id: child.nodeId + '-' + obj.nodeId, source: obj.nodeId, target: child.nodeId});
+                arrayEdges.push({
+                    id: child.nodeId + '-' + obj.nodeId, 
+                    source: obj.nodeId, 
+                    target: child.nodeId,
+                    label: JSON.stringify(obj.nodeMetadata)
+                });
             });
         });
         setNodes(array);
