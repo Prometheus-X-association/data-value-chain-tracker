@@ -75,6 +75,7 @@ const swaggerOptions = {
                 }
               }
             },
+            totalIncentive: { type: 'integer' },
             prevNode: {
               type: 'array',
               items: {

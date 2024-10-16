@@ -4,6 +4,7 @@ const Data = require('../models/data');
 const { generateJsonLdData } = require('./generateJsonLdData');
 const { updateChildNode } = require('./updateChildNode');
 const { generateNewNodeForPrevDataId } = require('./generateNewNodeForPrevDataId');
+const { fetchNodeTree } = require('./fetchNodeTree'); // Ensure this function is available
 const router = express.Router();
 
 /**
@@ -101,6 +102,31 @@ const router = express.Router();
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /api/node-tree/{nodeId}:
+ *   get:
+ *     summary: Retrieve node and all connected child and grandchild nodes
+ *     parameters:
+ *       - in: path
+ *         name: nodeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The nodeId of the starting node
+ *     responses:
+ *       200:
+ *         description: Hierarchical node data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/JsonLdData'
+ *       404:
+ *         description: Node not found
+ *       500:
+ *         description: Internal server error
+ */
+
 
 const logger = winston.createLogger({
   level: "info",
@@ -185,6 +211,21 @@ router.get('/data', async (req, res) => {
   try {
     const allData = await Data.find({});
     res.json(allData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API to retrieve node and all connected child and grandchild nodes, with total incentive calculation
+router.get('/node-tree/:nodeId', async (req, res) => {
+  const { nodeId } = req.params;
+  try {
+    const nodeTree = await fetchNodeTree(nodeId);
+    if (nodeTree) {
+      res.json(nodeTree); // Return node tree with total incentive
+    } else {
+      res.status(404).json({ message: 'Node not found' });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
