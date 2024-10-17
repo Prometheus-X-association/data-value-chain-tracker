@@ -1,16 +1,24 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {ReactFlow, useEdgesState, useNodesState} from '@xyflow/react';
 import axios from 'axios';
+import _ from 'lodash'; 
 import '@xyflow/react/dist/style.css';
+import './DataNodes.css'
 
 
 export const getNodes = async() => {
     return axios.get('api/data');
 };
 
+export const getNodesTree= async(nodeId: string) => {
+    return axios.get('api/node-tree/' + nodeId);
+};
+
+
 export const  DataNodes = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [nodesEdges, setNodesEdges, onEdgesChange] = useEdgesState([]);
+    const [nodeId, setNodeId] = useState<string>('');
 
     const getNodesData = async() =>{
         try{
@@ -19,6 +27,25 @@ export const  DataNodes = () => {
         }catch(error){
             console.log(error);
         }
+    }
+
+    const getChildrenOfNode = async() =>{
+        var array = [];
+        var allNodeIds = [nodeId]
+
+        var allNodes = await getNodes();
+        var res = await getNodesTree(nodeId);
+        
+        res.data.childNode.map((obj: any) =>{
+            allNodeIds.push(obj.nodeId);
+        })
+          
+        for(const obj of allNodes.data){
+            if(obj.nodeId === nodeId ||  allNodeIds.includes(obj.nodeId)){
+                array.push(obj)
+            }
+        }
+        createNodes(array);
     }
 
     const createNodes =  (data: any) =>{
@@ -61,6 +88,7 @@ export const  DataNodes = () => {
         getNodesData();
     }, []);
 
+
     const renderApp = useCallback(() => {
         var result = false;
         if(nodes){
@@ -72,6 +100,16 @@ export const  DataNodes = () => {
 
     return renderApp() === false ? (<div></div>) : (
         <div style={{width: '100vw', height: '100vh'}}>
+            <div className="show-structure">
+                <button onClick={() => {
+                        if(nodeId){
+                            getChildrenOfNode()
+                        }
+                    }
+                } 
+                type='submit'>Show structure</button>
+                <input placeholder='nodeId' onChange={(event: React.ChangeEvent<HTMLInputElement>) =>{setNodeId(event?.target.value)}}></input>
+            </div>
             <ReactFlow nodes={nodes} edges={nodesEdges} onNodesChange={onNodesChange}
                        onEdgesChange={onEdgesChange}/>
         </div>
