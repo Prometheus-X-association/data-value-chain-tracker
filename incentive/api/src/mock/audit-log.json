@@ -1,0 +1,20 @@
+[
+  {
+    "eventId": "event1",
+    "eventType": "PointsTransfer",
+    "timestamp": "2023-09-25T10:00:00Z",
+    "details": {
+      "fromWallet": "wallet1",
+      "toWallet": "wallet2",
+      "points": 100
+    }
+  },
+  {
+    "eventId": "event2",
+    "eventType": "NewWalletCreated",
+    "timestamp": "2023-09-24T09:00:00Z",
+    "details": {
+      "walletId": "wallet3"
+    }
+  }
+]
