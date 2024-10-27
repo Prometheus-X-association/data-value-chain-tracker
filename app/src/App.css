@@ -1,0 +1,7 @@
+.App {
+  text-align: center;
+}
+
+.react-flow__node {
+  width: fit-content !important;
+}

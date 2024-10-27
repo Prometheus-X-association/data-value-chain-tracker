@@ -1,0 +1,55 @@
+{
+  "name": "react-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:9081/",
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.106",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "@visx/visx": "^3.11.0",
+    "@xyflow/react": "^12.1.1",
+    "axios": "^1.7.5",
+    "d3": "^7.9.0",
+    "lodash": "^4.17.21",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-flow-renderer": "^10.3.17",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.12.7",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/cytoscape": "^3.21.7",
+    "@types/react-cytoscapejs": "^1.2.5"
+  }
+}
