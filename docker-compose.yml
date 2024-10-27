@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  core-frontend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80" # http://localhost:3000
+
+  core-api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.server
+    ports:
+      - "3001:9081" # http:localhost:3001
+    environment:
+      MONGODB_URI: "mongodb://mongodb:27017/jsonldDB"
+    depends_on:
+      - mongodb
+
+  incentive-api:
+    build:
+      context: ./incentive/api
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000" # http://localhost:3002
+    environment:
+      PORT: 3000
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
