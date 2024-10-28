@@ -7,3 +7,8 @@ build/
 node_modules/
 out/
 cache/
+cache_hardhat/
+artifacts/
+typechain-types/
+**/ignition/deployments/
+
