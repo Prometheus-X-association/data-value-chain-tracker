@@ -1,0 +1,25 @@
+{
+  "name": "engine",
+  "version": "1.0.0",
+  "description": "The Incentive Engine is the core component of our Incentive Distribution System, responsible for processing events, calculating rewards, and managing the distribution of incentives across the network.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node src/message-consumer.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/amqplib": "^0.10.5",
+    "amqplib": "^0.10.4",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
+    "typescript": "^5.6.3",
+    "viem": "^2.21.35"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
