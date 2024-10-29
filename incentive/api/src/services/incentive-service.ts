@@ -1,6 +1,6 @@
 import amqp from "amqplib";
 import { DistributeIncentiveRequest } from "../types/types";
-import crypto from "crypto";
+import crypto, { createHmac } from "crypto";
 
 export class IncentiveService {
   private rabbitMQUrl: string;
@@ -9,8 +9,9 @@ export class IncentiveService {
 
   constructor() {
     this.rabbitMQUrl = process.env.RABBITMQ_URL || "amqp://localhost";
-    this.queueName = "incentiveQueue";
-    this.privateKey = process.env.PRIVATE_KEY || "your-private-key"; // Load your private key securely
+    console.log("RABBIT URL:", this.rabbitMQUrl);
+    this.queueName = "incentive_queue";
+    this.privateKey = process.env.PRIVATE_KEY || "your-private-key";
   }
 
   private generateHash(data: DistributeIncentiveRequest): string {
@@ -24,7 +25,13 @@ export class IncentiveService {
     const sign = crypto.createSign("RSA-SHA256");
     sign.update(hash);
     sign.end();
-    return sign.sign(this.privateKey, "hex");
+    return sign.sign(this.privateKey, "base64");
+  }
+
+  private signMessageHMAC(hash: string): string {
+    const hmac = createHmac("sha256", this.privateKey);
+    hmac.update(hash);
+    return hmac.digest("base64");
   }
 
   private generateNonce(): string {
@@ -36,7 +43,7 @@ export class IncentiveService {
       const timestamp = Math.floor(Date.now() / 1000); // Current timestamp in seconds
       const nonce = this.generateNonce();
       const hash = this.generateHash(data);
-      const signature = this.signMessage(hash);
+      const signature = this.signMessageHMAC(hash);
 
       const message = {
         ...data,

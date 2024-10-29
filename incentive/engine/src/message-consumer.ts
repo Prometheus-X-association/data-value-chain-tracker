@@ -1,8 +1,6 @@
 import amqp from "amqplib";
-import { createPublicClient, createWalletClient, http, stringify } from "viem";
-import { mainnet } from "viem/chains";
-import { privateKeyToAccount } from "viem/accounts";
-import crypto from "crypto";
+import { ethers } from "ethers";
+import crypto, { createHmac, timingSafeEqual } from "crypto";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,35 +10,25 @@ const QUEUE_NAME = process.env.RABBITMQ_QUEUE || "incentiveQueue";
 const PUBLIC_KEY = process.env.PUBLIC_KEY || "";
 const BLOCKCHAIN_RPC_URL = process.env.BLOCKCHAIN_RPC_URL || "";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
+const BLOCKCHAIN_PRIVATE_KEY = process.env.BLOCKCHAIN_PRIVATE_KEY || "";
 
 if (!PUBLIC_KEY || !BLOCKCHAIN_RPC_URL || !PRIVATE_KEY) {
   throw new Error("Missing essential environment variables");
 }
 
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(BLOCKCHAIN_RPC_URL),
-});
-
-const account = privateKeyToAccount(`0x${PRIVATE_KEY}`);
-const walletClient = createWalletClient({
-  account,
-  chain: mainnet,
-  transport: http(BLOCKCHAIN_RPC_URL),
-});
+const provider = new ethers.JsonRpcProvider(BLOCKCHAIN_RPC_URL);
+const wallet = new ethers.Wallet(BLOCKCHAIN_PRIVATE_KEY, provider);
 
 function verifyMessage(data: any): boolean {
   const { metadata, ...originalData } = data;
   const { hash, signature, timestamp, nonce } = metadata;
 
-  // Check if the message is too old
   const currentTimestamp = Math.floor(Date.now() / 1000);
   if (currentTimestamp - timestamp > 300) {
     console.error("Message expired.");
     return false;
   }
 
-  // Recalculate the hash and verify it matches the provided hash
   const recalculatedHash = crypto
     .createHash("sha256")
     .update(JSON.stringify(originalData))
@@ -51,32 +39,40 @@ function verifyMessage(data: any): boolean {
     return false;
   }
 
-  // Verify the signature using the public key
-  const verify = crypto.createVerify("RSA-SHA256");
-  verify.update(hash);
-  verify.end();
-  return verify.verify(PUBLIC_KEY, signature, "hex");
+  const expectedSignature = createHmac("sha256", PRIVATE_KEY)
+    .update(hash)
+    .digest("base64");
+
+  const expectedBuffer = Buffer.from(expectedSignature, "base64");
+  const signatureBuffer = Buffer.from(signature, "base64");
+
+  if (
+    expectedBuffer.length !== signatureBuffer.length ||
+    !timingSafeEqual(expectedBuffer, signatureBuffer)
+  ) {
+    console.error("Signature mismatch.");
+    return false;
+  }
+
+  return true;
 }
 
 async function processMessage(data: any) {
   const { contractId, distribution } = data;
 
   try {
-    // Loop through each provider to dispatch incentives
-    for (const { provider, points } of distribution) {
-      const tx = await walletClient.sendTransaction({
-        to: provider, // Blockchain address of the provider
-        value: BigInt(points), // Convert points to BigInt for viem
-        chain: mainnet,
+    for (const { provider, points, public_key } of distribution) {
+      // Send the transaction using the wallet
+      const tx = await wallet.sendTransaction({
+        to: public_key,
+        value: ethers.parseEther(points.toString()),
       });
 
-      console.log(`Transaction sent to ${provider}:`, tx);
+      console.log(`Transaction sent to ${provider}:`, tx.hash);
 
       // Wait for confirmation
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: tx,
-      });
-      console.log(`Transaction confirmed: ${receipt.transactionHash}`);
+      const receipt = await tx.wait();
+      console.log(`Transaction confirmed: ${receipt}`);
     }
 
     console.log(
@@ -89,30 +85,48 @@ async function processMessage(data: any) {
 }
 
 async function consumeMessages() {
-  try {
-    const connection = await amqp.connect(RABBITMQ_URL);
-    const channel = await connection.createChannel();
+  const maxRetries = 5;
+  const retryDelay = 5000;
 
-    await channel.assertQueue(QUEUE_NAME, { durable: true });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log("Connecting to:", RABBITMQ_URL);
+      const connection = await amqp.connect(RABBITMQ_URL);
+      const channel = await connection.createChannel();
 
-    console.log(`Waiting for messages in queue: ${QUEUE_NAME}`);
+      await channel.assertQueue(QUEUE_NAME, { durable: true });
 
-    channel.consume(QUEUE_NAME, async (msg) => {
-      if (msg !== null) {
-        const message = JSON.parse(msg.content.toString());
+      console.log(`Waiting for messages in queue: ${QUEUE_NAME}`);
 
-        if (verifyMessage(message)) {
-          await processMessage(message);
-          channel.ack(msg);
-        } else {
-          console.error("Message verification failed.");
-          // Might want a deadletter queue
-          channel.nack(msg, false, false);
+      channel.consume(QUEUE_NAME, async (msg) => {
+        if (msg !== null) {
+          const message = JSON.parse(msg.content.toString());
+
+          console.log("Received message:", message);
+
+          if (verifyMessage(message)) {
+            await processMessage(message);
+            channel.ack(msg);
+          } else {
+            console.error("Message verification failed.");
+            // Might want a deadletter queue
+            channel.nack(msg, false, false);
+          }
         }
+      });
+
+      break;
+    } catch (error) {
+      console.error(`Attempt ${attempt} to connect to RabbitMQ failed:`, error);
+
+      if (attempt === maxRetries) {
+        console.error("Max retries reached. Exiting...");
+        process.exit(1);
       }
-    });
-  } catch (error) {
-    console.error("Error consuming messages:", error);
+
+      console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+    }
   }
 }
 

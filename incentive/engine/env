@@ -1,5 +1,0 @@
-RABBITMQ_URL=amqp://localhost
-RABBITMQ_QUEUE=incentive_queue
-BLOCKCHAIN_RPC_URL=https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID
-PUBLIC_KEY="your-public-key" 
-PRIVATE_KEY="your-blockchain-private-key"  

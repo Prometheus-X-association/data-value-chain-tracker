@@ -4,11 +4,15 @@ DOCKER_COMPOSE_FILE = docker-compose.yml
 
 up:
 	@echo "Starting all services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up --build -d
+	docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 down:
 	@echo "Stopping all services..."
 	docker-compose -f $(DOCKER_COMPOSE_FILE) down
+
+rebuild:
+	@echo "Rebuilding and starting all services..."
+	docker-compose -f $(DOCKER_COMPOSE_FILE) up --build -d
 
 clean:
 	@echo "Cleaning up containers, networks, and volumes..."

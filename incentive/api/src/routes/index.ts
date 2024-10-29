@@ -4,6 +4,8 @@ import { WalletBalanceController } from "../controllers/wallet";
 import { TransactionHistoryController } from "../controllers/transaction";
 import { AuditLogController } from "../controllers/audit-log";
 import { hasError } from "../lib/error";
+import { DistributeIncentiveController } from "../controllers/distribute-incentives";
+import { DistributeIncentiveRequest } from "../types/types";
 
 const router = express.Router();
 
@@ -53,6 +55,19 @@ router.get("/incentives/audit-log", async (_req, res) => {
     const response = await controller.getAuditLog();
     return res.send(response);
   } catch (error) {
+    return res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+router.post("/incentives/distribute", async (req, res) => {
+  const controller = new DistributeIncentiveController();
+  const requestBody: DistributeIncentiveRequest = req.body;
+
+  try {
+    const response = await controller.distributeIncentive(requestBody);
+    return res.send(response);
+  } catch (error) {
+    console.error(error);
     return res.status(500).send({ error: "Internal server error" });
   }
 });

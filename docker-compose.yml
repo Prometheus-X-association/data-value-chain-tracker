@@ -27,6 +27,25 @@ services:
       - "3002:3000" # http://localhost:3002
     environment:
       PORT: 3000
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+      PRIVATE_KEY: "your-private-key"
+      PUBLIC_KEY: "corresponding-public-key"
+    depends_on:
+      - rabbitmq
+
+  incentive-engine:
+    build:
+      context: ./incentive/engine
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+      BLOCKCHAIN_RPC_URL: "http://hardhat:8545"
+      PRIVATE_KEY: "your-private-key"
+      PUBLIC_KEY: "corresponding-public-key"
+      BLOCKCHAIN_PRIVATE_KEY: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    depends_on:
+      - rabbitmq
+      - hardhat
 
   mongodb:
     image: mongo
@@ -35,6 +54,22 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672" # RabbitMQ message broker port
+      - "15672:15672" # RabbitMQ management UI
+
+  hardhat:
+    build:
+      context: ./incentive/blockchain-docker
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
 
 volumes:
   mongo_data:
