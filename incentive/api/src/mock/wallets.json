@@ -1,0 +1,4 @@
+[
+  { "walletId": "wallet1", "balance": 1000 },
+  { "walletId": "wallet2", "balance": 2000 }
+]
