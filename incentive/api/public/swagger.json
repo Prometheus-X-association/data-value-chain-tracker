@@ -97,6 +97,46 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"Distribution": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"public_key": {
+						"type": "string"
+					},
+					"points": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"provider",
+					"public_key",
+					"points"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DistributeIncentiveRequest": {
+				"properties": {
+					"distribution": {
+						"items": {
+							"$ref": "#/components/schemas/Distribution"
+						},
+						"type": "array"
+					},
+					"contractId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"distribution",
+					"contractId"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -224,6 +264,43 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/incentive/distribute": {
+			"post": {
+				"operationId": "DistributeIncentive",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DistributeIncentiveRequest"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

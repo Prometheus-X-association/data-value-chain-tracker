@@ -1,8 +1,14 @@
 app/node_modules
 dist
+build/
 .env
 !.env.sample
 
 node_modules/
 out/
 cache/
+cache_hardhat/
+artifacts/
+typechain-types/
+**/ignition/deployments/
+
