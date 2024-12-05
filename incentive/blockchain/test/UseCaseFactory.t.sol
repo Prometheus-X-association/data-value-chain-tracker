@@ -5,6 +5,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import {UseCaseFactory} from "../src/UseCaseFactory.sol";
 import {UseCaseContract} from "../src/UseCaseContract.sol";
 import {PTXToken} from "../src/PTX.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract UseCaseFactoryTest is Test {
     uint256 public constant INITIAL_SUPPLY = 1_000_000;
@@ -38,8 +39,8 @@ contract UseCaseFactoryTest is Test {
         token = new PTXToken(INITIAL_SUPPLY);
         factory = new UseCaseFactory(address(token));
         
-        // Transfer tokens to user and approve factory
-        token.transfer(user, INITIAL_SUPPLY * 10**18);
+        // Transfer tokens to user but keep some for other tests
+        token.transfer(user, INITIAL_SUPPLY * 10**18 / 2); // Transfer only half to user
         vm.stopPrank();
 
         // User approves factory
@@ -177,6 +178,15 @@ contract UseCaseFactoryTest is Test {
         uint256[] memory baseRewards = new uint256[](1);
         baseRewards[0] = 100 * 10**18;
 
+        // Ensure operator has tokens and approves factory
+        vm.startPrank(owner);
+        token.transfer(operator, REWARD_POOL * 10**18 * 3);
+        vm.stopPrank();
+
+        vm.startPrank(operator);
+        token.approve(address(factory), type(uint256).max);
+        vm.stopPrank();
+
         vm.startPrank(user);
         factory.createUseCase(1 days, eventNames, baseRewards, REWARD_POOL * 10**18);
         factory.createUseCase(1 days, eventNames, baseRewards, REWARD_POOL * 10**18);
@@ -189,5 +199,69 @@ contract UseCaseFactoryTest is Test {
         assertEq(userCases.length, 2);
         assertEq(userCases[0], 0);
         assertEq(userCases[1], 1);
+    }
+
+    function test_CreateUseCase_TokenTransfer() public {
+        // Setup event configuration
+        string[] memory eventNames = new string[](1);
+        eventNames[0] = "Event1";
+        uint256[] memory baseRewards = new uint256[](1);
+        baseRewards[0] = 100 * 10**18;
+        
+        uint256 initialRewardPool = REWARD_POOL * 10**18;
+        
+        // Record initial balances
+        uint256 userInitialBalance = token.balanceOf(user);
+        
+        // Create use case
+        vm.startPrank(user);
+        uint256 useCaseId = factory.createUseCase(
+            1 days,
+            eventNames,
+            baseRewards,
+            initialRewardPool
+        );
+        vm.stopPrank();
+        
+        // Get use case contract address
+        address useCaseAddr = factory.useCaseContracts(useCaseId);
+        
+        // Verify token transfers
+        assertEq(token.balanceOf(useCaseAddr), initialRewardPool, "Use case should receive reward pool");
+        assertEq(
+            token.balanceOf(user), 
+            userInitialBalance - initialRewardPool, 
+            "User balance should decrease by reward pool amount"
+        );
+    }
+
+    function test_CreateUseCase_RevertOnInsufficientAllowance() public {
+        string[] memory eventNames = new string[](1);
+        eventNames[0] = "Event1";
+        uint256[] memory baseRewards = new uint256[](1);
+        baseRewards[0] = 100 * 10**18;
+        
+        uint256 initialRewardPool = REWARD_POOL * 10**18;
+        
+        // Revoke approval
+        vm.startPrank(user);
+        token.approve(address(factory), 0);
+        
+        // Attempt to create use case without approval
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "ERC20InsufficientAllowance(address,uint256,uint256)",
+                address(factory),
+                0,
+                initialRewardPool
+            )
+        );
+        factory.createUseCase(
+            1 days,
+            eventNames,
+            baseRewards,
+            initialRewardPool
+        );
+        vm.stopPrank();
     }
 }

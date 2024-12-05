@@ -123,13 +123,24 @@ contract UseCaseFactory is Ownable {
         
         uint256 useCaseId = nextUseCaseId++;
         
+        // Create the use case contract first
         UseCaseContract useCase = new UseCaseContract(
-             msg.sender,
+            msg.sender,
             rewardPoolAmount,
             lockDuration,
             address(incentiveToken),
             eventNames,
             baseRewards
+        );
+        
+        // Transfer tokens from user to the new use case contract
+        require(
+            IERC20(incentiveToken).transferFrom(
+                msg.sender, 
+                address(useCase), 
+                rewardPoolAmount
+            ),
+            "Token transfer failed"
         );
         
         useCaseContracts[useCaseId] = address(useCase);
