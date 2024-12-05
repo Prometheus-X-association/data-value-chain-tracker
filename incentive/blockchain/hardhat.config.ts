@@ -5,13 +5,13 @@ import "@nomicfoundation/hardhat-foundry";
 import "@nomicfoundation/hardhat-ignition";
 import "@typechain/hardhat";
 
-task("accounts", "Prints the list of accounts", async () => {
-  const accounts = await ethers.getSigners();
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {
-    const balance = await ethers.provider.getBalance(account.address);
+    const balance = await hre.ethers.provider.getBalance(account.address);
     console.log(
-      `Address: ${account.address} | Balance: ${ethers.formatEther(
+      `Address: ${account.address} | Balance: ${hre.ethers.formatEther(
         balance
       )} ETH`
     );
