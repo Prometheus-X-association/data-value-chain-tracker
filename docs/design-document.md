@@ -74,7 +74,7 @@ flowchart TD
     linkStyle 9 stroke:orange;
     linkStyle 10 stroke:Blue;
 ```
-From the "tracking node chain" image, a use case has for example two analytics functionalities, each of these functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1.
+From the "tracking node chain" image, a use case has for example two analytics functionalities, each of these functionalities requires different Data and AI (Artificial Intelligence) Services. For the function 1, Nodes 3 and 4 are using the data directly from Node 1, while Node 5 and Node n are indirectly using the data from Node 1. These Nodes 3,4,5 or n can be regarded as a linked data provider based on the linked data value chain figure.
 
 To encourage data sharing, digital incentives should be provided to the ecosystem. These digital incentives can be used to convert the "value" of data sharing into a valuable asset that can be used for various activities within the Prometheus-X (PTX) ecosystem. DVCT act as tool to distribute the digital incentives based on data usage of participants.
 
