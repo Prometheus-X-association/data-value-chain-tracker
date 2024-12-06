@@ -493,8 +493,8 @@ classDiagram
         +Recover from failures()
     }
 
-    DataProvider --|> DVCT_Core : provides data to
-    DataConsumer --|> DVCT_Core : consumes data from
+    DataProvider --|> DVCT_Core : provides metadata about the data to be exchanged
+    DataConsumer --|> DVCT_Core : consumes metadata about the data to be exchanged
     DVCT_Core --|> Blockchain : uses
     DVCT_Core --|> Database : uses
     DVCT_Core --|> UserInterface : outputs to
