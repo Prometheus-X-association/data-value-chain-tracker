@@ -430,9 +430,9 @@ To further develop the integration of other aspects (e.g. data quality) for the 
 
 ### Component Descriptions:
 
-1. **DataProvider:** Entities that supply data to the system.
-2. **DataConsumer:** Entities that use data provided by DataProviders.
-3. **DVCT_Core:** Central logic component that tracks data usage, creates data nodes and chains between data usage nodes.
+1. **DataProvider:** Entities that supply data to the use case and provide metadata about the data.
+2. **DataConsumer:** Entities that use data provided by DataProviders and get the metadata.
+3. **DVCT_Core:** Central logic component that tracks data usage, creates metadata nodes and chains between data usage nodes.
 4. **Blockchain:** Ensures data immutability and transaction verification.
 5. **Database:** Stores non-blockchain data records and manages queries.
 6. **UserInterface:** Provides visualizations of data lineage, data usages information, points/token information and manages user interactions.
