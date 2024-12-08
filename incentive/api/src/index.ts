@@ -1,29 +1,45 @@
-import express, { Application, Request, Response } from "express";
-import morgan from "morgan";
-import swaggerUi from "swagger-ui-express";
+import express from "express";
+import { ethers } from "ethers";
+import { createIncentiveRouter } from "./routes/IncentiveRoutes";
 
-import Router from "./routes";
+async function startServer() {
+  const app = express();
 
-const PORT = process.env.PORT || 8080;
+  app.use(express.json());
 
-const app: Application = express();
+  // Initialize blockchain connection
+  const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+  const contractAddress = process.env.CONTRACT_ADDRESS!;
 
-app.use(express.json());
-app.use(morgan("tiny"));
-app.use(express.static("public"));
+  const incentiveRouter = createIncentiveRouter(
+    provider,
+    wallet,
+    contractAddress
+  );
 
-app.use(
-  "/docs",
-  swaggerUi.serve,
-  swaggerUi.setup(undefined, {
-    swaggerOptions: {
-      url: "/swagger.json",
-    },
-  }),
-);
+  app.use("/api/incentives", incentiveRouter);
 
-app.use(Router);
+  // Error handling middleware
+  app.use(
+    (
+      err: Error,
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction
+    ) => {
+      console.error(err.stack);
+      res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  );
 
-app.listen(PORT, () => {
-  console.log("Server is running on port", PORT);
-});
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+startServer().catch(console.error);
