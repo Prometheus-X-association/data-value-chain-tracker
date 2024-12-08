@@ -19,8 +19,8 @@ interface UseCaseCardProps {
   lockDuration: bigint;
   eventCount: number;
   isActive: boolean;
-  owner: string;
-  currentAddress?: string;
+  owner: `0x${string}` | undefined;
+  currentAddress: `0x${string}` | undefined;
 }
 
 export function UseCaseCard({
@@ -33,7 +33,7 @@ export function UseCaseCard({
   owner,
   currentAddress,
 }: UseCaseCardProps) {
-  const isOwner = currentAddress === owner;
+  const isOwner = currentAddress && currentAddress === owner;
 
   return (
     <Card>
@@ -71,7 +71,7 @@ export function UseCaseCard({
             <div className="flex justify-between">
               <span className="text-muted-foreground">Owner</span>
               <span className="font-medium">
-                {owner.slice(0, 6)}...{owner.slice(-4)}
+                {owner?.slice(0, 6)}...{owner?.slice(-4)}
               </span>
             </div>
           </div>

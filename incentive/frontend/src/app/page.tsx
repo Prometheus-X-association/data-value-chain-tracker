@@ -7,13 +7,22 @@ import { PageHeader } from "@/components/layout/page-header";
 import { UseCaseCard } from "@/components/use-case/use-case-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { useUseCaseContracts } from "@/hooks/useUseCaseContracts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePtxToken } from "@/hooks/use-ptx-token";
+import { useFactoryContract } from "@/hooks/use-factory";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
-  const { ownedUseCases, participatedUseCases, useCases, ptxBalance } =
-    useUseCaseContracts();
+  const { getAllUseCases } = useFactoryContract();
+  const { balance } = usePtxToken();
+
+  const useCases = getAllUseCases();
+  const ownedUseCases = useCases.filter((useCase) => useCase.owner === address);
+  const participatedUseCases = useCases.filter((useCase) =>
+    useCase?.participants.some(
+      (participant) => participant.address === address,
+    ),
+  );
 
   if (!isConnected) {
     return (
@@ -36,7 +45,7 @@ export default function DashboardPage() {
       <div className="space-y-8">
         <PageHeader
           title="Dashboard"
-          description={`Address: ${address} | Balance: ${ptxBalance} PTX`}
+          description={`Address: ${address} | Balance: ${balance} PTX`}
         />
 
         <Tabs defaultValue="owned" className="w-full">
@@ -65,13 +74,13 @@ export default function DashboardPage() {
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {ownedUseCases.map((useCase) => (
                   <UseCaseCard
-                    key={useCase.id.toString()}
+                    key={useCase?.id.toString()}
                     id={useCase.id}
-                    rewardPool={useCase.rewardPool}
-                    remainingRewardPool={useCase.remainingRewardPool}
-                    lockDuration={useCase.lockDuration}
-                    eventCount={useCase.eventCount}
-                    isActive={useCase.isActive}
+                    rewardPool={useCase.stats.rewardPool}
+                    remainingRewardPool={useCase.stats.remainingRewardPool}
+                    lockDuration={useCase.stats.lockDuration}
+                    eventCount={useCase.stats.eventCount}
+                    isActive={useCase.stats.isActive}
                     owner={useCase.owner}
                     currentAddress={address}
                   />
@@ -94,11 +103,11 @@ export default function DashboardPage() {
                   <UseCaseCard
                     key={useCase.id.toString()}
                     id={useCase.id}
-                    rewardPool={useCase.rewardPool}
-                    remainingRewardPool={useCase.remainingRewardPool}
-                    lockDuration={useCase.lockDuration}
-                    eventCount={useCase.eventCount}
-                    isActive={useCase.isActive}
+                    rewardPool={useCase.stats.rewardPool}
+                    remainingRewardPool={useCase.stats.remainingRewardPool}
+                    lockDuration={useCase.stats.lockDuration}
+                    eventCount={useCase.stats.eventCount}
+                    isActive={useCase.stats.isActive}
                     owner={useCase.owner}
                     currentAddress={address}
                   />
@@ -113,11 +122,11 @@ export default function DashboardPage() {
                 <UseCaseCard
                   key={useCase.id.toString()}
                   id={useCase.id}
-                  rewardPool={useCase.rewardPool}
-                  remainingRewardPool={useCase.remainingRewardPool}
-                  lockDuration={useCase.lockDuration}
-                  eventCount={useCase.eventCount}
-                  isActive={useCase.isActive}
+                  rewardPool={useCase.stats.rewardPool}
+                  remainingRewardPool={useCase.stats.remainingRewardPool}
+                  lockDuration={useCase.stats.lockDuration}
+                  eventCount={useCase.stats.eventCount}
+                  isActive={useCase.stats.isActive}
                   owner={useCase.owner}
                   currentAddress={address}
                 />

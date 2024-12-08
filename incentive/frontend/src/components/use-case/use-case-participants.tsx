@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatEther } from "viem";
-import { useUseCase } from "@/hooks/useUseCase";
+import { useUseCase } from "@/hooks/use-use-case";
 import {
   Dialog,
   DialogContent,

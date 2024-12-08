@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useUseCase } from "@/hooks/useUseCase";
+import { useUseCase } from "@/hooks/use-use-case";
 import { Pause, Play, Ban } from "lucide-react";
 
 interface UseCaseActionsProps {

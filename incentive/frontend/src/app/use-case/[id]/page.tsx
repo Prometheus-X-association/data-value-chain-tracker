@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import { Container } from "@/components/layout/container";
 import { PageHeader } from "@/components/layout/page-header";
-import { useUseCase } from "@/hooks/useUseCase";
+import { useUseCase } from "@/hooks/use-use-case";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UseCaseOverview } from "@/components/use-case/use-case-overview";
 import { UseCaseParticipants } from "@/components/use-case/use-case-participants";

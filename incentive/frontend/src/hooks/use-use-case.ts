@@ -1,31 +1,17 @@
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { FACTORY_ADDRESS, FACTORY_ABI, USECASE_ABI } from "@/config/contracts";
-import { toast } from "@/hooks/use-toast";
-
-interface Participant {
-  address: string;
-  rewardIndex: number;
-  pendingRewards: bigint;
-  claimedRewards: bigint;
-  isLocked: boolean;
-}
-
-interface UseCaseStats {
-  totalAllocated: bigint;
-  totalClaimed: bigint;
-  totalRejected: bigint;
-  totalPending: bigint;
-  rewardPool: bigint;
-  remainingRewardPool: bigint;
-  isActive: boolean;
-  lockDuration: bigint;
-  eventCount: number;
-}
+import {
+  mapRewardAllocatedEvents,
+  RewardAllocatedEventLog,
+  UseCase,
+  UseCaseStats,
+} from "@/types/types";
+import { useContractEvents } from "./use-contract-event";
 
 export function useUseCase(useCaseId: bigint) {
   const { address } = useAccount();
 
-  // Get use case contract address
+  // Get use case contract address from id
   const { data: useCaseAddress, isLoading: isAddressLoading } = useReadContract(
     {
       address: FACTORY_ADDRESS,
@@ -53,13 +39,18 @@ export function useUseCase(useCaseId: bigint) {
     functionName: "getSupportedEvents",
   });
 
-  // Get participant rewards
-  const { data: participantRewards } = useReadContract({
+  const { data: participantsData } = useContractEvents({
     address: useCaseAddress,
     abi: USECASE_ABI,
-    functionName: "getParticipantRewards",
-    args: [address!],
+    eventName: "RewardAllocated",
   });
+
+  const participants = mapRewardAllocatedEvents(
+    participantsData as RewardAllocatedEventLog[],
+  );
+  const participantsAddresses = participants.map(
+    (participant) => participant.participant,
+  );
 
   // Get owner
   const { data: owner, error: ownerError } = useReadContract({
@@ -133,51 +124,11 @@ export function useUseCase(useCaseId: bigint) {
       }),
   };
 
-  // Add new contract reads
-  const { data: rewardPool } = useReadContract({
-    address: useCaseAddress,
-    abi: USECASE_ABI,
-    functionName: "remainingRewardPool",
-  });
-
   const { data: lockDuration } = useReadContract({
     address: useCaseAddress,
     abi: USECASE_ABI,
     functionName: "lockDuration",
   });
-
-  const formatParticipants = (rewards: any) => {
-    if (!rewards) return [];
-
-    const [amounts, unlockTimes, rejected, claimed, participants] = rewards;
-    const participantMap = new Map<string, Participant>();
-
-    amounts.forEach((amount: bigint, index: number) => {
-      const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
-      const isLocked = BigInt(unlockTimes[index]) > currentTimestamp;
-      const address = participants[index];
-
-      if (!participantMap.has(address)) {
-        participantMap.set(address, {
-          address,
-          pendingRewards: 0n,
-          claimedRewards: 0n,
-          isLocked: false,
-          rewardIndex: index,
-        });
-      }
-
-      const participant = participantMap.get(address)!;
-      if (claimed[index]) {
-        participant.claimedRewards += amount;
-      } else if (!rejected[index]) {
-        participant.pendingRewards += amount;
-        participant.isLocked = participant.isLocked || isLocked;
-      }
-    });
-
-    return Array.from(participantMap.values());
-  };
 
   // Format the stats
   const stats: UseCaseStats = {
@@ -193,39 +144,22 @@ export function useUseCase(useCaseId: bigint) {
   };
 
   // Format the return data
-  const useCase =
-    useCaseStats && supportedEvents
-      ? {
-          id: useCaseId,
-          address: useCaseAddress,
-          owner,
-          stats,
-          events: {
-            names: [...supportedEvents[0]],
-            rewards: [...supportedEvents[1]],
-          },
-          participantRewards,
-          participants: formatParticipants(participantRewards),
-        }
-      : null;
-
-  return {
-    // New API
+  const useCase = {
     id: useCaseId,
     address: useCaseAddress,
     owner,
     stats,
     events: {
-      names: useCase?.events.names ?? [],
-      rewards: useCase?.events.rewards ?? [],
+      names: supportedEvents?.[0] ?? [],
+      rewards: supportedEvents?.[1] ?? [],
     },
-    participantRewards,
-    participants: formatParticipants(participantRewards),
-    error: statsError || eventsError || ownerError,
+    participants: participantsAddresses,
+  } as UseCase;
 
-    // Old API compatibility
+  return {
     useCase,
     actions,
     isLoading: isAddressLoading || isStatsLoading,
+    error: statsError || eventsError || ownerError,
   };
 }
