@@ -268,4 +268,24 @@ contract UseCaseContractTest is Test {
         
         assertEq(token.balanceOf(address(useCase)), 0);
     }
+
+    function test_GetUseCaseStats() public {
+        (
+            uint256 totalAllocated,
+            uint256 totalClaimed,
+            uint256 totalRejected,
+            uint256 totalPending,
+            uint256 rewardPool,
+            uint256 remainingRewardPool,
+            bool isActive
+        ) = useCase.getUseCaseStats();
+        
+        assertEq(totalAllocated, 0);
+        assertEq(totalClaimed, 0);
+        assertEq(totalRejected, 0);
+        assertEq(totalPending, 0);
+        assertEq(rewardPool, REWARD_POOL * 10**18);
+        assertEq(remainingRewardPool, REWARD_POOL * 10**18);
+        assertTrue(!isActive); // contract starts unpaused, so isActive should be true
+    }
 }

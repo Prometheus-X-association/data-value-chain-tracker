@@ -184,4 +184,17 @@ contract UseCaseFactory is Ownable {
             }
         }
     }
+
+    /// @notice Gets the contract addresses for multiple use case IDs
+    /// @param useCaseIds Array of use case IDs
+    /// @return addresses Array of corresponding use case contract addresses
+    function getUseCaseAddresses(
+        uint256[] calldata useCaseIds
+    ) external view returns (address[] memory addresses) {
+        addresses = new address[](useCaseIds.length);
+        for (uint256 i = 0; i < useCaseIds.length; i++) {
+            addresses[i] = useCaseContracts[useCaseIds[i]];
+        }
+        return addresses;
+    }
 }

@@ -66,7 +66,7 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
     uint256 public constant MAX_FACTOR = 1e18;    // 1.0 = 100%
     /// @notice Minimum reward factor (1%)
     uint256 public constant MIN_FACTOR = 1e16;    // 0.01 = 1%
-    /// @notice Minimum lock duration for rewards
+    /// @notice Minimum lock duration for rewards (if non-zero)
     uint256 public constant MIN_LOCK_DURATION = 1 hours;
     /// @notice Maximum lock duration for rewards
     uint256 public constant MAX_LOCK_DURATION = 30 days;
@@ -180,8 +180,11 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
             require(baseRewards[i] > 0, "Invalid base reward");
         }
         require(rewardPool_ > 0, "Invalid reward pool");
-        require(lockDuration_ >= MIN_LOCK_DURATION, "Lock duration too short");
-        require(lockDuration_ <= MAX_LOCK_DURATION, "Lock duration too long");
+        require(
+            lockDuration_ == 0 || 
+            (lockDuration_ >= MIN_LOCK_DURATION && lockDuration_ <= MAX_LOCK_DURATION),
+            "Invalid lock duration"
+        );
         require(rewardToken_ != address(0), "Invalid token address");
         require(
             eventNames.length == baseRewards.length,
@@ -399,11 +402,17 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
     /// @return totalClaimed Total rewards claimed
     /// @return totalRejected Total rewards rejected
     /// @return totalPending Total rewards pending
+    /// @return rewardPool_ Initial reward pool amount
+    /// @return remainingRewardPool_ Current remaining reward pool
+    /// @return isActive Whether the contract is active
     function getUseCaseStats() external view returns (
         uint256 totalAllocated,
         uint256 totalClaimed,
         uint256 totalRejected,
-        uint256 totalPending
+        uint256 totalPending,
+        uint256 rewardPool_,
+        uint256 remainingRewardPool_,
+        bool isActive
     ) {
         uint256 nextId = factory.nextUseCaseId();
         for (uint256 i = 0; i < nextId; i++) {
@@ -416,6 +425,45 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
                     totalPending += rewards[j].amount;
                 }
             }
+        }
+        rewardPool_ = totalAllocated + remainingRewardPool;
+        remainingRewardPool_ = remainingRewardPool;
+        isActive = !paused;
+    }
+
+    /// @notice Gets all rewards for a specific participant
+    /// @param participant Address of the participant
+    /// @return amounts Array of reward amounts
+    /// @return unlockTimes Array of unlock timestamps
+    /// @return rejected Array of rejection flags
+    /// @return claimed Array of claim flags
+    /// @return eventTypes Array of event type hashes
+    /// @return eventNames Array of event names
+    function getParticipantRewards(address participant) external view returns (
+        uint256[] memory amounts,
+        uint256[] memory unlockTimes,
+        bool[] memory rejected,
+        bool[] memory claimed,
+        bytes32[] memory eventTypes,
+        string[] memory eventNames
+    ) {
+        Reward[] storage rewards = participantRewards[participant];
+        uint256 length = rewards.length;
+        
+        amounts = new uint256[](length);
+        unlockTimes = new uint256[](length);
+        rejected = new bool[](length);
+        claimed = new bool[](length);
+        eventTypes = new bytes32[](length);
+        eventNames = new string[](length);
+        
+        for (uint256 i = 0; i < length; i++) {
+            amounts[i] = rewards[i].amount;
+            unlockTimes[i] = rewards[i].unlockTime;
+            rejected[i] = rewards[i].rejected;
+            claimed[i] = rewards[i].claimed;
+            eventTypes[i] = rewards[i].eventType;
+            eventNames[i] = rewards[i].eventName;
         }
     }
 
