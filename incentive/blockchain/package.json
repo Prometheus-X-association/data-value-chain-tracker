@@ -12,6 +12,7 @@
     "ptx-deploy": "npx hardhat ignition deploy ./ignition/modules/PTXProtocol.ts --network localhost",
     "ptx-deploy-test": "npx hardhat run script/deployTestEnv.ts --network localhost",
     "export-abis": "npx hardhat compile && npx ts-node script/exportAbis.ts",
+    "export-abis-to-api": "npx hardhat compile && npx ts-node script/exportAbisToApi.ts",
     "node": "npx hardhat node",
     "clean": "npx hardhat clean"
   },

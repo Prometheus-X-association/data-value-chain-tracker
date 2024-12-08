@@ -6,14 +6,27 @@ import {
 } from "../types/types";
 import crypto from "crypto";
 import { ethers } from "ethers";
+import { FACTORY_ABI, USECASE_ABI } from "../contracts/abis";
+import {
+  UseCaseFactory,
+  UseCaseContract,
+} from "../../../blockchain/typechain-types";
 
 export class IncentiveService {
+  private factory: UseCaseFactory;
+
   constructor(
     private keyManager: KeyManagementService,
     private provider: ethers.Provider,
     private wallet: ethers.Wallet,
-    private contractAddress: string
-  ) {}
+    private factoryAddress: string
+  ) {
+    this.factory = new ethers.Contract(
+      factoryAddress,
+      FACTORY_ABI,
+      wallet
+    ) as unknown as UseCaseFactory;
+  }
 
   async distributeIncentive(request: IncentiveRequest): Promise<string> {
     // 1. Validate request
@@ -80,20 +93,27 @@ export class IncentiveService {
   }
 
   private async submitTransaction(request: IncentiveRequest): Promise<string> {
-    // Create contract instance
-    const contract = new ethers.Contract(
-      this.contractAddress,
-      ["function distributeIncentive(address recipient, uint256 amount)"],
+    const useCaseAddress = await this.factory.useCaseContracts(
+      BigInt(request.useCaseId)
+    );
+    if (useCaseAddress === ethers.ZeroAddress) {
+      throw new Error("Invalid use case ID");
+    }
+
+    const useCase = new ethers.Contract(
+      useCaseAddress,
+      [
+        "function notifyEvent(string memory eventName, address participant, uint256 factor)",
+      ],
       this.wallet
-    );
+    ) as unknown as UseCaseContract;
 
-    // Submit transaction
-    const tx = await contract.distributeIncentive(
+    const tx = await useCase.notifyEvent(
+      request.eventName,
       request.recipient,
-      ethers.parseUnits(request.amount, 18)
+      ethers.parseUnits(request.factor, 18)
     );
 
-    // Wait for confirmation
     await tx.wait();
 
     return tx.hash;

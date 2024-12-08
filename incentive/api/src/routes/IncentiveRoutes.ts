@@ -8,7 +8,7 @@ import { ethers } from "ethers";
 export function createIncentiveRouter(
   provider: ethers.Provider,
   wallet: ethers.Wallet,
-  contractAddress: string
+  factoryAddress: string
 ): Router {
   const storage = new FileKeyStorage();
   const keyManager = new KeyManagementService(storage);
@@ -16,7 +16,7 @@ export function createIncentiveRouter(
     keyManager,
     provider,
     wallet,
-    contractAddress
+    factoryAddress
   );
 
   const controller = new IncentiveController(incentiveService);
@@ -24,9 +24,6 @@ export function createIncentiveRouter(
   const router = Router();
 
   router.post("/distribute", controller.distributeIncentive);
-
-  // router.get('/status/:txHash', controller.getDistributionStatus);
-  // router.get('/history', controller.getDistributionHistory);
 
   return router;
 }
