@@ -10,6 +10,7 @@ export interface UseCase {
   };
   stats: UseCaseStats;
   participants: `0x${string}`[];
+  participantsRewards: Reward[];
 }
 
 export interface UseCaseStats {
@@ -30,6 +31,16 @@ export interface Participant {
   pendingRewards: bigint;
   claimedRewards: bigint;
   isLocked: boolean;
+}
+
+export interface Reward {
+  participant: `0x${string}`;
+  amount: bigint;
+  unlockTime: bigint;
+  rejected: boolean;
+  claimed: boolean;
+  eventType: `0x${string}`;
+  eventName: string;
 }
 
 export interface RewardAllocatedEventLog extends Log {

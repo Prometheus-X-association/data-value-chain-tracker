@@ -28,9 +28,10 @@ export function UseCaseActions({ useCaseId }: UseCaseActionsProps) {
 
   const handleBatchRejectRewards = async () => {
     try {
-      const participants = useCase.participants?.map((p) => p.address) ?? [];
+      const participants =
+        useCase.participantsRewards?.map((reward) => reward.participant) ?? [];
       const rewardIndices =
-        useCase.participants?.map((p) => BigInt(p.rewardIndex)) ?? [];
+        useCase.participantsRewards?.map((reward) => BigInt(0)) ?? [];
       await actions.batchRejectRewards(participants, rewardIndices);
       // Add toast notification for success
     } catch (error) {

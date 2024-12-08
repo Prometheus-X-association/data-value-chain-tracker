@@ -38,11 +38,14 @@ export const mapUseCasesData = (useCasesData?: any[]) => {
 
   const processedUseCases: UseCase[] = [];
 
-  // Assuming the data comes in groups of 3 (stats, events, owner)
-  for (let i = 0; i < useCasesData.length; i += 3) {
+  console.log(useCasesData);
+
+  // Data comes in groups of 4 (stats, events, owner, participantRewards)
+  for (let i = 0; i < useCasesData.length; i += 4) {
     const useCaseStats = useCasesData[i]?.result;
     const supportedEvents = useCasesData[i + 1]?.result;
     const owner = useCasesData[i + 2]?.result;
+    const participantRewards = useCasesData[i + 3]?.result;
 
     // Skip if any critical data is missing
     if (!useCaseStats || !supportedEvents || !owner) continue;
@@ -55,12 +58,12 @@ export const mapUseCasesData = (useCasesData?: any[]) => {
       rewardPool: useCaseStats[4] ?? 0n,
       remainingRewardPool: useCaseStats[5] ?? 0n,
       isActive: !useCaseStats[6],
-      lockDuration: useCaseStats[7] ?? 0n, // Adjust index if needed
+      lockDuration: useCaseStats[7] ?? 0n,
       eventCount: supportedEvents[0]?.length ?? 0,
     };
 
     const useCase: UseCase = {
-      id: BigInt(i / 3), // Generate an ID based on iteration
+      id: BigInt(i / 4), // Adjust ID calculation for groups of 4
       address: useCasesData[i]?.result as `0x${string}`,
       owner,
       stats,
@@ -68,8 +71,11 @@ export const mapUseCasesData = (useCasesData?: any[]) => {
         names: supportedEvents[0] ?? [],
         rewards: supportedEvents[1] ?? [],
       },
-      participants: [], // only getting per use case
+      participants: [], // This would come from events if needed
+      participantsRewards: participantRewards ?? [], // Add the participant rewards
     };
+
+    console.log("use case", useCase);
 
     processedUseCases.push(useCase);
   }

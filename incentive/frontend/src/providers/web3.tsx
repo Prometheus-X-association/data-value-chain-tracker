@@ -5,7 +5,7 @@ import { type ReactNode, useState, useEffect } from "react";
 import { WagmiProvider, http, createConfig } from "wagmi";
 import { hardhat } from "wagmi/chains";
 
-const config = createConfig({
+export const config = createConfig({
   chains: [hardhat],
   transports: {
     [hardhat.id]: http(),

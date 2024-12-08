@@ -5,6 +5,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { ClientProvider } from "@/providers/client-provider";
 import { Header } from "@/components/Header";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Incentive Protocol",
@@ -21,6 +22,7 @@ export default function RootLayout({
         <ClientProvider>
           <Header />
           {children}
+          <Toaster />
         </ClientProvider>
       </body>
     </html>

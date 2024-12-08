@@ -1,8 +1,10 @@
-import { useReadContract, useReadContracts } from "wagmi";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { FACTORY_ADDRESS, FACTORY_ABI, USECASE_ABI } from "@/config/contracts";
 import { mapUseCasesData } from "@/lib/use-case";
 
 export function useFactoryContract() {
+  const { address: participantAddress } = useAccount();
+
   // Get total number of use cases
   const { data: totalUseCases } = useReadContract({
     address: FACTORY_ADDRESS,
@@ -41,6 +43,12 @@ export function useFactoryContract() {
             address: result.result as `0x${string}`,
             abi: USECASE_ABI,
             functionName: "owner",
+          },
+          {
+            address: result.result as `0x${string}`,
+            abi: USECASE_ABI,
+            functionName: "getParticipantRewards",
+            args: [participantAddress],
           },
         ])
         .flat() ?? [],

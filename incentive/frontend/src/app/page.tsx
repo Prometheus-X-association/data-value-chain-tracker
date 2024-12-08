@@ -13,15 +13,12 @@ import { useFactoryContract } from "@/hooks/use-factory";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
-  const { getAllUseCases } = useFactoryContract();
+  const { useCases } = useFactoryContract();
   const { balance } = usePtxToken();
 
-  const useCases = getAllUseCases();
   const ownedUseCases = useCases.filter((useCase) => useCase.owner === address);
   const participatedUseCases = useCases.filter((useCase) =>
-    useCase?.participants.some(
-      (participant) => participant.address === address,
-    ),
+    useCase?.participants.some((participant) => participant === address),
   );
 
   if (!isConnected) {

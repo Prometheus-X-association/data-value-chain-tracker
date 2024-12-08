@@ -901,6 +901,62 @@ export const USECASE_ABI = [
   {
     "inputs": [
       {
+        "internalType": "address[]",
+        "name": "participants",
+        "type": "address[]"
+      }
+    ],
+    "name": "getMultipleParticipantRewards",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "participant",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unlockTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "rejected",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "eventType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "eventName",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct UseCaseContract.Reward[]",
+        "name": "rewards",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "participant",
         "type": "address"
@@ -909,34 +965,46 @@ export const USECASE_ABI = [
     "name": "getParticipantRewards",
     "outputs": [
       {
-        "internalType": "uint256[]",
-        "name": "amounts",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "unlockTimes",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "bool[]",
-        "name": "rejected",
-        "type": "bool[]"
-      },
-      {
-        "internalType": "bool[]",
-        "name": "claimed",
-        "type": "bool[]"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "eventTypes",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "string[]",
-        "name": "eventNames",
-        "type": "string[]"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "participant",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unlockTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "rejected",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "eventType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "eventName",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct UseCaseContract.Reward[]",
+        "name": "",
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -1080,6 +1148,11 @@ export const USECASE_ABI = [
     ],
     "name": "participantRewards",
     "outputs": [
+      {
+        "internalType": "address",
+        "name": "participant",
+        "type": "address"
+      },
       {
         "internalType": "uint256",
         "name": "amount",

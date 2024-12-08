@@ -26,6 +26,7 @@ export function useUseCase(useCaseId: bigint) {
     data: useCaseStats,
     isLoading: isStatsLoading,
     error: statsError,
+    refetch: refetchStats,
   } = useReadContract({
     address: useCaseAddress,
     abi: USECASE_ABI,
@@ -40,10 +41,12 @@ export function useUseCase(useCaseId: bigint) {
   });
 
   const { data: participantsData } = useContractEvents({
-    address: useCaseAddress,
+    address: useCaseAddress!,
     abi: USECASE_ABI,
     eventName: "RewardAllocated",
   });
+
+  console.log("participantsData", participantsData);
 
   const participants = mapRewardAllocatedEvents(
     participantsData as RewardAllocatedEventLog[],
@@ -52,6 +55,13 @@ export function useUseCase(useCaseId: bigint) {
     (participant) => participant.participant,
   );
 
+  const { data: participantsRewards } = useReadContract({
+    address: useCaseAddress,
+    abi: USECASE_ABI,
+    functionName: "getMultipleParticipantRewards",
+    args: [participantsAddresses],
+  });
+
   // Get owner
   const { data: owner, error: ownerError } = useReadContract({
     address: useCaseAddress,
@@ -59,27 +69,34 @@ export function useUseCase(useCaseId: bigint) {
     functionName: "owner",
   });
 
+  const refetch = async () => {
+    await Promise.all([
+      refetchStats(),
+      // Add other refetch functions here
+    ]);
+  };
+
   // Write contract functions
-  const { writeContract } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
 
   // Contract actions
   const actions = {
     claimRewards: () =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "claimRewards",
       }),
 
     pause: () =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "pause",
       }),
 
     rejectReward: (participant: string, rewardIndex: number) =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "rejectReward",
@@ -87,14 +104,14 @@ export function useUseCase(useCaseId: bigint) {
       }),
 
     unpause: () =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "unpause",
       }),
 
     batchRejectRewards: (participants: string[], rewardIndices: bigint[]) =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "batchRejectRewards",
@@ -102,7 +119,7 @@ export function useUseCase(useCaseId: bigint) {
       }),
 
     topUpRewardPool: (amount: bigint) =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "topUpRewardPool",
@@ -110,14 +127,14 @@ export function useUseCase(useCaseId: bigint) {
       }),
 
     withdrawUnusedRewards: () =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "withdrawUnusedRewards",
       }),
 
     emergencyWithdraw: () =>
-      writeContract({
+      writeContractAsync({
         address: useCaseAddress!,
         abi: USECASE_ABI,
         functionName: "emergencyWithdraw",
@@ -154,6 +171,7 @@ export function useUseCase(useCaseId: bigint) {
       rewards: supportedEvents?.[1] ?? [],
     },
     participants: participantsAddresses,
+    participantsRewards: participantsRewards ?? [],
   } as UseCase;
 
   return {
@@ -161,5 +179,6 @@ export function useUseCase(useCaseId: bigint) {
     actions,
     isLoading: isAddressLoading || isStatsLoading,
     error: statsError || eventsError || ownerError,
+    refetch,
   };
 }

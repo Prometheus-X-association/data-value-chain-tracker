@@ -28,6 +28,7 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
     }
 
     /// @notice Reward information for participants
+    /// @param participant Address of the participant
     /// @param amount Amount of tokens to be rewarded
     /// @param unlockTime Timestamp when the reward becomes claimable
     /// @param rejected Whether the reward was rejected by orchestrator
@@ -35,6 +36,7 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
     /// @param eventType Hash of the event type that triggered this reward
     /// @param eventName Name of the event for transparency
     struct Reward {
+        address participant;
         uint256 amount;
         uint256 unlockTime;
         bool rejected;
@@ -239,6 +241,7 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
         uint256 unlockTime = block.timestamp + lockDuration;
 
         participantRewards[participant].push(Reward({
+            participant: participant,
             amount: rewardAmount,
             unlockTime: unlockTime,
             rejected: false,
@@ -431,40 +434,41 @@ contract UseCaseContract is Ownable, ReentrancyGuard {
         isActive = !paused;
     }
 
+    /// @notice Gets rewards for multiple participants
+    /// @param participants Array of participant addresses
+    /// @return rewards Array of Reward arrays for each participant
+    function getMultipleParticipantRewards(
+        address[] calldata participants
+    ) external view returns (Reward[] memory rewards) {
+        uint256 totalRewardCount = 0;
+    
+        // First pass: count total rewards
+        for (uint256 i = 0; i < participants.length; i++) {
+            totalRewardCount += participantRewards[participants[i]].length;
+        }
+
+        rewards = new Reward[](totalRewardCount);
+        
+        uint256 currentIndex = 0;
+        // Second pass: populate flat array
+        for (uint256 i = 0; i < participants.length; i++) {
+            for (uint256 j = 0; j < participantRewards[participants[i]].length; j++) {
+                Reward storage currentReward = participantRewards[participants[i]][j];
+                rewards[currentIndex] = currentReward;
+                currentIndex++;
+            }
+        }
+        
+        return rewards;
+    }
+
     /// @notice Gets all rewards for a specific participant
     /// @param participant Address of the participant
-    /// @return amounts Array of reward amounts
-    /// @return unlockTimes Array of unlock timestamps
-    /// @return rejected Array of rejection flags
-    /// @return claimed Array of claim flags
-    /// @return eventTypes Array of event type hashes
-    /// @return eventNames Array of event names
-    function getParticipantRewards(address participant) external view returns (
-        uint256[] memory amounts,
-        uint256[] memory unlockTimes,
-        bool[] memory rejected,
-        bool[] memory claimed,
-        bytes32[] memory eventTypes,
-        string[] memory eventNames
-    ) {
-        Reward[] storage rewards = participantRewards[participant];
-        uint256 length = rewards.length;
-        
-        amounts = new uint256[](length);
-        unlockTimes = new uint256[](length);
-        rejected = new bool[](length);
-        claimed = new bool[](length);
-        eventTypes = new bytes32[](length);
-        eventNames = new string[](length);
-        
-        for (uint256 i = 0; i < length; i++) {
-            amounts[i] = rewards[i].amount;
-            unlockTimes[i] = rewards[i].unlockTime;
-            rejected[i] = rewards[i].rejected;
-            claimed[i] = rewards[i].claimed;
-            eventTypes[i] = rewards[i].eventType;
-            eventNames[i] = rewards[i].eventName;
-        }
+    /// @return Array of Reward structs for the participant
+    function getParticipantRewards(
+        address participant
+    ) external view returns (Reward[] memory) {
+        return participantRewards[participant];
     }
 
     /// @notice Version of the contract for tracking deployments
