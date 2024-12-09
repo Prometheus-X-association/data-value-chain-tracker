@@ -14,6 +14,7 @@
     "export-abis": "npx hardhat compile && npx ts-node script/exportAbis.ts",
     "export-abis-to-api": "npx hardhat compile && npx ts-node script/exportAbisToApi.ts",
     "node": "npx hardhat node",
+    "docs": "forge doc",
     "clean": "npx hardhat clean"
   },
   "author": "",
