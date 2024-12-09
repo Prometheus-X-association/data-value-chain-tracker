@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { ethers } from "ethers";
 import axios from "axios";
 import { setupTestEnvironment, TestEnvironment } from "./setup";
-import { UseCaseContract } from "../../blockchain/typechain-types";
-import UseCaseContractArtifact from "../../blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
-import { IncentiveSigner } from "../../api/client/lib/IncentiveSigner";
-import { KeyManagementService } from "../../api/src/services/KeyManagementService";
+import { UseCaseContract } from "../../incentive/blockchain/typechain-types";
+import UseCaseContractArtifact from "../../incentive/blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
+import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner";
+import { KeyManagementService } from "../../incentive/api/src/services/KeyManagementService";
 import { FileKeyStorage } from "api/src/storage/FileKeyStorage";
 import { IncentivePermission } from "api/src/types/types";
 

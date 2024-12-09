@@ -7,13 +7,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "outDir": "dist",
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
     }
   },
-  "include": ["test/**/*", "blockchain/artifacts/**/*"],
+  "include": ["e2e-tests/**/*", "./incentive/blockchain/artifacts/**/*"],
   "exclude": ["node_modules"]
 }

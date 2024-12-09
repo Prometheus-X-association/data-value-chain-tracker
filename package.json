@@ -1,0 +1,39 @@
+{
+  "name": "dvct",
+  "type": "commonjs",
+  "version": "1.0.0",
+  "description": "Data value chain tracker with incentive distribution through blockchain",
+  "scripts": {
+    "pretest:integration": "cd incentive/blockchain && npx hardhat compile && cd ../api && npm run build",
+    "test:blockchain": "cd incentive/blockchain && npx hardhat test",
+    "test:incentive:api": "cd incentive/api && npm test",
+    "test:integration:only": "ts-mocha -p ./tsconfig.json --timeout 30000 'e2e-tests/**/*.test.ts'",
+    "test:integration": "concurrently \"npm run start:node\" \"sleep 5 && ts-mocha -p ./tsconfig.json --timeout 30000 'e2e-tests/**/*.test.ts'\" --kill-others --success first",
+    "start:node": "cd incentive/blockchain && npx hardhat node",
+    "start:api": "cd incentive/api && npm start",
+    "build:api": "cd incentive/api && npm run build",
+    "clean": "rimraf **/node_modules"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "axios": "^1.6.2",
+    "chai": "^4.3.10",
+    "concurrently": "^8.2.2",
+    "ethers": "^6.9.0",
+    "hardhat": "^2.19.1",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.5",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true,
+  "workspaces": [
+    "app",
+    "incentive"
+  ]
+}

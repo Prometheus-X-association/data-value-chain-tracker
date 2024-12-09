@@ -1,9 +1,12 @@
 import { ethers } from "ethers";
-import { UseCaseFactory, PTXToken } from "../../blockchain/typechain-types";
+import {
+  UseCaseFactory,
+  PTXToken,
+} from "../../incentive/blockchain/typechain-types";
 import { Server } from "http";
-import { startServer } from "../../api/src/server";
-import PTXTokenArtifact from "../../blockchain/artifacts/src/PTXToken.sol/PTXToken.json";
-import UseCaseFactoryArtifact from "../../blockchain/artifacts/src/UseCaseFactory.sol/UseCaseFactory.json";
+import { startServer } from "../../incentive/api/src/server";
+import PTXTokenArtifact from "../../incentive/blockchain/artifacts/src/PTXToken.sol/PTXToken.json";
+import UseCaseFactoryArtifact from "../../incentive/blockchain/artifacts/src/UseCaseFactory.sol/UseCaseFactory.json";
 
 export interface TestEnvironment {
   apiServer: Server;
