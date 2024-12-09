@@ -29,13 +29,10 @@ export class IncentiveService {
   }
 
   async distributeIncentive(request: IncentiveRequest): Promise<string> {
-    // 1. Validate request
     await this.validateRequest(request);
 
-    // 2. Verify signature
     await this.verifySignature(request);
 
-    // 3. Submit transaction
     return this.submitTransaction(request);
   }
 
@@ -58,13 +55,12 @@ export class IncentiveService {
       throw new Error("Request has expired");
     }
 
-    // Additional validations as needed
     if (!ethers.isAddress(request.recipient)) {
       throw new Error("Invalid recipient address");
     }
 
     try {
-      ethers.parseUnits(request.amount, 18); // Assuming 18 decimals
+      ethers.parseUnits(request.amount, 18);
     } catch {
       throw new Error("Invalid amount");
     }

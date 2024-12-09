@@ -102,6 +102,21 @@ When a notifier notifies that an event has triggered he will have to submit a fa
 
 - Maybe we should be able to reduce rewards instead of just reverting as owner?
 
+### Scripts
+
+Workspace:
+
+- `yarn start:node` - starts the local hardhat node
+
+Project:
+
+- `yarn ptx-deploy` - Deploys the contracts to the local hardhat network
+- `yarn ptx-deploy-test` - Deploys contracts and a test environment where many transactions has been made. Useful for frontend development.
+- `yarn export-abis` - Export the contract abis to the incentive frontend
+- `yarn export-abis-to-api` - Export the contract abis to the incentive api
+- `yarn docs` - generates solidity docs using forge
+- `yarn clean` - cleans the hardhat workspace
+
 ## [DVCT Incentive Frontend](./incentive/frontend/)
 
 Built using Next.js, Tailwind CSS, Shadcn, wagmi, viem. Providing interfaces for:
@@ -114,6 +129,12 @@ Built using Next.js, Tailwind CSS, Shadcn, wagmi, viem. Providing interfaces for
 Right now this is a simple website that lets you connect your wallet. From you wallet you will get an overview of your created use cases, use cases you have participated in, and all use cases. From there you can enter a specific use case. Here you will get information about the remaining reward pool, pausing, lock duration etc. You will see all participants, and how they have participated. Participants will be able to claim their reward when the lock is finished. Owner will be able to revert (single or batch) rewards, if the lock is still up. Plus some other small things.
 
 You will also be able to create a use case in this UI. This is in development. This will most likely not be something you do through this UI, but rather in the overall Use Case creation process. Hopefully, this ui can provide a good starting point for the developers of the use case form.
+
+### Scripts
+
+Workspace:
+
+- `yarn start:incentive:frontend` - starts the next.js app
 
 ## [DVCT Incentive API](./incentive/api/)
 
@@ -132,7 +153,33 @@ We did have some mock endpoints for the information api's, but I removed those, 
 
 ### How it works
 
-### Tools
+The aim of the incentive api is to provide simple access to the smart contracts through a normal api, but still retaining the security. For this we have created a **KeyManagementService**. It manages client authentication and authorization through public-key cryptography.
+
+**KeyManagementService** overview:
+
+- Generates 2048-bit RSA key pairs
+- Associates keys with client IDs
+- Stores public keys and permissions
+- Returns private key for client distribution (centralized management)
+- Validates if clients have specific permissions
+- Clint management (public key retrival, access revocation etc)
+
+**IKeyStorage**: Interface used for the storage implementation. We will probably use a cloud-based secure key-value vault in production. We created this interface so that it is easy to swap storage solutions. Right now we have only implemented a **FileKeyStorage**, used for testing.
+
+**IncentiveService**: This is the core incentive distribution service. This handles a request by validating the request, verifying the signature, and if all is good, then submits the transaction to the blockchain. Meaning that the wallet connected to the incentive api is paying for gas. This is to be seen as a direct operational cost, and can be reduced by using the **notifier** concept we discussed above.
+
+### Tools/clients
+
+**Incentive signer**: We have created a a client library that exposes a signer, so that it is easy for clients to create a signature that matches what we expect in the api. This needs to be signed with the private key that we provide to them.
+
+**addClient script**: This is a simple script used to add new clients. Just for ease-of-use. It uses the local FileStorage implementation.
+
+### Scripts
+
+Workspace:
+
+- `yarn start:api` - starts the express server
+- `yarn build:api` - builds the api
 
 ## Testing
 
