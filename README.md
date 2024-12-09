@@ -26,7 +26,7 @@ The blockchain component uses Foundry and Hardhat for development and testing. K
 - **UseCaseFactory**: Factory contract for creating and managing use cases
 - **UseCaseContract**: Handles individual use case logic and reward distribution
 
-Link to generated smart contract documentation: [docs](./incentive/blockchain/docs/src/README.md)
+Link to generated smart contract documentation: [docs](./incentive/blockchain/docs/src/src/README.md)
 
 ### PTX Token
 
