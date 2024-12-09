@@ -2,6 +2,8 @@ import { ethers } from "ethers";
 import { UseCaseFactory, PTXToken } from "../../blockchain/typechain-types";
 import { Server } from "http";
 import { startServer } from "../../api/src/server";
+import PTXTokenArtifact from "../../blockchain/artifacts/src/PTXToken.sol/PTXToken.json";
+import UseCaseFactoryArtifact from "../../blockchain/artifacts/src/UseCaseFactory.sol/UseCaseFactory.json";
 
 export interface TestEnvironment {
   apiServer: Server;
@@ -19,7 +21,6 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
   const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
 
   // Create wallets for different roles
-  // Using hardhat's default private keys for compatibility
   const owner = new ethers.Wallet(
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     provider
@@ -33,27 +34,36 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
     provider
   );
 
-  const PTXToken = new ethers.ContractFactory(
-    require("../../blockchain/artifacts/contracts/PTX.sol/PTXToken.json").abi,
-    require("../../blockchain/artifacts/contracts/PTX.sol/PTXToken.json").bytecode,
+  // Deploy PTX Token with await for transaction confirmation
+  const PTXTokenFactory = new ethers.ContractFactory(
+    PTXTokenArtifact.abi,
+    PTXTokenArtifact.bytecode,
     owner
   );
-  const token = (await PTXToken.deploy(
+  const token = (await PTXTokenFactory.deploy(
     ethers.parseEther("1000000")
   )) as PTXToken;
+  await token.waitForDeployment();
 
+  // Deploy Factory with await for transaction confirmation
   const Factory = new ethers.ContractFactory(
-    require("../../blockchain/artifacts/contracts/UseCaseFactory.sol/UseCaseFactory.json").abi,
-    require("../../blockchain/artifacts/contracts/UseCaseFactory.sol/UseCaseFactory.json").bytecode,
+    UseCaseFactoryArtifact.abi,
+    UseCaseFactoryArtifact.bytecode,
     owner
   );
   const factory = (await Factory.deploy(
     await token.getAddress()
   )) as UseCaseFactory;
+  await factory.waitForDeployment();
 
-  // Setup roles
-  await factory.addOperator(operator.address);
-  await factory.connect(operator).addGlobalNotifier(apiSigner.address);
+  // Setup roles with await for transaction confirmations
+  const addOperatorTx = await factory.addOperator(operator.address);
+  await addOperatorTx.wait();
+
+  const addNotifierTx = await factory
+    .connect(operator)
+    .addGlobalNotifier(apiSigner.address);
+  await addNotifierTx.wait();
 
   const apiConfig = {
     port: 3001,

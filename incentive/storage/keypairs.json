@@ -1,0 +1,10 @@
+{
+  "test-client": {
+    "clientId": "test-client",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlhNjYkapvFV1zlm55nO2\ns/22R8AAyz9WYJIBx1YHEF1oz2etLiO7x4Vk0+feyZnLxscpehBRqoldb+wqKTGe\nGLYEOEN2sfjjsWovN3txRCKwEgsu9wwWUWHNnU9S9AhABol7LLrkFgSOBIH5Yi4M\nmyQ1yb3DrLg2F64S8EIekiSJAXA1EcdrWItaU4P0YYYZFeD2VMeGiIB/qLIsdbTq\nc0dYuvAEVSR8OXGmKQ+WloaNUCxBZQdizwsCXPhhIJYK0F238xpv/L6rB8GMS8eW\nhxoIcqTKQUjDNwgxOy6eTP0fyMDUS7+iSxfoNg2TMs+h0UQDygKksD4Rbx4BQi6x\naQIDAQAB\n-----END PUBLIC KEY-----\n",
+    "permissions": [
+      "distribute"
+    ],
+    "createdAt": "2024-12-09T01:44:19.350Z"
+  }
+}

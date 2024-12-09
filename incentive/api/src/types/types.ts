@@ -14,6 +14,7 @@ export interface IncentivePayload {
   useCaseId: string;
   recipient: string;
   eventName: string;
+  amount: string;
   factor: string;
   nonce: number;
   timestamp: number;

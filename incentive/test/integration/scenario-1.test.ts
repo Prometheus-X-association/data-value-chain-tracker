@@ -4,11 +4,23 @@ import { ethers } from "ethers";
 import axios from "axios";
 import { setupTestEnvironment, TestEnvironment } from "./setup";
 import { UseCaseContract } from "../../blockchain/typechain-types";
-describe("Scenario 1: Full cycle from use case creation to reward claim", () => {
+import UseCaseContractArtifact from "../../blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
+import { IncentiveSigner } from "../../api/client/lib/IncentiveSigner";
+import { KeyManagementService } from "../../api/src/services/KeyManagementService";
+import { FileKeyStorage } from "api/src/storage/FileKeyStorage";
+import { IncentivePermission } from "api/src/types/types";
+
+describe("Scenario 1: Full cycle from use case creation to reward claim", function () {
+  this.timeout(30000); // Set timeout to 30 seconds
+
   let env: TestEnvironment;
   let provider: ethers.JsonRpcProvider;
   let orchestrator: ethers.Wallet;
   let participant: ethers.Wallet;
+  let keyManagement: KeyManagementService;
+  let apiClientId: string = "test-client";
+  let apiPrivateKey: string;
+  let apiPublicKey: string;
 
   before(async () => {
     provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
@@ -21,10 +33,21 @@ describe("Scenario 1: Full cycle from use case creation to reward claim", () => 
       provider
     );
     env = await setupTestEnvironment();
+
+    // Setup key management and register client
+    keyManagement = new KeyManagementService(new FileKeyStorage());
+    const { privateKey, publicKey } = await keyManagement.generateKeyPair(
+      apiClientId,
+      [IncentivePermission.DISTRIBUTE]
+    );
+    apiPrivateKey = privateKey;
+    apiPublicKey = publicKey;
   });
 
   after(async () => {
-    await env.apiServer.close();
+    if (env?.apiServer) {
+      await env.apiServer.close();
+    }
   });
 
   it("should complete full cycle from use case creation to reward claim", async () => {
@@ -33,12 +56,19 @@ describe("Scenario 1: Full cycle from use case creation to reward claim", () => 
     const baseRewards = [ethers.parseEther("100")];
     const rewardPool = ethers.parseEther("1000");
 
-    // Transfer and approve tokens for orchestrator
-    await env.token.transfer(orchestrator.address, ethers.parseEther("2000"));
-    await env.token
+    // Transfer and approve tokens for orchestrator with wait
+    const transferTx = await env.token.transfer(
+      orchestrator.address,
+      ethers.parseEther("2000")
+    );
+    await transferTx.wait();
+
+    const approveTx = await env.token
       .connect(orchestrator)
       .approve(env.contracts.factoryAddress, rewardPool);
+    await approveTx.wait();
 
+    // Create use case with wait
     const tx = await env.factory.connect(orchestrator).createUseCase(
       24 * 60 * 60, // 1 day lock
       eventNames,
@@ -54,17 +84,21 @@ describe("Scenario 1: Full cycle from use case creation to reward claim", () => 
     );
     const useCaseId = env.factory.interface.parseLog(event as any)?.args[0];
 
-    // 2. External system calls API to distribute rewards
-    const externalSystemPayload = {
-      useCaseId: useCaseId.toString(),
-      eventName: "data_provider",
-      participant: participant.address,
-      performanceFactor: 0.8,
-    };
+    // Create signer with registered client
+    const signer = new IncentiveSigner(apiPrivateKey, apiClientId);
+
+    // Create signed request
+    const signedRequest = signer.createSignedRequest(
+      useCaseId.toString(),
+      participant.address,
+      baseRewards[0].toString(),
+      "data_provider",
+      "0.8"
+    );
 
     const response = await axios.post(
-      `${env.apiUrl}/incentive/distribute`,
-      externalSystemPayload
+      `${env.apiUrl}/api/incentives/distribute`,
+      signedRequest
     );
 
     expect(response.status).to.equal(200);
@@ -75,8 +109,8 @@ describe("Scenario 1: Full cycle from use case creation to reward claim", () => 
 
     const useCaseAddress = await env.factory.useCaseContracts(useCaseId);
     const UseCaseContract = new ethers.ContractFactory(
-      require("../../blockchain/artifacts/contracts/UseCase.sol/UseCaseContract.json").abi,
-      require("../../blockchain/artifacts/contracts/UseCase.sol/UseCaseContract.json").bytecode,
+      UseCaseContractArtifact.abi,
+      UseCaseContractArtifact.bytecode,
       participant
     );
     const useCase = UseCaseContract.attach(useCaseAddress) as UseCaseContract;
