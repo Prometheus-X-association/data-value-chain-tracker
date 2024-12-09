@@ -1,0 +1,39 @@
+{
+  "name": "incentive",
+  "version": "1.0.0",
+  "description": "Incentive distribution system with blockchain integration",
+  "scripts": {
+    "test:blockchain": "cd blockchain && npx hardhat test",
+    "test:api": "cd api && npm test",
+    "test:integration": "hardhat node & sleep 5 && hardhat test test/integration/**/*.test.ts --network localhost",
+    "test": "npm run test:blockchain && npm run test:api && npm run test:integration",
+    "start:blockchain": "cd blockchain && npx hardhat node",
+    "start:api": "cd api && npm start",
+    "start": "concurrently \"npm run start:blockchain\" \"npm run start:api\"",
+    "build": "concurrently \"cd blockchain && npm run build\" \"cd api && npm run build\"",
+    "build:api": "cd api && npm run build",
+    "clean": "rimraf **/node_modules **/dist **/.next"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "axios": "^1.6.2",
+    "chai": "^4.3.10",
+    "concurrently": "^8.2.2",
+    "ethers": "^6.9.0",
+    "hardhat": "^2.19.1",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true,
+  "workspaces": [
+    "api",
+    "blockchain",
+    "frontend"
+  ]
+}

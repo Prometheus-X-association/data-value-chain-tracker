@@ -17,19 +17,16 @@ async function main() {
     process.exit(1);
   }
 
-  // Initialize services
   const storage = new FileKeyStorage();
   const keyManager = new KeyManagementService(storage);
 
   try {
-    // Check if client already exists
     const existingKey = await keyManager.getPublicKey(clientId);
     if (existingKey) {
       console.error(`Client ${clientId} already exists!`);
       process.exit(1);
     }
 
-    // Generate new keypair
     const permissions = [IncentivePermission.DISTRIBUTE];
     const { privateKey, publicKey } = await keyManager.generateKeyPair(
       clientId,
