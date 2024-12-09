@@ -2,14 +2,12 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node build/index.js",
-    "predev": "npm run swagger",
-    "prebuild": "npm run swagger",
+    "start": "node dist/api/src/index.js",
     "build": "tsc",
-    "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec\"",
-    "swagger": "tsoa spec"
+    "dev": "concurrently \"nodemon\" \"nodemon -x tsc\""
   },
   "nodemonConfig": {
     "watch": [
@@ -36,6 +34,7 @@
     "@types/axios": "^0.9.36",
     "amqplib": "^0.10.4",
     "axios": "^1.7.7",
+    "ethers": "^6.13.4",
     "express": "^4.21.0",
     "joi": "^17.13.3",
     "morgan": "^1.10.0",

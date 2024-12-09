@@ -12,3 +12,7 @@ artifacts/
 typechain-types/
 **/ignition/deployments/
 
+incentive/api/private-keys/*
+incentive/api/scripts/storage/*
+incentive/api/src/storage/*
+storage/keypairs.json

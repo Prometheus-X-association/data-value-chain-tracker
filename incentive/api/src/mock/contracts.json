@@ -1,0 +1,23 @@
+[
+  {
+    "dvctId": "connector_id",
+    "usecaseContractId": "use_case_contract_id",
+    "usecaseContractTitle": "use_case_contract_title",
+    "contractId": "contract_id",
+    "dataId": "data_id",
+    "dataProviderId": "data_provider_id",
+    "dataConsumerId": "data_consumer_id",
+    "dataConsumerIsAIProvider": false,
+    "prevDataId": "prev_data_id",
+    "incentiveForDataProvider": {
+      "numPoints": 5,
+      "factor": 1,
+      "factorCheck": false
+    },
+    "extraIncentiveForAIProvider": {
+      "numPoints": 10,
+      "factor": 1,
+      "factorCheck": false
+    }
+  }
+]

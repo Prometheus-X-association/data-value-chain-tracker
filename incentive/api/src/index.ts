@@ -1,29 +1,13 @@
-import express, { Application, Request, Response } from "express";
-import morgan from "morgan";
-import swaggerUi from "swagger-ui-express";
+import { startServer } from "./server";
 
-import Router from "./routes";
+if (require.main === module) {
+  startServer({
+    port: parseInt(process.env.PORT || "3000"),
+    privateKey: process.env.PRIVATE_KEY!,
+    factoryAddress: process.env.CONTRACT_ADDRESS!,
+    tokenAddress: process.env.TOKEN_ADDRESS!,
+    rpcUrl: process.env.RPC_URL!,
+  }).catch(console.error);
+}
 
-const PORT = process.env.PORT || 8080;
-
-const app: Application = express();
-
-app.use(express.json());
-app.use(morgan("tiny"));
-app.use(express.static("public"));
-
-app.use(
-  "/docs",
-  swaggerUi.serve,
-  swaggerUi.setup(undefined, {
-    swaggerOptions: {
-      url: "/swagger.json",
-    },
-  }),
-);
-
-app.use(Router);
-
-app.listen(PORT, () => {
-  console.log("Server is running on port", PORT);
-});
+export { startServer };
