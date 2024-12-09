@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {Test, console2} from "forge-std/Test.sol";
 import {UseCaseContract} from "../src/UseCaseContract.sol";
 import {UseCaseFactory} from "../src/UseCaseFactory.sol";
-import {PTXToken} from "../src/PTX.sol";
+import {PTXToken} from "../src/PTXToken.sol";
 
 contract UseCaseContractTest is Test {
     UseCaseContract public useCase;
@@ -105,7 +105,7 @@ contract UseCaseContractTest is Test {
 
         // Check reward allocation
         uint256 expectedReward = (baseRewards[0] * factor) / 1e18;
-        (uint256 amount,,,,,) = useCase.participantRewards(participant, 0);
+        (,uint256 amount,,,,,) = useCase.participantRewards(participant, 0);
         assertEq(amount, expectedReward);
     }
 
@@ -166,7 +166,7 @@ contract UseCaseContractTest is Test {
         useCase.claimRewards();
         
         // Verify reward was claimed
-        (,,, bool claimed,,) = useCase.participantRewards(participant, 0);
+        (,,,, bool claimed,,) = useCase.participantRewards(participant, 0);
         assertTrue(claimed);
         
         // Verify participant received the tokens
@@ -190,7 +190,7 @@ contract UseCaseContractTest is Test {
         useCase.rejectReward(participant, 0);
         
         // Verify reward was rejected
-        (,, bool rejected, bool claimed,,) = useCase.participantRewards(participant, 0);
+        (,,, bool rejected, bool claimed,,) = useCase.participantRewards(participant, 0);
         assertTrue(rejected);
         assertFalse(claimed);
     }
@@ -225,7 +225,7 @@ contract UseCaseContractTest is Test {
         useCase.notifyEvent(eventNames[0], participant, factor);
         
         uint256 expectedReward = (baseRewards[0] * factor) / 1e18;
-        (uint256 amount,,,,,) = useCase.participantRewards(participant, 0);
+        (, uint256 amount,,,,,) = useCase.participantRewards(participant, 0);
         assertEq(amount, expectedReward);
     }
 
@@ -286,6 +286,6 @@ contract UseCaseContractTest is Test {
         assertEq(totalPending, 0);
         assertEq(rewardPool, REWARD_POOL * 10**18);
         assertEq(remainingRewardPool, REWARD_POOL * 10**18);
-        assertTrue(!isActive); // contract starts unpaused, so isActive should be true
+        assertTrue(isActive);
     }
 }

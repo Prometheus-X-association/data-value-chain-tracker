@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {PTXToken} from "../src/PTX.sol";
+import {PTXToken} from "../src/PTXToken.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 contract PTXTokenTest is Test {

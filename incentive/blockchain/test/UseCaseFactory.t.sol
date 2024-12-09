@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {Test, console2} from "forge-std/Test.sol";
 import {UseCaseFactory} from "../src/UseCaseFactory.sol";
 import {UseCaseContract} from "../src/UseCaseContract.sol";
-import {PTXToken} from "../src/PTX.sol";
+import {PTXToken} from "../src/PTXToken.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract UseCaseFactoryTest is Test {

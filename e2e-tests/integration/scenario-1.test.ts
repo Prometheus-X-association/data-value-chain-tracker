@@ -7,8 +7,8 @@ import { UseCaseContract } from "../../incentive/blockchain/typechain-types";
 import UseCaseContractArtifact from "../../incentive/blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
 import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner";
 import { KeyManagementService } from "../../incentive/api/src/services/KeyManagementService";
-import { FileKeyStorage } from "api/src/storage/FileKeyStorage";
-import { IncentivePermission } from "api/src/types/types";
+import { FileKeyStorage } from "../../incentive/api/src/storage/FileKeyStorage";
+import { IncentivePermission } from "../../incentive/api/src/types/types";
 
 describe("Scenario 1: Full cycle from use case creation to reward claim", function () {
   this.timeout(30000); // Set timeout to 30 seconds
