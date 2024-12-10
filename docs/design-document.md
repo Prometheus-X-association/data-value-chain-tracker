@@ -393,7 +393,7 @@ In order to make the BB function, the integration with other BB is expected:
 
 ### Data Value Chain Tracker visualization
 
-- Visualization of value tracking for provider of chain data:  
+- Visualization of value tracking for provider of chain data. This visualization maps how data flows across use cases and entities within the dataspace, highlighting its contribution to decision-making and revenue generation. Designed for transparency and accountability, it uses a hierarchical or triple-marble format where each node reveals detailed data usage. The goal is to provide an accessible overview of the data lifecycle and its value. An example is shown below.
   <img src="diagrams/dvct-viz-2.png" style="float: left;" width="350">
 
 ### Data Value Chain Tracker digital incentives distribution
