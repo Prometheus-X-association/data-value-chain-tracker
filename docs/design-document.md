@@ -723,7 +723,7 @@ sequenceDiagram
     cat -) cc2: contract and data exchange information
     deactivate cat
 	
-    Note over dw1,dw-c1: incentive distribution
+    Note over dw1,dw-c2: incentive distribution
 
 	dvct-c1 -) cc1: request to update prevRoot(if any) based on data-output [Node2]
     cc1 -) dp1: send request and prevRoot node(s) data [Node1]
