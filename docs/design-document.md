@@ -674,34 +674,69 @@ sequenceDiagram
 
 ```
 
-To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we divided the process into different main processes:
+The sequence diagram shows the current possibilities for the use case orhcestrator to confirm the organization's participation for their use case independently at one time, or different times, to give them more possibilities to understand the offer and negotiate the contract. To make the diagram smaller, more manageable parts, ensuring it remains comprehensible and easy to follow on smaller screens, we divided the process into different main processes:
 
 - **Part 1:** Initiating Data Exchange and Basic Data Handling
 
 ```mermaid
 sequenceDiagram
     participant o as Orchestrator
-    participant cat as Catalogue Service
+    participant dw1 as Orchestrator wallet
+
     participant dp1 as Data provider 1
-    participant dp2 as Data provider 2
+    participant dw-p1 as Wallet Provider 1
     participant pc1 as Connector provider 1
+    participant dvct-p1 as DVCT provider 1
+
+    participant dp2 as Data provider 2
+    participant dw-p2 as Wallet Provider 2
     participant pc2 as Connector provider 2
+    participant dvct-p2 as DVCT provider 2
+
+    participant cot as Contract Service
+    participant wal as Billing/Wallet Service
+    participant cat as Catalogue Service
+
+    participant dvct-c1 as DVCT consumer/AI provider 1
     participant cc1 as Connector Consumer 1
-    participant cc2 as Connector Consumer 2
+    participant dw-c1 as Wallet Consumer 1
     participant c1 as Consumer/AI provider 1
+
+    participant dvct-c2 as DVCT consumer/AI provider 2
+    participant cc2 as Connector Consumer 2
+    participant dw-c2 as Wallet consumer 2
     participant c2 as Consumer/AI provider 2
 
+    Note over dw1: points/token available
+    Note over dw-c1: points/token available
+    Note over dw-c2: points/token available
     activate cat
-    o ->>+ cat: Define use case, data flow & points distribution
-    dp1 ->>+ cat: Join use case
-    dp2 ->>+ cat: Join use case
-    c1 ->>+ cat: Join use case
-    c2 ->>+ cat: Join use case
-    cat -->>- pc1: Provide contract and data exchange information
-    cat -->>- pc2: Provide contract and data exchange information
-    cat -->>- cc1: Provide contract and data exchange information
-    cat -->>- cc2: Provide contract and data exchange information
+    o -) cat: Trigger data exchange, trigger data exchange, define the use case, data flow & points distribution
+    Note over cat: use case
+    dp1 -) cat: join the use case
+    cat -) pc1: contract and data exchange information
+    dp2 -) cat: join the use case
+    cat -) pc2: contract and data exchange information
+    c1 -) cat: join the use case
+    cat -) cc1: contract and data exchange information
+    c2 -) cat: join the use case
+    cat -) cc2: contract and data exchange information
     deactivate cat
+	
+    Note over dw1,dw-c1: incentive distribution
+
+	dvct-c1 -) cc1: request to update prevRoot(if any) based on data-output [Node2]
+    cc1 -) dp1: send request and prevRoot node(s) data [Node1]
+    dp1 -) dvct-p1: chain-data update request, check if Node1 is already exist
+    alt is exist and has no prevRoot
+        dvct-p1 -) dvct-p1: update Node
+    else is exist and has prevRoot
+        loop prevNodes
+            dvct-p1 -) dvct-p1: update Node and send update request to all prevRoot
+        end
+    else is not exist
+        dvct-p1 -) dvct-p1: create a new Node for Node1
+    end
 
 ```
 
@@ -709,23 +744,36 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant pc1 as Connector provider 1
     participant dp1 as Data provider 1
-    participant cc1 as Connector Consumer 1
-    participant c1 as Consumer/AI provider 1
-    participant dvct-c1 as DVCT consumer/AI provider 1
-    participant cot as Contract Service
+    participant dw-p1 as Wallet Provider 1
+    participant pc1 as Connector provider 1
+    participant dvct-p1 as DVCT provider 1
 
-    cc1 ->> pc1: Data request (with contract)
-    pc1 ->> cot: Verify contract
-    cot -->> pc1: Verified contract & policies
-    pc1 ->> dp1: Request data
-    dp1 -->> pc1: Provide raw data DP1
-    pc1 -->> cc1: Transfer data DP1
-    cc1 ->> c1: Consume data DP1
-    cc1 ->>+ dvct-c1: Trigger data consume DVCT
-    cc1 ->> dvct-c1: Get DP1 metadata info
-    dvct-c1 ->> dvct-c1: Create Node based on DP1 metadata
+    participant dvct-c1 as DVCT consumer/AI provider 1
+    participant cc1 as Connector Consumer 1
+    participant dw-c1 as Wallet Consumer 1
+    participant c1 as Consumer/AI provider 1
+
+    cc1 -) pc1: data request (with contract)
+    Note over pc1: policy verification & access control
+    pc1 -) dp1: get data
+    Note over dp1: Raw data DP1
+    dp1 -) pc1: data
+    pc1 -) cc1: data DP1
+    Note over cc1: policy verification & access control
+    cc1 -) c1: consume data DP1
+
+    cc1 -) dvct-c1: data consume trigger DVCT
+    dvct-c1 -) cc1: get DP1 information
+    cc1 -) dvct-c1: DP1 metadata info
+    dvct-c1 -) dvct-c1: [Node1] create Node based on DP1 metadata
+    Note over dvct-c1: A node consist of metadata, prevRoot, and children
+    dvct-c1 -) cc1: get data-type output [chain-data]
+    cc1 -) dvct-c1: data-type output [chain data]
+    dvct-c1 -) dvct-c1: [Node2] create Node based on data-type output defined in contract
+    dvct-c1 -) dvct-c1: create chain between Node1 and Node2
+    Note over dvct-c1: the chain = [Node1 is prevRoot of Node2]
+    Note left of dvct-c1: visualization of chain between Node1 and Node2
 
 ```
 
@@ -733,22 +781,28 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant dvct-c1 as DVCT consumer/AI provider 1
+    participant o as Orchestrator
     participant dw1 as Orchestrator wallet
-    participant dw-c1 as Wallet Consumer 1
-    participant dw-p1 as Wallet Provider 1
-    participant dp1 as Data provider 1
-    participant dvct-p1 as DVCT provider 1
-    participant cc1 as Connector Consumer 1
 
-    dvct-c1 ->> dw1: Request point(s) based on contract
-    dw1 -->> dvct-c1: Provide point(s)
-    dvct-c1 ->> dw-c1: Distribute point(s)
-    dvct-c1 ->> dw-p1: Distribute point(s)
-    dvct-c1 ->> cc1: Request update to prevRoot based on data output
-    cc1 ->> dp1: Send request and prevRoot node(s) data
-    dp1 ->> dvct-p1: Update chain data, check existence
-    dvct-p1 ->> dvct-p1: Handle Node creation or update
+    participant dp1 as Data provider 1
+    participant dw-p1 as Wallet Provider 1
+    participant pc1 as Connector provider 1
+
+    participant dvct-c1 as DVCT consumer/AI provider 1
+    participant cc1 as Connector Consumer 1
+    participant dw-c1 as Wallet Consumer 1
+  
+    dvct-c1 -) cc1: get data for point distribution
+    cc1 -) dvct-c1: data of point distribution
+
+    dvct-c1 -) dw1: get point(s) as AI provider based on contract
+    dw1 -) dw1: reduce point(s)
+    dw1 -) dvct-c1: point(s)
+    dvct-c1 -) dw-c1: distribute point
+    dvct-c1 -) dw-c1: get point(s) for data usage
+    dw-c1 -) dw-c1: reduce point(s)
+    dw-c1 -) dvct-c1: point(s)
+    dvct-c1 -) dw-p1: distribute point
 ```
 
 ## Configuration & Deployment Settings
