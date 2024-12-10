@@ -140,7 +140,7 @@ Based on the DVCT objective and technical usage scenario, there are three key fu
 
 ## Requirements
 
-Some requirements for the DVCT are based on the DVCT objectives, the technical usage scenario, the initial conceptual overview and GAIA-X and IDSA, including\*:
+The requirements for the DVCT are derived from its objectives, technical usage scenarios, the initial conceptual overview, and the guidelines from GAIA-X and IDSA. We use the term "MUST" to denote essential requirements that must be fulfilled, and "SHOULD" to indicate strong recommendations where alternative solutions may exist or because of different conditions is being applied. It’s important to note that these proposed requirements have not yet been directly validated with end users. The proposed requirements include:\*:
 
 - **`[BB_06__01]`** DVCT MUST support tracking direct and indirect data usage
 - **`[BB_06__02]`** DVCT MUST interface with the Contract
@@ -151,6 +151,12 @@ Some requirements for the DVCT are based on the DVCT objectives, the technical u
 - **`[BB_06__07]`** DVCT SHOULD provide visualization of data value chain (data-usage history)
 - **`[BB_06__08]`** DVCT SHOULD interface with the Distributed Data Visualization Building block
 - **`[BB_06__09]`** DVCT MUST interface with the Data Space Connector
+
+explanation why strong recommendation for BB_06__04: it depends on the technology and underlying architecture that being used to store the digital incentive, if thirdparty is being used as digital incentive with different mechanism DVCT should adjust, but highly recommend that DVCT has direct access to the digital incentive storage.
+
+explanation why strong recommendation for BB_06__06: the initial design the point distribution can also later be from other aspect that is not always define directly in the contract. but here we highly recommend to use distribution based on the dataspace contract.
+
+explanation why strong recommendation for BB_06__07 and BB_06__08: The visualization can also be just a table or a JSON data format, which depends on the user/data provider if they want to visualize the data in a readable form in their frontend or also use building blocks to visualize the usage data.
 
 ## Distribution of incentives in DVCT
 
