@@ -838,7 +838,7 @@ The test plan for the Data Value Chain Tracker (DVCT) aims to ensure the system'
 
 To check the result of the value chain creation, the DVCT should create a node for the data usage in **output data** json format after the data is used on the data consumer side (PDC consumer will trigger DVCT). Each time information about the prevDataId is present in the input data, the DVCT checks whether the prevDataId already exists (as a nodeId) within the value chain node. If this is the case, the childNode of the prevDataId is updated with the new dataId as a child node.
 
-DVCT testing scenario can be find [here](/docs/DVCT%20testing%20scenario.md).
+DVCT testing scenario can be found [here](/docs/DVCT%20testing%20scenario.md).
 
 **Output data:**
 
