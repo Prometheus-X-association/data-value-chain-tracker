@@ -5,4 +5,3 @@
 - [PTXToken](PTXToken.sol/contract.PTXToken.md)
 - [IPTXToken](UseCaseContract.sol/interface.IPTXToken.md)
 - [UseCaseContract](UseCaseContract.sol/contract.UseCaseContract.md)
-- [UseCaseFactory](UseCaseFactory.sol/contract.UseCaseFactory.md)
