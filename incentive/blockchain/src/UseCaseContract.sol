@@ -278,4 +278,26 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         }
         return Participant(address(0), 0, 0);
     }
+
+    function getMultipleUseCaseInfo(string[] calldata useCaseIds) external view returns (UseCaseInfo[] memory) {
+        UseCaseInfo[] memory infos = new UseCaseInfo[](useCaseIds.length);
+        
+        for (uint256 i = 0; i < useCaseIds.length; i++) {
+            UseCase storage useCase = useCases[useCaseIds[i]];
+            require(useCase.owner != address(0), "Use case doesn't exist");
+            
+            infos[i] = UseCaseInfo({
+                id: useCase.id,
+                owner: useCase.owner,
+                rewardPool: useCase.rewardPool,
+                lockupPeriod: useCase.lockupPeriod,
+                lockTime: useCase.lockTime,
+                rewardsLocked: useCase.rewardsLocked,
+                totalShares: totalRewardShares[useCaseIds[i]],
+                participants: participants[useCaseIds[i]]
+            });
+        }
+        
+        return infos;
+    }
 }

@@ -62,3 +62,18 @@ export const mapRewardAllocatedEvents = (
 
   return events.map((event) => event.args);
 };
+
+export interface UseCaseInfo {
+  id: string;
+  owner: `0x${string}`;
+  rewardPool: bigint;
+  lockupPeriod: bigint;
+  lockTime: bigint;
+  rewardsLocked: boolean;
+  totalShares: bigint;
+  participants: readonly {
+    participant: `0x${string}`;
+    rewardShare: bigint;
+    fixedReward: bigint;
+  }[];
+}

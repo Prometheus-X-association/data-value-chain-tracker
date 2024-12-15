@@ -3,7 +3,7 @@ import path from "path";
 import { artifacts } from "hardhat";
 
 async function main() {
-  const contracts = ["UseCaseFactory", "UseCaseContract"];
+  const contracts = ["UseCaseContract", "PTXToken"];
   const abis: Record<string, any> = {};
 
   for (const contractName of contracts) {
@@ -22,11 +22,6 @@ async function main() {
 
   const content = `
 // This file is auto-generated. Do not edit.
-export const FACTORY_ABI = ${JSON.stringify(
-    abis.UseCaseFactory,
-    null,
-    2
-  )} as const;
 export const USECASE_ABI = ${JSON.stringify(
     abis.UseCaseContract,
     null,

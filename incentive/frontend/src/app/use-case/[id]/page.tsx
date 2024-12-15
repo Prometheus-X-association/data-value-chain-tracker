@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useAccount } from "wagmi";
 import { Container } from "@/components/layout/container";
 import { PageHeader } from "@/components/layout/page-header";
-import { useUseCase } from "@/hooks/use-use-case";
+import { useUseCaseContract } from "@/hooks/use-use-case-contract";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UseCaseOverview } from "@/components/use-case/use-case-overview";
 import { UseCaseParticipants } from "@/components/use-case/use-case-participants";
@@ -13,7 +13,7 @@ import { UseCaseActions } from "@/components/use-case/use-case-actions";
 export default function UseCasePage() {
   const { id } = useParams();
   const { address } = useAccount();
-  const { useCase, isLoading, error } = useUseCase(BigInt(id as string));
+  const { useCase, isLoading } = useUseCaseContract();
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;

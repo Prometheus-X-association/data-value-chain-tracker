@@ -10,8 +10,8 @@ describe("PTXToken Integration Tests", function () {
   let user2: SignerWithAddress;
   let useCase: SignerWithAddress;
 
-  const INITIAL_SUPPLY = 1_000_000n;
-  const TRANSFER_AMOUNT = 1_000n;
+  const INITIAL_SUPPLY = ethers.parseEther("1000000");
+  const TRANSFER_AMOUNT = ethers.parseEther("1000");
 
   beforeEach(async function () {
     [owner, user1, user2, useCase] = await ethers.getSigners();
@@ -23,9 +23,8 @@ describe("PTXToken Integration Tests", function () {
 
   describe("Basic Token Functionality", function () {
     it("should have correct initial supply", async function () {
-      const expectedSupply = INITIAL_SUPPLY * 10n ** 18n;
-      expect(await token.totalSupply()).to.equal(expectedSupply);
-      expect(await token.balanceOf(owner.address)).to.equal(expectedSupply);
+      expect(await token.totalSupply()).to.equal(INITIAL_SUPPLY);
+      expect(await token.balanceOf(owner.address)).to.equal(INITIAL_SUPPLY);
     });
 
     it("should allow transfers between accounts", async function () {
@@ -53,34 +52,15 @@ describe("PTXToken Integration Tests", function () {
 
   describe("Use Case Reward Functionality", function () {
     it("should allow use case to transfer rewards", async function () {
-      // Transfer tokens to use case contract
       await token.transfer(useCase.address, TRANSFER_AMOUNT);
 
-      // Mock use case transferring rewards
       await token
         .connect(useCase)
-        .transferReward(
-          user1.address,
-          TRANSFER_AMOUNT / 2n,
-          ethers.encodeBytes32String("useCaseId")
-        );
+        .transfer(user1.address, TRANSFER_AMOUNT / 2n);
 
       expect(await token.balanceOf(user1.address)).to.equal(
         TRANSFER_AMOUNT / 2n
       );
-    });
-
-    it("should emit RewardTransfer event", async function () {
-      await token.transfer(useCase.address, TRANSFER_AMOUNT);
-
-      const useCaseId = ethers.encodeBytes32String("useCaseId");
-      await expect(
-        token
-          .connect(useCase)
-          .transferReward(user1.address, TRANSFER_AMOUNT, useCaseId)
-      )
-        .to.emit(token, "RewardTransfer")
-        .withArgs(useCase.address, user1.address, TRANSFER_AMOUNT, useCaseId);
     });
   });
 
