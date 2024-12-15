@@ -1,15 +1,3 @@
-export interface IncentiveRequest {
-  clientId: string;
-  useCaseId: string;
-  recipient: string;
-  eventName: string;
-  amount: string;
-  factor: string; // Between 0.0 and 1.0. Might come from oracle in the future
-  nonce: number;
-  timestamp: number;
-  signature: string;
-}
-
 export interface IncentivePayload {
   useCaseId: string;
   recipient: string;
@@ -33,3 +21,26 @@ export enum IncentivePermission {
   DISTRIBUTE = "distribute",
   // We can add more permissions later
 }
+export type PermitSignature = {
+  v: number;
+  r: string;
+  s: string;
+  deadline: number;
+  value: string;
+};
+
+export type BasePermitRequest = PermitSignature & {
+  owner: string;
+  amount: string;
+};
+
+export type UseCaseDepositRequest = BasePermitRequest & {
+  useCaseId: string;
+};
+
+export type TokenRewardRequest = BasePermitRequest & {
+  incentiveType: string;
+  recipient: string;
+};
+
+export type IncentiveRequest = UseCaseDepositRequest | TokenRewardRequest;

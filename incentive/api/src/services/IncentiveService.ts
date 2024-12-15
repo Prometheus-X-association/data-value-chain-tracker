@@ -6,34 +6,58 @@ import {
 } from "../types/types";
 import crypto from "crypto";
 import { ethers } from "ethers";
-import { FACTORY_ABI, USECASE_ABI } from "../contracts/abis";
-import {
-  UseCaseFactory,
-  UseCaseContract,
-} from "../../../blockchain/typechain-types";
+import { USECASE_ABI } from "../contracts/abis";
+import { UseCaseContract } from "../../../blockchain/typechain-types";
+import { PTXToken } from "../types/types";
 
 export class IncentiveService {
   private factory: UseCaseFactory;
+  private token: PTXToken;
 
   constructor(
-    private keyManager: KeyManagementService,
-    private provider: ethers.Provider,
     private wallet: ethers.Wallet,
-    private factoryAddress: string
+    private factoryAddress: string,
+    private tokenAddress: string
   ) {
     this.factory = new ethers.Contract(
       factoryAddress,
       FACTORY_ABI,
       wallet
     ) as unknown as UseCaseFactory;
+
+    this.token = new ethers.Contract(
+      tokenAddress,
+      [
+        "function transferRewardWithPermit(address,address,address,uint256,uint256,uint8,bytes32,bytes32,bytes32)",
+      ],
+      wallet
+    ) as unknown as PTXToken;
   }
 
   async distributeIncentive(request: IncentiveRequest): Promise<string> {
-    await this.validateRequest(request);
+    // Basic validation
+    if (!ethers.isAddress(request.owner)) {
+      throw new Error("Invalid owner address");
+    }
 
-    await this.verifySignature(request);
+    try {
+      ethers.parseUnits(request.amount, 18);
+    } catch {
+      throw new Error("Invalid amount");
+    }
 
-    return this.submitTransaction(request);
+    if (request.deadline < Math.floor(Date.now() / 1000)) {
+      throw new Error("Permit has expired");
+    }
+
+    // Distribute based on request type
+    if ("useCaseId" in request) {
+      return this.distributeUseCaseIncentive(request);
+    } else if ("incentiveType" in request) {
+      return this.distributeDirectIncentive(request);
+    }
+
+    throw new Error("Invalid request type");
   }
 
   private async validateRequest(request: IncentiveRequest): Promise<void> {
