@@ -6,19 +6,22 @@ import { Container } from "@/components/layout/container";
 import { PageHeader } from "@/components/layout/page-header";
 import { UseCaseCard } from "@/components/use-case/use-case-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePtxToken } from "@/hooks/use-ptx-token";
-import { useFactoryContract } from "@/hooks/use-factory";
+import { useUseCaseContract } from "@/hooks/use-use-case-contract";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
-  const { useCases } = useFactoryContract();
+  const { useCases, userUseCases, isLoading } = useUseCaseContract();
   const { balance } = usePtxToken();
 
-  const ownedUseCases = useCases.filter((useCase) => useCase.owner === address);
-  const participatedUseCases = useCases.filter((useCase) =>
-    useCase?.participants.some((participant) => participant === address),
+  // Filter for participated use cases
+  const participatedUseCases = useCases?.filter((useCase) =>
+    useCase.participants.some(
+      (participant) =>
+        participant.participant.toLowerCase() === address?.toLowerCase(),
+    ),
   );
 
   if (!isConnected) {
@@ -37,6 +40,17 @@ export default function DashboardPage() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <Container className="flex min-h-[80vh] items-center justify-center">
+        <div className="space-y-4 text-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p>Loading use cases...</p>
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <div className="space-y-8">
@@ -48,18 +62,18 @@ export default function DashboardPage() {
         <Tabs defaultValue="owned" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="owned">
-              My Use Cases ({ownedUseCases.length})
+              My Use Cases ({userUseCases?.length ?? 0})
             </TabsTrigger>
             <TabsTrigger value="participated">
-              Participated ({participatedUseCases.length})
+              Participated ({participatedUseCases?.length ?? 0})
             </TabsTrigger>
             <TabsTrigger value="all">
-              All Use Cases ({useCases.length})
+              All Use Cases ({useCases?.length ?? 0})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="owned">
-            {ownedUseCases.length === 0 ? (
+            {!userUseCases?.length ? (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
@@ -69,16 +83,10 @@ export default function DashboardPage() {
               </Alert>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {ownedUseCases.map((useCase) => (
+                {userUseCases.map((useCase) => (
                   <UseCaseCard
-                    key={useCase?.id.toString()}
-                    id={useCase.id}
-                    rewardPool={useCase.stats.rewardPool}
-                    remainingRewardPool={useCase.stats.remainingRewardPool}
-                    lockDuration={useCase.stats.lockDuration}
-                    eventCount={useCase.stats.eventCount}
-                    isActive={useCase.stats.isActive}
-                    owner={useCase.owner}
+                    key={useCase.id}
+                    useCase={useCase}
                     currentAddress={address}
                   />
                 ))}
@@ -87,7 +95,7 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="participated">
-            {participatedUseCases.length === 0 ? (
+            {!participatedUseCases?.length ? (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
@@ -98,14 +106,8 @@ export default function DashboardPage() {
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {participatedUseCases.map((useCase) => (
                   <UseCaseCard
-                    key={useCase.id.toString()}
-                    id={useCase.id}
-                    rewardPool={useCase.stats.rewardPool}
-                    remainingRewardPool={useCase.stats.remainingRewardPool}
-                    lockDuration={useCase.stats.lockDuration}
-                    eventCount={useCase.stats.eventCount}
-                    isActive={useCase.stats.isActive}
-                    owner={useCase.owner}
+                    key={useCase.id}
+                    useCase={useCase}
                     currentAddress={address}
                   />
                 ))}
@@ -115,16 +117,10 @@ export default function DashboardPage() {
 
           <TabsContent value="all">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {useCases.map((useCase) => (
+              {useCases?.map((useCase) => (
                 <UseCaseCard
-                  key={useCase.id.toString()}
-                  id={useCase.id}
-                  rewardPool={useCase.stats.rewardPool}
-                  remainingRewardPool={useCase.stats.remainingRewardPool}
-                  lockDuration={useCase.stats.lockDuration}
-                  eventCount={useCase.stats.eventCount}
-                  isActive={useCase.stats.isActive}
-                  owner={useCase.owner}
+                  key={useCase.id}
+                  useCase={useCase}
                   currentAddress={address}
                 />
               ))}

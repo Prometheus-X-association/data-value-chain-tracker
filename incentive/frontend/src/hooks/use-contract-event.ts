@@ -11,6 +11,7 @@ export function useContractEvents<T = Log>(
   },
 ) {
   const [data, setData] = useState<T[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { address, abi, eventName, onLogs } = config;
 
   // Fetch historical events
@@ -23,13 +24,17 @@ export function useContractEvents<T = Log>(
     });
 
     async function getHistoricalLogs() {
-      const logs = await client.getLogs({
-        address,
-        event: (abi as any).find((x: any) => x.name === eventName),
-        fromBlock: 0n,
-        toBlock: "latest",
-      });
-      setData(logs as T[]);
+      try {
+        const logs = await client.getLogs({
+          address,
+          event: (abi as any).find((x: any) => x.name === eventName),
+          fromBlock: 0n,
+          toBlock: "latest",
+        });
+        setData(logs as T[]);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     getHistoricalLogs();
@@ -51,5 +56,5 @@ export function useContractEvents<T = Log>(
     },
   });
 
-  return { data };
+  return { data, isLoading };
 }

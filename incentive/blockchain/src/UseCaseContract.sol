@@ -96,6 +96,47 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         emit UseCaseCreated(useCaseId, msg.sender);
     }
 
+    function createUseCaseWithParticipants(
+        string calldata useCaseId,
+        address[] calldata participants_,
+        uint256[] calldata shares_,
+        uint256[] calldata fixedRewards_
+    ) external {
+        require(useCases[useCaseId].owner == address(0), "Use case already exists");
+        require(participants_.length == shares_.length, "Array lengths mismatch");
+        require(participants_.length == fixedRewards_.length, "Array lengths mismatch");
+        
+        useCases[useCaseId] = UseCase({
+            id: useCaseId,
+            owner: msg.sender,
+            rewardPool: 0,
+            lockupPeriod: 0,
+            lockTime: 0,
+            rewardsLocked: false
+        });
+
+        if (participants_.length > 0) {
+            uint256 totalShares = 0;
+            for (uint256 i = 0; i < participants_.length; i++) {
+                require(participants_[i] != address(0), "Zero address not allowed");
+                totalShares += shares_[i];
+                participants[useCaseId].push(Participant({
+                    participant: participants_[i],
+                    rewardShare: shares_[i],
+                    fixedReward: fixedRewards_[i]
+                }));
+                emit RewardSharesUpdated(useCaseId, participants_[i], shares_[i]);
+                if (fixedRewards_[i] > 0) {
+                    emit FixedRewardAdded(useCaseId, participants_[i], fixedRewards_[i]);
+                }
+            }
+            totalRewardShares[useCaseId] = totalShares;
+            require(totalShares <= 10000, "Total shares exceed 100%");
+        }
+
+        emit UseCaseCreated(useCaseId, msg.sender);
+    }
+
     modifier useCaseExists(string calldata useCaseId) {
         address useCaseOwner = useCases[useCaseId].owner;
         require(useCases[useCaseId].owner != address(0), "Use case doesn't exist");

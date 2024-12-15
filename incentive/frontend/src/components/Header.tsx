@@ -51,6 +51,12 @@ export function Header() {
                 Dashboard
               </Link>
             </Button>
+            <Button asChild variant="ghost">
+              <Link href="/rewards">
+                <Wallet className="h-4 w-4" />
+                Rewards
+              </Link>
+            </Button>
             <Button onClick={() => router.push("/create")} className="gap-2">
               <Plus className="h-4 w-4" />
               Create Use Case

@@ -315,6 +315,34 @@ export const USECASE_ABI = [
         "type": "string"
       },
       {
+        "internalType": "address[]",
+        "name": "participants_",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "shares_",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "fixedRewards_",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "createUseCaseWithParticipants",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "useCaseId",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"

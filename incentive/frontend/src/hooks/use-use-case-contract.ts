@@ -2,7 +2,7 @@ import { useContractEvents } from "@/hooks/use-contract-event";
 import { useAccount, useReadContract } from "wagmi";
 import { USECASE_CONTRACT_ADDRESS, USECASE_ABI } from "@/config/contracts";
 import { useState, useEffect } from "react";
-import { UseCase, UseCaseInfo } from "@/types/types";
+import { UseCaseInfo } from "@/types/types";
 
 export function useUseCaseContract() {
   const { address } = useAccount();
@@ -37,16 +37,7 @@ export function useUseCaseContract() {
   });
 
   // Format the use cases data
-  const useCases = useCasesData?.map((data: UseCaseInfo) => ({
-    id: data.id,
-    owner: data.owner,
-    rewardPool: data.rewardPool,
-    lockupPeriod: data.lockupPeriod,
-    lockTime: data.lockTime,
-    rewardsLocked: data.rewardsLocked,
-    totalShares: data.totalShares,
-    participants: data.participants,
-  }));
+  const useCases = useCasesData?.map((data) => data as UseCaseInfo);
 
   // Filter for user's own use cases
   const userUseCases = useCases?.filter(
