@@ -1,6 +1,12 @@
 DOCKER_COMPOSE_FILE = docker-compose.yml
 
-.PHONY: up down rebuild clean logs
+.PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incentive-frontend build-hardhat build-all
+
+CORE_FRONTEND_IMAGE = dvct-core-frontend:latest
+CORE_API_IMAGE = dvct-core-api:latest
+INCENTIVE_API_IMAGE = dvct-incentive-api:latest
+INCENTIVE_FRONTEND_IMAGE = dvct-incentive-frontend:latest
+HARDHAT_IMAGE = dvct-hardhat:latest
 
 up:
 	@echo "Starting all services..."
@@ -21,3 +27,27 @@ clean:
 logs:
 	@echo "Showing logs for all services..."
 	docker-compose -f $(DOCKER_COMPOSE_FILE) logs -f
+
+build-core-frontend:
+	@echo "Building core frontend image..."
+	docker build -t $(CORE_FRONTEND_IMAGE) -f app/Dockerfile.frontend ./app
+
+build-core-api:
+	@echo "Building core API image..."
+	docker build -t $(CORE_API_IMAGE) -f app/Dockerfile.server ./app
+
+build-incentive-api:
+	@echo "Building incentive API image..."
+	docker build -t $(INCENTIVE_API_IMAGE) -f incentive/api/Dockerfile ./incentive/api
+
+build-incentive-frontend:
+	@echo "Building incentive frontend image..."
+	docker build -t $(INCENTIVE_FRONTEND_IMAGE) -f incentive/frontend/Dockerfile ./incentive/frontend
+
+build-hardhat:
+	@echo "Building Hardhat node image..."
+	docker build -t $(HARDHAT_IMAGE) -f incentive/blockchain/Dockerfile ./incentive/blockchain
+
+# Build all images
+build-all: build-core-frontend build-core-api build-incentive-api build-incentive-frontend build-hardhat
+	@echo "All images built successfully!"

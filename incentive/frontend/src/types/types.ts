@@ -1,4 +1,4 @@
-import { Address, Log } from "viem";
+import { Address } from "viem";
 
 export interface Participant {
   participant: Address;
@@ -9,19 +9,20 @@ export interface Participant {
 export interface UseCaseInfo {
   id: string;
   owner: Address;
-  rewardPool: bigint;
-  lockupPeriod: bigint;
-  lockTime: bigint;
+  totalRewardPool: bigint;
+  remainingRewardPool: bigint;
+  lockupPeriod: number;
+  lockTime: number;
   rewardsLocked: boolean;
   totalShares: bigint;
   participants: readonly Participant[];
 }
 
 export interface RewardTransfer {
-  from: Address;
-  to: Address;
+  from: string;
+  to: string;
   amount: bigint;
   timestamp: number;
-  transactionHash: string;
+  transactionHash: `0x${string}`;
   incentiveType: string;
 }

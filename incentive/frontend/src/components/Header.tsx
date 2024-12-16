@@ -33,7 +33,7 @@ export function Header() {
   });
 
   const handleDisconnect = () => {
-    disconnect();
+    void disconnect?.();
     router.push("/");
   };
 

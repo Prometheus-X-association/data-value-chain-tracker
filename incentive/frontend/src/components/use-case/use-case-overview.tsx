@@ -48,7 +48,13 @@ export function UseCaseOverview({ useCase }: UseCaseOverviewProps) {
             <div>
               <p className="text-sm text-muted-foreground">Total Reward Pool</p>
               <p className="text-lg font-medium">
-                {formatEther(useCase.rewardPool)} PTX
+                {formatEther(useCase.totalRewardPool)} PTX
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Remaining Rewards</p>
+              <p className="text-lg font-medium">
+                {formatEther(useCase.remainingRewardPool)} PTX
               </p>
             </div>
             <div>

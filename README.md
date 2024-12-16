@@ -236,3 +236,20 @@ Displays logs for all services defined in the Docker Compose file.
 ```bash
 make logs
 ```
+
+### Individual Builds
+- `make build-core-frontend` - Builds the core frontend Docker image
+- `make build-core-api` - Builds the core API Docker image
+- `make build-incentive-api` - Builds the incentive API Docker image
+- `make build-incentive-frontend` - Builds the incentive frontend Docker image
+- `make build-hardhat` - Builds the Hardhat node Docker image# Individual ddimage build commands
+
+
+## Frontend pictures
+![dashboard](pictures/dashboard.png)
+![use-case-overview](pictures/use-case-overview.png)
+![use-case-participants](pictures/use-case-participants.png)
+![use-case-deposit](pictures/use-case-deposit.png)
+![use-case-manage](pictures/use-case-manage.png)
+![create-use-case](pictures/create-use-case.png)
+

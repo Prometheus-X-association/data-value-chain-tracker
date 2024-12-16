@@ -5,6 +5,14 @@ import { hardhat } from "viem/chains";
 
 type EventHandler<T> = (logs: T[]) => void;
 
+// Type the event properly
+type ContractEvent = Log & {
+  args: {
+    name: string;
+    [key: string]: any;
+  };
+};
+
 export function useContractEvents<T = Log>(
   config: UseWatchContractEventParameters & {
     onLogs?: EventHandler<T>;

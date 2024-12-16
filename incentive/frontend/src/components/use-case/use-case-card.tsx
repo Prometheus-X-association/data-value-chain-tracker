@@ -12,6 +12,7 @@ import { formatEther } from "viem";
 import { Eye } from "lucide-react";
 import { formatDuration } from "@/lib/utils";
 import { UseCaseInfo } from "@/types/types";
+import { useBlockTime } from "@/hooks/use-block-time";
 
 interface UseCaseCardProps {
   useCase: UseCaseInfo;
@@ -23,13 +24,14 @@ export function UseCaseCard({ useCase, currentAddress }: UseCaseCardProps) {
     currentAddress &&
     currentAddress.toLowerCase() === useCase.owner.toLowerCase();
 
-  const currentTime = BigInt(Math.floor(Date.now() / 1000));
+  const currentTime = useBlockTime();
   const isFinished =
     useCase.rewardsLocked &&
     useCase.lockTime > 0n &&
     currentTime >= useCase.lockTime + useCase.lockupPeriod;
 
   const getStatus = () => {
+    console.log(useCase.id, useCase.lockTime, useCase.lockupPeriod, currentTime);
     if (isFinished) return { label: "Finished", variant: "secondary" as const };
     if (useCase.rewardsLocked)
       return { label: "Locked", variant: "secondary" as const };
@@ -58,7 +60,13 @@ export function UseCaseCard({ useCase, currentAddress }: UseCaseCardProps) {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Reward Pool</span>
               <span className="font-medium">
-                {formatEther(useCase.rewardPool)} PTX
+                {formatEther(useCase.totalRewardPool)} PTX
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Remaining Rewards</span>
+              <span className="font-medium">
+                {formatEther(useCase.remainingRewardPool)} PTX
               </span>
             </div>
             <div className="flex justify-between">

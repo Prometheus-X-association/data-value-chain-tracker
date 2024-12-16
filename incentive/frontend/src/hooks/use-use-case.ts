@@ -24,19 +24,13 @@ export function useUseCase(id: string) {
     ? {
         id: useCaseData.id,
         owner: useCaseData.owner,
-        rewardPool: useCaseData.rewardPool,
+        totalRewardPool: useCaseData.totalRewardPool,
+        remainingRewardPool: useCaseData.remainingRewardPool,
         lockupPeriod: useCaseData.lockupPeriod,
         lockTime: useCaseData.lockTime,
         rewardsLocked: useCaseData.rewardsLocked,
         totalShares: useCaseData.totalShares,
         participants: useCaseData.participants,
-        stats: {
-          rewardPool: useCaseData.rewardPool,
-          remainingRewardPool: useCaseData.rewardPool,
-          isActive: !useCaseData.rewardsLocked,
-          lockDuration: useCaseData.lockupPeriod,
-          eventCount: useCaseData.participants.length,
-        },
       }
     : null;
 
@@ -71,7 +65,7 @@ export function useUseCase(id: string) {
         address: USECASE_CONTRACT_ADDRESS,
         abi: USECASE_ABI,
         functionName: "lockRewards",
-        args: [id, lockupPeriod],
+        args: [id, Number(lockupPeriod)],
       });
     },
     claimRewards: async () => {

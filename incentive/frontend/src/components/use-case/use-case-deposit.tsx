@@ -46,7 +46,10 @@ export function UseCaseDeposit({ useCaseId }: { useCaseId: string }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={async (e) => {
+        e.preventDefault();
+        await form.handleSubmit(onSubmit)(e);
+      }} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Deposit Rewards</CardTitle>

@@ -1,5 +1,8 @@
 FROM node:20.18.0-alpine AS build
 
+# Install dependencies needed for node-gyp and other build tools
+RUN apk add --no-cache python3 make g++ gcc libc-dev
+
 WORKDIR /app
 
 # Copy package files

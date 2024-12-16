@@ -1,5 +1,5 @@
 import { useAccount, useReadContract } from "wagmi";
-import { TOKEN_ABI, TOKEN_ADDRESS, USECASE_ABI } from "@/config/contracts";
+import { TOKEN_ABI, TOKEN_ADDRESS } from "@/config/contracts";
 
 export function usePtxToken() {
   const { address } = useAccount();

@@ -14,6 +14,7 @@ import { Badge } from "../ui/badge";
 import { useAccount } from "wagmi";
 import { Loader2 } from "lucide-react";
 import { useTransaction } from "@/hooks/use-transaction";
+import { useBlockTime } from "@/hooks/use-block-time";
 
 interface UseCaseParticipantsProps {
   useCaseId: string;
@@ -27,6 +28,7 @@ export function UseCaseParticipants({
   const { useCase, actions, refetch } = useUseCase(useCaseId);
   const { address } = useAccount();
   const { handleTransaction, isLoading: isClaimLoading } = useTransaction();
+  const currentTime = useBlockTime();
 
   if (!useCase) return null;
 
@@ -43,7 +45,6 @@ export function UseCaseParticipants({
     (p) => p.participant.toLowerCase() === address?.toLowerCase(),
   );
 
-  const currentTime = BigInt(Math.floor(Date.now() / 1000));
   const isLockPeriodOver =
     useCase.lockTime > 0n &&
     currentTime >= useCase.lockTime + useCase.lockupPeriod;
@@ -67,7 +68,12 @@ export function UseCaseParticipants({
                   You have rewards available to claim
                 </p>
               </div>
-              <Button onClick={handleClaimRewards} disabled={isClaimLoading}>
+              <Button
+                onClick={async () => {
+                  await handleClaimRewards();
+                }}
+                disabled={isClaimLoading}
+              >
                 {isClaimLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

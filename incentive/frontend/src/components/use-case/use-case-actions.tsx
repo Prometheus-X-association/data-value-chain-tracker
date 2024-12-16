@@ -17,7 +17,6 @@ import { Plus, Trash2 } from "lucide-react";
 import { useUseCase } from "@/hooks/use-use-case";
 import { useTransaction } from "@/hooks/use-transaction";
 import { parseEther } from "viem";
-import { Separator } from "@/components/ui/separator";
 
 const managementSchema = z.object({
   lockupPeriod: z.number().min(3600, "Minimum 1 hour required"),
@@ -81,7 +80,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
     try {
       switch (activeAction) {
         case "lock":
-          await handleTransaction(
+          void handleTransaction(
             () => actions.lockRewards(BigInt(data.lockupPeriod)),
             {
               successMessage: "Rewards locked successfully",
@@ -98,7 +97,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
           const shares = data.participants.map((p) =>
             BigInt(p.rewardShare * 100),
           );
-          await handleTransaction(
+          void handleTransaction(
             () => actions.updateRewardShares(addresses, shares),
             {
               successMessage: "Reward shares updated successfully",
@@ -115,7 +114,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
           const fixedRewards = data.fixedRewards.map((p) =>
             parseEther(p.fixedReward.toString()),
           );
-          await handleTransaction(
+          void handleTransaction(
             () => actions.addFixedRewards(rewardAddresses, fixedRewards),
             {
               successMessage: "Fixed rewards added successfully",

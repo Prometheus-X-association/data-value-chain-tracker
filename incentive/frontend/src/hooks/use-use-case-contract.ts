@@ -4,6 +4,12 @@ import { USECASE_CONTRACT_ADDRESS, USECASE_ABI } from "@/config/contracts";
 import { useState, useEffect } from "react";
 import { UseCaseInfo } from "@/types/types";
 
+interface CreationEvent {
+  args: {
+    id: string;
+  }
+}
+
 export function useUseCaseContract() {
   const { address } = useAccount();
   const [useCaseIds, setUseCaseIds] = useState<string[]>([]);
@@ -19,7 +25,7 @@ export function useUseCaseContract() {
   useEffect(() => {
     if (creationEvents) {
       const ids = creationEvents
-        .map((event) => (event as any)?.args?.id as string)
+        .map((event) => (event as unknown as CreationEvent)?.args?.id)
         .filter(Boolean);
       setUseCaseIds(ids);
     }

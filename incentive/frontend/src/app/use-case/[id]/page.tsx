@@ -37,7 +37,7 @@ export default function UseCasePage() {
     <Container>
       <div className="space-y-8">
         <PageHeader
-          title={`Use Case #${id}`}
+          title={`Use Case #${String(id)}`}
           description={`Created by ${useCase.owner}`}
         />
 
