@@ -2,6 +2,19 @@
 
 See the design document [here](docs/design-document.md).
 
+## TLDR FOR TESTERS
+
+We have created integration tests for the three scenarios in our design document.
+They can be run with the following command:
+
+- `yarn test:integration` (PS: Is quite slow)
+
+To run all the components together in docker, run the following command:
+
+- `make up`
+
+If needed, more commands and specifics are documented below.
+
 ## DVCT Core components
 
 ### DVCT Core server
@@ -238,18 +251,18 @@ make logs
 ```
 
 ### Individual Builds
+
 - `make build-core-frontend` - Builds the core frontend Docker image
 - `make build-core-api` - Builds the core API Docker image
 - `make build-incentive-api` - Builds the incentive API Docker image
 - `make build-incentive-frontend` - Builds the incentive frontend Docker image
 - `make build-hardhat` - Builds the Hardhat node Docker image# Individual ddimage build commands
 
-
 ## Frontend pictures
+
 ![dashboard](pictures/dashboard.png)
 ![use-case-overview](pictures/use-case-overview.png)
 ![use-case-participants](pictures/use-case-participants.png)
 ![use-case-deposit](pictures/use-case-deposit.png)
 ![use-case-manage](pictures/use-case-manage.png)
 ![create-use-case](pictures/create-use-case.png)
-
