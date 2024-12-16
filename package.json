@@ -38,12 +38,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "private": true,
-  "workspaces": [
-    "app",
-    "incentive/api",
-    "incentive/blockchain",
-    "incentive/frontend",
-    "incentive/blockchain-docker"
-  ]
+  "private": true
 }
