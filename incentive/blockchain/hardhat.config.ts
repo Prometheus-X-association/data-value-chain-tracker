@@ -1,7 +1,9 @@
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-foundry";
+if (process.env.NODE_ENV !== "docker") {
+  require("@nomicfoundation/hardhat-foundry");
+}
 import "@nomicfoundation/hardhat-ignition";
 import "@typechain/hardhat";
 
@@ -28,6 +30,12 @@ const config: HardhatUserConfig = {
       },
       viaIR: true,
     },
+  },
+  paths: {
+    sources: "./src", // Make sure this matches where your .sol files are
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
   },
   networks: {
     localhost: {

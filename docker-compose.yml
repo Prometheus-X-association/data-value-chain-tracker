@@ -30,6 +30,15 @@ services:
     depends_on:
       - hardhat
 
+  incentive-frontend:
+    build:
+      context: ./incentive/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3000" # http://localhost:3003
+    depends_on:
+      - hardhat
+
   mongodb:
     image: mongo
     container_name: mongodb
@@ -40,7 +49,7 @@ services:
 
   hardhat:
     build:
-      context: ./incentive/blockchain-docker
+      context: ./incentive/blockchain
       dockerfile: Dockerfile
     ports:
       - "8545:8545"

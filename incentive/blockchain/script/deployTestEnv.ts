@@ -70,7 +70,7 @@ async function main() {
     [participant1.address, participant3.address],
     [7000, 3000] // 70%, 30%
   );
-  await useCaseContract.lockRewards("use-case-3", 60); // 1 minute lockup
+  await useCaseContract.lockRewards("use-case-3", 172800); // 2 days lockup
 
   // Create Use Case 4 (Locked and claimable)
   await useCase.connect(useCaseOwner2).createUseCase("use-case-4");
@@ -82,10 +82,10 @@ async function main() {
     [participant1.address, participant2.address, participant3.address],
     [3000, 3000, 4000] // 30%, 30%, 40%
   );
-  await useCase.connect(useCaseOwner2).lockRewards("use-case-4", 1); // 1 second lockup
+  await useCase.connect(useCaseOwner2).lockRewards("use-case-4", 86400); // 1 day lockup
 
   // Skip time to make use case 4 claimable
-  await ethers.provider.send("evm_increaseTime", [2]); // Skip 2 seconds
+  await ethers.provider.send("evm_increaseTime", [90000]); // Skip ~25 hours
   await ethers.provider.send("evm_mine", []); // Mine a new block
 
   // Write deployment info to a JSON file
