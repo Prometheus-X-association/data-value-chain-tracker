@@ -13,15 +13,16 @@ async function main() {
 
   // Write to frontend
   const abiPath = path.join(__dirname, "../../frontend/src/config/abis.ts");
+
   const content = `
-// This file is auto-generated. Do not edit.
-export const USECASE_ABI = ${JSON.stringify(
-    abis.UseCaseContract,
-    null,
-    2
-  )} as const;
-export const TOKEN_ABI = ${JSON.stringify(abis.PTXToken, null, 2)} as const;
-`;
+    // This file is auto-generated. Do not edit.
+    export const USECASE_ABI = ${JSON.stringify(
+      abis.UseCaseContract,
+      null,
+      2
+    )} as const;
+    export const TOKEN_ABI = ${JSON.stringify(abis.PTXToken, null, 2)} as const;
+  `;
 
   fs.writeFileSync(abiPath, content);
   console.log(`ABIs exported to ${abiPath}`);

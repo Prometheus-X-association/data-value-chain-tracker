@@ -1,141 +1,125 @@
-import { KeyManagementService } from "./KeyManagementService";
-import {
-  IncentivePermission,
-  IncentiveRequest,
-  IncentivePayload,
-} from "../types/types";
-import crypto from "crypto";
 import { ethers } from "ethers";
-import { USECASE_ABI } from "../contracts/abis";
 import { UseCaseContract } from "../../../blockchain/typechain-types";
-import { PTXToken } from "../types/types";
+import { PTXToken } from "../../../blockchain/typechain-types";
+import { TokenRewardRequest, UseCaseDepositRequest } from "../types/types";
+import { TOKEN_ABI, USECASE_ABI } from "../contracts/abis";
 
 export class IncentiveService {
-  private factory: UseCaseFactory;
   private token: PTXToken;
+  private useCase: UseCaseContract;
 
   constructor(
     private wallet: ethers.Wallet,
-    private factoryAddress: string,
+    private useCaseAddress: string,
     private tokenAddress: string
   ) {
-    this.factory = new ethers.Contract(
-      factoryAddress,
-      FACTORY_ABI,
+    this.useCase = new ethers.Contract(
+      useCaseAddress,
+      USECASE_ABI,
       wallet
-    ) as unknown as UseCaseFactory;
+    ) as unknown as UseCaseContract;
 
     this.token = new ethers.Contract(
       tokenAddress,
-      [
-        "function transferRewardWithPermit(address,address,address,uint256,uint256,uint8,bytes32,bytes32,bytes32)",
-      ],
+      TOKEN_ABI,
       wallet
     ) as unknown as PTXToken;
   }
 
-  async distributeIncentive(request: IncentiveRequest): Promise<string> {
-    // Basic validation
-    if (!ethers.isAddress(request.owner)) {
-      throw new Error("Invalid owner address");
+  async transferReward(request: TokenRewardRequest): Promise<string> {
+    if (!this.validateTransferRequest(request)) {
+      throw new Error("Invalid transfer request");
     }
 
-    try {
-      ethers.parseUnits(request.amount, 18);
-    } catch {
-      throw new Error("Invalid amount");
-    }
-
-    if (request.deadline < Math.floor(Date.now() / 1000)) {
-      throw new Error("Permit has expired");
-    }
-
-    // Distribute based on request type
-    if ("useCaseId" in request) {
-      return this.distributeUseCaseIncentive(request);
-    } else if ("incentiveType" in request) {
-      return this.distributeDirectIncentive(request);
-    }
-
-    throw new Error("Invalid request type");
-  }
-
-  private async validateRequest(request: IncentiveRequest): Promise<void> {
-    // Check if client has permission
-    const hasPermission = await this.keyManager.validatePermission(
-      request.clientId,
-      IncentivePermission.DISTRIBUTE
+    const tx = await this.token.transferReward(
+      request.from,
+      request.to,
+      ethers.parseEther(request.amount),
+      ethers.id(request.incentiveType)
     );
-
-    if (!hasPermission) {
-      throw new Error(
-        "Client does not have permission to distribute incentives"
-      );
-    }
-
-    // Validate timestamp (e.g., not too old)
-    const MAX_AGE = 5 * 60 * 1000; // 5 minutes
-    if (Date.now() - request.timestamp > MAX_AGE) {
-      throw new Error("Request has expired");
-    }
-
-    if (!ethers.isAddress(request.recipient)) {
-      throw new Error("Invalid recipient address");
-    }
-
-    try {
-      ethers.parseUnits(request.amount, 18);
-    } catch {
-      throw new Error("Invalid amount");
-    }
-  }
-
-  private async verifySignature(request: IncentiveRequest): Promise<void> {
-    const { signature, ...payload } = request;
-
-    // Get public key
-    const publicKey = await this.keyManager.getPublicKey(request.clientId);
-    if (!publicKey) {
-      throw new Error("Public key not found");
-    }
-
-    // Create message
-    const message = JSON.stringify(payload, Object.keys(payload).sort());
-
-    // Verify signature
-    const verifier = crypto.createVerify("SHA256");
-    verifier.update(message);
-
-    const isValid = verifier.verify(publicKey, signature, "base64");
-    if (!isValid) {
-      throw new Error("Invalid signature");
-    }
-  }
-
-  private async submitTransaction(request: IncentiveRequest): Promise<string> {
-    const useCaseAddress = await this.factory.useCaseContracts(
-      BigInt(request.useCaseId)
-    );
-    if (useCaseAddress === ethers.ZeroAddress) {
-      throw new Error("Invalid use case ID");
-    }
-
-    const useCase = new ethers.Contract(
-      useCaseAddress,
-      [
-        "function notifyEvent(string memory eventName, address participant, uint256 factor)",
-      ],
-      this.wallet
-    ) as unknown as UseCaseContract;
-
-    const tx = await useCase.notifyEvent(
-      request.eventName,
-      request.recipient,
-      ethers.parseUnits(request.factor, 18)
-    );
-
-    await tx.wait();
 
     return tx.hash;
+  }
+
+  async transferRewardWithPermit(request: TokenRewardRequest): Promise<string> {
+    if (!request.permit) {
+      throw new Error("Permit required for this operation");
+    }
+    if (!this.validateTransferRequest(request)) {
+      throw new Error("Invalid transfer request");
+    }
+
+    const tx = await this.token.transferRewardWithPermit(
+      request.permit.owner,
+      request.permit.spender,
+      request.to,
+      ethers.parseEther(request.amount),
+      request.permit.deadline,
+      request.permit.v,
+      request.permit.r,
+      request.permit.s,
+      ethers.id(request.incentiveType)
+    );
+
+    return tx.hash;
+  }
+
+  async depositRewards(request: UseCaseDepositRequest): Promise<string> {
+    if (!this.validateDepositRequest(request)) {
+      throw new Error("Invalid deposit request");
+    }
+
+    const tx = await this.useCase.depositRewards(
+      request.useCaseId,
+      ethers.parseEther(request.amount)
+    );
+
+    return tx.hash;
+  }
+
+  async depositRewardsWithPermit(
+    request: UseCaseDepositRequest
+  ): Promise<string> {
+    if (!request.permit) {
+      throw new Error("Permit required for this operation");
+    }
+    if (!this.validateDepositRequest(request)) {
+      throw new Error("Invalid deposit request");
+    }
+
+    const tx = await this.useCase.depositRewardsWithPermit(
+      request.useCaseId,
+      request.permit.owner,
+      ethers.parseEther(request.amount),
+      request.permit.deadline,
+      request.permit.v,
+      request.permit.r,
+      request.permit.s
+    );
+
+    return tx.hash;
+  }
+
+  private validateTransferRequest(request: TokenRewardRequest): boolean {
+    return (
+      ethers.isAddress(request.from) &&
+      ethers.isAddress(request.to) &&
+      request.to !== ethers.ZeroAddress &&
+      request.from !== ethers.ZeroAddress &&
+      parseFloat(request.amount) > 0 &&
+      !!request.incentiveType
+    );
+  }
+
+  private validateDepositRequest(request: UseCaseDepositRequest): boolean {
+    return (
+      !!request.useCaseId &&
+      request.useCaseId.length > 0 &&
+      ethers.isAddress(request.from) &&
+      ethers.isAddress(request.to) &&
+      request.to !== ethers.ZeroAddress &&
+      request.from !== ethers.ZeroAddress &&
+      parseFloat(request.amount) > 0
+    );
   }
 }

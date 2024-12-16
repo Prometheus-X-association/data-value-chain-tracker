@@ -1,5 +1,4 @@
 import { IKeyStorage } from "../interfaces/IKeyStorage";
-import { KeyPair, IncentivePermission } from "../types/types";
 import crypto from "crypto";
 
 export class KeyManagementService {
@@ -7,7 +6,7 @@ export class KeyManagementService {
 
   public async generateKeyPair(
     clientId: string,
-    permissions: IncentivePermission[]
+    permissions: string[]
   ): Promise<{
     privateKey: string;
     publicKey: string;
@@ -36,7 +35,7 @@ export class KeyManagementService {
 
   public async validatePermission(
     clientId: string,
-    permission: IncentivePermission
+    permission: string
   ): Promise<boolean> {
     const keyPair = await this.storage.get(clientId);
     if (!keyPair) return false;
@@ -53,7 +52,7 @@ export class KeyManagementService {
     return this.storage.delete(clientId);
   }
 
-  public async listClients(): Promise<KeyPair[]> {
+  public async listClients(): Promise<string[]> {
     return this.storage.list();
   }
 }

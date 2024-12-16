@@ -9,38 +9,30 @@ export interface IncentivePayload {
   clientId: string;
 }
 
-export interface KeyPair {
-  clientId: string;
-  publicKey: string;
-  permissions: IncentivePermission[];
-  createdAt: Date;
-  lastUsed?: Date;
-}
-
-export enum IncentivePermission {
-  DISTRIBUTE = "distribute",
-  // We can add more permissions later
-}
-export type PermitSignature = {
+export type Permit = {
+  owner: string;
+  spender: string;
+  amount: string;
+  deadline: number;
   v: number;
   r: string;
   s: string;
-  deadline: number;
-  value: string;
 };
 
-export type BasePermitRequest = PermitSignature & {
-  owner: string;
+export type TransferRequest = {
+  from: string;
+  to: string;
   amount: string;
 };
 
-export type UseCaseDepositRequest = BasePermitRequest & {
+export type UseCaseDepositRequest = TransferRequest & {
   useCaseId: string;
+  permit?: Permit;
 };
 
-export type TokenRewardRequest = BasePermitRequest & {
+export type TokenRewardRequest = TransferRequest & {
   incentiveType: string;
-  recipient: string;
+  permit?: Permit;
 };
 
 export type IncentiveRequest = UseCaseDepositRequest | TokenRewardRequest;

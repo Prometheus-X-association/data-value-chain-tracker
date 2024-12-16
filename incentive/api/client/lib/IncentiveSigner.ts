@@ -1,66 +1,41 @@
 import { ethers } from "ethers";
-import { PermitSignature } from "../../src/types/types";
+import { Permit } from "../../src/types/types";
 
 export class IncentiveSigner {
   private wallet: ethers.Wallet;
-  private token: ethers.Contract;
-  private apiWalletAddress: string;
-  private useCaseContractAddress?: string;
 
   constructor(
     privateKey: string,
-    tokenAddress: string,
-    apiWalletAddress: string,
-    provider: ethers.Provider,
-    useCaseContractAddress?: string
+    private tokenAddress: string,
+    provider: ethers.Provider
   ) {
     this.wallet = new ethers.Wallet(privateKey, provider);
-    this.apiWalletAddress = apiWalletAddress;
-    this.useCaseContractAddress = useCaseContractAddress;
-
-    this.token = new ethers.Contract(
-      tokenAddress,
-      [
-        "function DOMAIN_SEPARATOR() view returns (bytes32)",
-        "function nonces(address owner) view returns (uint256)",
-        "function PERMIT_TYPEHASH() view returns (bytes32)",
-      ],
-      provider
-    );
   }
 
   /**
    * Creates a signed permit for token approval
    */
   private async createPermit(
-    isUseCaseDeposit: boolean,
+    spender: string,
     value: string,
     deadline: number = Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
-  ): Promise<PermitSignature> {
+  ): Promise<Permit> {
     const owner = this.wallet.address;
-    const spender = isUseCaseDeposit
-      ? this.useCaseContractAddress!
-      : this.apiWalletAddress;
+    const token = new ethers.Contract(
+      this.tokenAddress,
+      ["function nonces(address) view returns (uint256)"],
+      this.wallet.provider!
+    );
 
-    const nonce = await this.token.nonces(owner);
+    const nonce = await token.nonces(owner);
 
-    // Permit type data according to EIP-2612
-    const permitData = {
-      owner,
-      spender,
-      value: ethers.parseUnits(value, 18),
-      nonce,
-      deadline,
-    };
-
-    // Create permit signature
     const signature = await this.wallet.signTypedData(
       // Domain
       {
         name: "PTX Token",
         version: "1",
-        chainId: (await this.wallet.provider!.getNetwork()).chainId!,
-        verifyingContract: await this.token.getAddress(),
+        chainId: (await this.wallet.provider!.getNetwork()).chainId,
+        verifyingContract: this.tokenAddress,
       },
       // Types
       {
@@ -72,17 +47,26 @@ export class IncentiveSigner {
           { name: "deadline", type: "uint256" },
         ],
       },
-      permitData
+      // Value
+      {
+        owner,
+        spender,
+        value: ethers.parseUnits(value, 18),
+        nonce,
+        deadline,
+      }
     );
 
     const { v, r, s } = ethers.Signature.from(signature);
 
     return {
+      owner,
+      spender,
+      amount: ethers.parseUnits(value, 18).toString(),
+      deadline,
       v,
       r,
       s,
-      deadline,
-      value: permitData.value.toString(),
     };
   }
 
@@ -91,44 +75,38 @@ export class IncentiveSigner {
    */
   async createUseCaseDepositRequest(
     useCaseId: string,
+    useCaseAddress: string,
     amount: string,
     deadline?: number
   ) {
-    if (!this.useCaseContractAddress) {
-      throw new Error("Use case contract address not configured");
-    }
-
-    const permit = await this.createPermit(true, amount, deadline);
+    const permit = await this.createPermit(useCaseAddress, amount, deadline);
 
     return {
       useCaseId,
-      owner: this.wallet.address,
-      amount: permit.value,
-      deadline: permit.deadline,
-      v: permit.v,
-      r: permit.r,
-      s: permit.s,
+      from: this.wallet.address,
+      to: useCaseAddress,
+      amount,
+      permit,
     };
   }
 
   /**
-   * Creates a direct token reward transfer request
+   * Creates a direct token reward request
    */
   async createTokenRewardRequest(
+    to: string,
     amount: string,
     incentiveType: string,
     deadline?: number
   ) {
-    const permit = await this.createPermit(false, amount, deadline);
+    const permit = await this.createPermit(to, amount, deadline);
 
     return {
-      owner: this.wallet.address,
-      amount: permit.value,
+      from: this.wallet.address,
+      to,
+      amount,
       incentiveType,
-      deadline: permit.deadline,
-      v: permit.v,
-      r: permit.r,
-      s: permit.s,
+      permit,
     };
   }
 }
