@@ -72,7 +72,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
     /// @notice Extended structure containing all use case information including participants
     /// @param id Unique identifier for the use case
     /// @param owner Address of the use case creator/owner
-    /// @param rewardPool Total amount of tokens allocated for rewards
+    /// @param totalRewardPool Total amount of tokens allocated for rewards
+    /// @param remainingRewardPool Remaining rewards to be claimed
     /// @param lockupPeriod Duration for which rewards are locked
     /// @param lockTime Timestamp when rewards were locked
     /// @param rewardsLocked Boolean indicating if rewards are currently locked
@@ -81,7 +82,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
     struct UseCaseInfo {
         string id;
         address owner;
-        uint96 rewardPool;
+        uint96 totalRewardPool;
+        uint96 remainingRewardPool;
         uint32 lockupPeriod;
         uint32 lockTime;
         bool rewardsLocked;
@@ -103,16 +105,18 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
     /// @notice Structure defining a use case's core properties
     /// @param id Unique identifier for the use case
     /// @param owner Address of the use case creator/owner
-    /// @param rewardPool Total amount of tokens allocated for rewards
+    /// @param totalRewardPool Total rewards allocated for distribution
+    /// @param remainingRewardPool Remaining rewards to be claimed
     /// @param lockupPeriod Duration for which rewards are locked
     /// @param lockTime Timestamp when rewards were locked
     /// @param rewardsLocked Boolean indicating if rewards are currently locked
     struct UseCase {
         string id;                  
         address owner;              
-        uint96 rewardPool;        // Reduced from uint256 to uint96 for sufficient token amounts
-        uint32 lockupPeriod;      // Reduced from uint256 to uint32 (enough for ~136 years)
-        uint32 lockTime;          // Reduced from uint256 to uint32
+        uint96 totalRewardPool;    // Total rewards allocated for distribution
+        uint96 remainingRewardPool; // Remaining rewards to be claimed
+        uint32 lockupPeriod;      
+        uint32 lockTime;          
         bool rewardsLocked;        
     }
 
@@ -179,7 +183,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         useCases[useCaseId] = UseCase({
             id: useCaseId,
             owner: msg.sender,
-            rewardPool: 0,
+            totalRewardPool: 0,
+            remainingRewardPool: 0,
             lockupPeriod: 0,
             lockTime: 0,
             rewardsLocked: false
@@ -208,7 +213,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         useCases[useCaseId] = UseCase({
             id: useCaseId,
             owner: msg.sender,
-            rewardPool: 0,
+            totalRewardPool: 0,
+            remainingRewardPool: 0,
             lockupPeriod: 0,
             lockTime: 0,
             rewardsLocked: false
@@ -278,13 +284,15 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
 
         if(ptxToken.balanceOf(msg.sender) < amount) revert InsufficientBalance();
 
-        // Check for overflow
-        uint256 newRewardPool = uint256(useCase.rewardPool) + amount;
-        if(newRewardPool > type(uint96).max) revert RewardPoolOverflow();
+        // Check for overflow for both pools
+        uint256 newTotalPool = uint256(useCase.totalRewardPool) + amount;
+        uint256 newRemainingPool = uint256(useCase.remainingRewardPool) + amount;
+        if(newTotalPool > type(uint96).max || newRemainingPool > type(uint96).max) revert RewardPoolOverflow();
 
         ptxToken.transferReward(msg.sender, address(this), amount, keccak256(abi.encodePacked(useCaseId)));
 
-        useCase.rewardPool = uint96(newRewardPool);
+        useCase.totalRewardPool = uint96(newTotalPool);
+        useCase.remainingRewardPool = uint96(newRemainingPool);
 
         emit RewardsDeposited(useCaseId, amount);
     }
@@ -309,9 +317,10 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         if(amount == 0) revert ZeroAmount();
         UseCase storage useCase = useCases[useCaseId];
 
-        // Check for overflow
-        uint256 newRewardPool = uint256(useCase.rewardPool) + amount;
-        if(newRewardPool > type(uint96).max) revert RewardPoolOverflow();
+        // Check for overflow for both pools
+        uint256 newTotalPool = uint256(useCase.totalRewardPool) + amount;
+        uint256 newRemainingPool = uint256(useCase.remainingRewardPool) + amount;
+        if(newTotalPool > type(uint96).max || newRemainingPool > type(uint96).max) revert RewardPoolOverflow();
 
         bytes32 useCaseIdBytes = keccak256(abi.encodePacked(useCaseId));
 
@@ -325,7 +334,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
             useCaseIdBytes
         );
         
-        useCase.rewardPool = uint96(newRewardPool);
+        useCase.totalRewardPool = uint96(newTotalPool);
+        useCase.remainingRewardPool = uint96(newRemainingPool);
 
         emit RewardsDeposited(useCaseId, amount);
     }
@@ -433,22 +443,25 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         Participant storage participant = participants[useCaseId][participantIndex];
         if(participant.rewardShare == 0 && participant.fixedReward == 0) revert NoRewardsToClaim();
 
-        uint256 totalReward = 0;
+        uint256 shareBasedReward = 0;
+        uint256 fixedReward = 0;
 
         if (participant.rewardShare > 0) {
-            uint256 shareReward = (uint256(useCase.rewardPool) * participant.rewardShare) / totalRewardShares[useCaseId];
-            totalReward += shareReward;
+            shareBasedReward = (useCase.totalRewardPool * participant.rewardShare) / totalRewardShares[useCaseId];
             participant.rewardShare = 0;
         }
 
         if (participant.fixedReward > 0) {
-            totalReward += participant.fixedReward;
+            fixedReward = participant.fixedReward;
             participant.fixedReward = 0;
         }
 
+        uint256 totalReward = shareBasedReward + fixedReward;
         if(totalReward == 0) revert NoRewardsToClaim();
         
-        useCase.rewardPool = uint96(uint256(useCase.rewardPool) - totalReward);
+        if (shareBasedReward > 0) {
+            useCase.remainingRewardPool = uint96(useCase.remainingRewardPool - shareBasedReward);
+        }
         
         if(!ptxToken.transfer(msg.sender, totalReward)) revert TransferFailed();
 
@@ -461,10 +474,10 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
     function emergencyWithdraw(string calldata useCaseId) external nonReentrant useCaseExists(useCaseId) onlyUseCaseOwner(useCaseId) {
         UseCase storage useCase = useCases[useCaseId];
         if(useCase.rewardsLocked) revert RewardsAlreadyLocked();
-        if(useCase.rewardPool == 0) revert NoRewardsToClaim();
+        if(useCase.remainingRewardPool == 0) revert NoRewardsToClaim();
 
-        uint96 amount = useCase.rewardPool;
-        useCase.rewardPool = 0;
+        uint96 amount = useCase.remainingRewardPool;
+        useCase.remainingRewardPool = 0;
 
         if(!ptxToken.transfer(msg.sender, amount)) revert TransferFailed();
 
@@ -502,7 +515,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         return UseCaseInfo({
             id: useCase.id,
             owner: useCase.owner,
-            rewardPool: useCase.rewardPool,
+            totalRewardPool: useCase.totalRewardPool,
+            remainingRewardPool: useCase.remainingRewardPool,
             lockupPeriod: useCase.lockupPeriod,
             lockTime: useCase.lockTime,
             rewardsLocked: useCase.rewardsLocked,
@@ -528,7 +542,8 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
             infos[i] = UseCaseInfo({
                 id: useCase.id,
                 owner: useCase.owner,
-                rewardPool: useCase.rewardPool,
+                totalRewardPool: useCase.totalRewardPool,
+                remainingRewardPool: useCase.remainingRewardPool,
                 lockupPeriod: useCase.lockupPeriod,
                 lockTime: useCase.lockTime,
                 rewardsLocked: useCase.rewardsLocked,

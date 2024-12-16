@@ -637,7 +637,12 @@
           },
           {
             "internalType": "uint96",
-            "name": "rewardPool",
+            "name": "totalRewardPool",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint96",
+            "name": "remainingRewardPool",
             "type": "uint96"
           },
           {
@@ -775,7 +780,12 @@
           },
           {
             "internalType": "uint96",
-            "name": "rewardPool",
+            "name": "totalRewardPool",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint96",
+            "name": "remainingRewardPool",
             "type": "uint96"
           },
           {
@@ -1073,7 +1083,12 @@
       },
       {
         "internalType": "uint96",
-        "name": "rewardPool",
+        "name": "totalRewardPool",
+        "type": "uint96"
+      },
+      {
+        "internalType": "uint96",
+        "name": "remainingRewardPool",
         "type": "uint96"
       },
       {

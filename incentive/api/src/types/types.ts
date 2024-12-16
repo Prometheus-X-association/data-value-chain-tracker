@@ -1,3 +1,10 @@
+export type KeyPair = {
+  clientId: string;
+  publicKey: string;
+  permissions: string[];
+  createdAt: Date;
+};
+
 export interface IncentivePayload {
   useCaseId: string;
   recipient: string;

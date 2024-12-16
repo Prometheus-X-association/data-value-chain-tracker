@@ -1,3 +1,4 @@
+import { KeyPair } from "@/types/types";
 import { IKeyStorage } from "../interfaces/IKeyStorage";
 import crypto from "crypto";
 
@@ -52,7 +53,7 @@ export class KeyManagementService {
     return this.storage.delete(clientId);
   }
 
-  public async listClients(): Promise<string[]> {
+  public async listClients(): Promise<KeyPair[]> {
     return this.storage.list();
   }
 }

@@ -32,7 +32,7 @@ export class IncentiveSigner {
     const signature = await this.wallet.signTypedData(
       // Domain
       {
-        name: "PTX Token",
+        name: "PTXToken",
         version: "1",
         chainId: (await this.wallet.provider!.getNetwork()).chainId,
         verifyingContract: this.tokenAddress,

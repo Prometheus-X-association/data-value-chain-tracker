@@ -33,7 +33,8 @@ contract UseCaseContractTest is Test {
         UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
         assertEq(info.id, useCaseId);
         assertEq(info.owner, owner);
-        assertEq(info.rewardPool, 0);
+        assertEq(info.totalRewardPool, 0);
+        assertEq(info.remainingRewardPool, 0);
         assertFalse(info.rewardsLocked);
     }
 
@@ -74,7 +75,8 @@ contract UseCaseContractTest is Test {
         vm.stopPrank();
 
         UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
-        assertEq(info.rewardPool, 1000 ether);
+        assertEq(info.totalRewardPool, 1000 ether);
+        assertEq(info.remainingRewardPool, 1000 ether);
     }
 
     function test_RevertWhen_DepositZeroRewards() public {
@@ -162,7 +164,37 @@ contract UseCaseContractTest is Test {
         vm.prank(participant1);
         useCase.claimRewards(useCaseId);
 
+        UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
+        assertEq(info.totalRewardPool, 1000 ether);
+        assertEq(info.remainingRewardPool, 0);
         assertEq(token.balanceOf(participant1), 1000 ether);
+    }
+
+    function test_PartialClaimRewards() public {
+        vm.startPrank(owner);
+        useCase.createUseCase(useCaseId);
+        token.approve(address(useCase), 1000 ether);
+        useCase.depositRewards(useCaseId, 1000 ether);
+        
+        address[] memory participants = new address[](2);
+        uint96[] memory shares = new uint96[](2);
+        participants[0] = participant1;
+        participants[1] = participant2;
+        shares[0] = 6000; // 60%
+        shares[1] = 4000; // 40%
+        useCase.updateRewardShares(useCaseId, participants, shares);
+        useCase.lockRewards(useCaseId, 1 days);
+        vm.stopPrank();
+
+        // Warp time and claim for first participant
+        vm.warp(block.timestamp + 1 days + 1);
+        vm.prank(participant1);
+        useCase.claimRewards(useCaseId);
+
+        UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
+        assertEq(info.totalRewardPool, 1000 ether);
+        assertEq(info.remainingRewardPool, 400 ether);
+        assertEq(token.balanceOf(participant1), 600 ether);
     }
 
     function test_RevertWhen_ClaimBeforeLockupEnds() public {
@@ -194,6 +226,9 @@ contract UseCaseContractTest is Test {
         useCase.emergencyWithdraw(useCaseId);
         uint256 balanceAfter = token.balanceOf(owner);
         
+        UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
+        assertEq(info.totalRewardPool, 0);
+        assertEq(info.remainingRewardPool, 0);
         assertEq(balanceAfter - balanceBefore, 1000 ether);
         vm.stopPrank();
     }
@@ -308,8 +343,52 @@ contract UseCaseContractTest is Test {
         );
 
         UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
-        assertEq(info.rewardPool, amount, "Reward pool should have received the tokens");
+        assertEq(info.totalRewardPool, amount, "Reward pool should have received the tokens");
         assertEq(token.balanceOf(user1Address), 0, "User wallet should have zero balance");
         assertEq(token.balanceOf(address(useCase)), amount, "UseCase contract should have the tokens");
+    }
+    
+    function testRewardDistribution() public {
+        string memory testId = "test";
+        uint256 rewardPool = 1000 ether;
+        
+        // Setup use case and fund test contract
+        vm.startPrank(owner);
+        token.transfer(address(this), rewardPool);
+        vm.stopPrank();
+        
+        // Create and setup use case
+        useCase.createUseCase(testId);
+        
+        address[] memory participants = new address[](2);
+        participants[0] = address(1);
+        participants[1] = address(2);
+        
+        uint96[] memory shares = new uint96[](2);
+        shares[0] = 6000; // 60%
+        shares[1] = 4000; // 40%
+        
+        // Update shares first
+        useCase.updateRewardShares(testId, participants, shares);
+        
+        // Then deposit rewards
+        token.approve(address(useCase), rewardPool);
+        useCase.depositRewards(testId, rewardPool);
+        
+        // Lock rewards
+        useCase.lockRewards(testId, 1 days);
+        
+        // Advance time
+        vm.warp(block.timestamp + 1 days + 1);
+        
+        // Claim as both participants
+        vm.prank(address(1));
+        useCase.claimRewards(testId);
+        
+        vm.prank(address(2));
+        useCase.claimRewards(testId);
+        
+        assertEq(token.balanceOf(address(1)), 600 ether);
+        assertEq(token.balanceOf(address(2)), 400 ether);
     }
 }

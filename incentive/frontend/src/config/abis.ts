@@ -1,6 +1,6 @@
 
-// This file is auto-generated. Do not edit.
-export const USECASE_ABI = [
+    // This file is auto-generated. Do not edit.
+    export const USECASE_ABI = [
   {
     "inputs": [
       {
@@ -35,8 +35,135 @@ export const USECASE_ABI = [
   },
   {
     "inputs": [],
+    "name": "ArrayLengthMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EmergencyWithdrawalFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidLockupPeriod",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LockupPeriodNotEnded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MaxParticipantsExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoRewardsToClaim",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotUseCaseOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ParticipantNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ReentrancyGuardReentrantCall",
     "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RewardPoolOverflow",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RewardsAlreadyLocked",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RewardsNotLocked",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TotalSharesExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      }
+    ],
+    "name": "UseCaseAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      }
+    ],
+    "name": "UseCaseDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAmount",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "useCaseId",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "EmergencyWithdrawal",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -246,6 +373,31 @@ export const USECASE_ABI = [
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "useCaseId",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "UseCaseOwnershipTransferred",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "DEFAULT_ADMIN_ROLE",
     "outputs": [
@@ -253,6 +405,58 @@ export const USECASE_ABI = [
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_LOCKUP_PERIOD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_PARTICIPANTS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_TOTAL_SHARES",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MIN_LOCKUP_PERIOD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -271,9 +475,9 @@ export const USECASE_ABI = [
         "type": "address[]"
       },
       {
-        "internalType": "uint256[]",
+        "internalType": "uint96[]",
         "name": "amounts",
-        "type": "uint256[]"
+        "type": "uint96[]"
       }
     ],
     "name": "addFixedRewards",
@@ -320,14 +524,14 @@ export const USECASE_ABI = [
         "type": "address[]"
       },
       {
-        "internalType": "uint256[]",
+        "internalType": "uint96[]",
         "name": "shares_",
-        "type": "uint256[]"
+        "type": "uint96[]"
       },
       {
-        "internalType": "uint256[]",
+        "internalType": "uint96[]",
         "name": "fixedRewards_",
-        "type": "uint256[]"
+        "type": "uint96[]"
       }
     ],
     "name": "createUseCaseWithParticipants",
@@ -359,6 +563,11 @@ export const USECASE_ABI = [
         "internalType": "string",
         "name": "useCaseId",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       },
       {
         "internalType": "uint256",
@@ -394,6 +603,19 @@ export const USECASE_ABI = [
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "useCaseId",
+        "type": "string"
+      }
+    ],
+    "name": "emergencyWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "string[]",
         "name": "useCaseIds",
         "type": "string[]"
@@ -414,19 +636,24 @@ export const USECASE_ABI = [
             "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "rewardPool",
-            "type": "uint256"
+            "internalType": "uint96",
+            "name": "totalRewardPool",
+            "type": "uint96"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint96",
+            "name": "remainingRewardPool",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint32",
             "name": "lockupPeriod",
-            "type": "uint256"
+            "type": "uint32"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint32",
             "name": "lockTime",
-            "type": "uint256"
+            "type": "uint32"
           },
           {
             "internalType": "bool",
@@ -446,14 +673,14 @@ export const USECASE_ABI = [
                 "type": "address"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint96",
                 "name": "rewardShare",
-                "type": "uint256"
+                "type": "uint96"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint96",
                 "name": "fixedReward",
-                "type": "uint256"
+                "type": "uint96"
               }
             ],
             "internalType": "struct UseCaseContract.Participant[]",
@@ -492,14 +719,14 @@ export const USECASE_ABI = [
             "type": "address"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint96",
             "name": "rewardShare",
-            "type": "uint256"
+            "type": "uint96"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint96",
             "name": "fixedReward",
-            "type": "uint256"
+            "type": "uint96"
           }
         ],
         "internalType": "struct UseCaseContract.Participant",
@@ -552,19 +779,24 @@ export const USECASE_ABI = [
             "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "rewardPool",
-            "type": "uint256"
+            "internalType": "uint96",
+            "name": "totalRewardPool",
+            "type": "uint96"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint96",
+            "name": "remainingRewardPool",
+            "type": "uint96"
+          },
+          {
+            "internalType": "uint32",
             "name": "lockupPeriod",
-            "type": "uint256"
+            "type": "uint32"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint32",
             "name": "lockTime",
-            "type": "uint256"
+            "type": "uint32"
           },
           {
             "internalType": "bool",
@@ -584,14 +816,14 @@ export const USECASE_ABI = [
                 "type": "address"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint96",
                 "name": "rewardShare",
-                "type": "uint256"
+                "type": "uint96"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint96",
                 "name": "fixedReward",
-                "type": "uint256"
+                "type": "uint96"
               }
             ],
             "internalType": "struct UseCaseContract.Participant[]",
@@ -657,9 +889,9 @@ export const USECASE_ABI = [
         "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "lockupPeriod",
-        "type": "uint256"
+        "type": "uint32"
       }
     ],
     "name": "lockRewards",
@@ -688,14 +920,14 @@ export const USECASE_ABI = [
         "type": "address"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint96",
         "name": "rewardShare",
-        "type": "uint256"
+        "type": "uint96"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint96",
         "name": "fixedReward",
-        "type": "uint256"
+        "type": "uint96"
       }
     ],
     "stateMutability": "view",
@@ -796,14 +1028,32 @@ export const USECASE_ABI = [
         "type": "string"
       },
       {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferUseCaseOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "useCaseId",
+        "type": "string"
+      },
+      {
         "internalType": "address[]",
         "name": "_participants",
         "type": "address[]"
       },
       {
-        "internalType": "uint256[]",
+        "internalType": "uint96[]",
         "name": "shares",
-        "type": "uint256[]"
+        "type": "uint96[]"
       }
     ],
     "name": "updateRewardShares",
@@ -832,19 +1082,24 @@ export const USECASE_ABI = [
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "rewardPool",
-        "type": "uint256"
+        "internalType": "uint96",
+        "name": "totalRewardPool",
+        "type": "uint96"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint96",
+        "name": "remainingRewardPool",
+        "type": "uint96"
+      },
+      {
+        "internalType": "uint32",
         "name": "lockupPeriod",
-        "type": "uint256"
+        "type": "uint32"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "lockTime",
-        "type": "uint256"
+        "type": "uint32"
       },
       {
         "internalType": "bool",
@@ -856,7 +1111,7 @@ export const USECASE_ABI = [
     "type": "function"
   }
 ] as const;
-export const TOKEN_ABI = [
+    export const TOKEN_ABI = [
   {
     "inputs": [
       {
@@ -867,6 +1122,27 @@ export const TOKEN_ABI = [
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "AccessControlBadConfirmation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "neededRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "AccessControlUnauthorizedAccount",
+    "type": "error"
   },
   {
     "inputs": [],
@@ -1041,6 +1317,16 @@ export const TOKEN_ABI = [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAmount",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -1107,6 +1393,81 @@ export const TOKEN_ABI = [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newAdminRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "from",
         "type": "address"
@@ -1126,6 +1487,19 @@ export const TOKEN_ABI = [
     ],
     "name": "Transfer",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -1150,7 +1524,7 @@ export const TOKEN_ABI = [
         "type": "bytes32"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1277,6 +1651,67 @@ export const TOKEN_ABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "name",
     "outputs": [
@@ -1349,6 +1784,61 @@ export const TOKEN_ABI = [
     "name": "permit",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "callerConfirmation",
+        "type": "address"
+      }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1467,6 +1957,11 @@ export const TOKEN_ABI = [
       },
       {
         "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "to",
         "type": "address"
       },
@@ -1520,3 +2015,4 @@ export const TOKEN_ABI = [
     "type": "function"
   }
 ] as const;
+  

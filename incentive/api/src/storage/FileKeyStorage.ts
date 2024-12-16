@@ -1,13 +1,7 @@
+import { KeyPair } from "@/types/types";
 import { IKeyStorage } from "../interfaces/IKeyStorage";
 import fs from "fs/promises";
 import path from "path";
-
-type KeyPair = {
-  clientId: string;
-  publicKey: string;
-  permissions: string[];
-  createdAt: Date;
-};
 
 export class FileKeyStorage implements IKeyStorage {
   private storagePath: string;
