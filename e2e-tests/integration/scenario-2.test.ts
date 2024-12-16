@@ -3,18 +3,19 @@ import { expect } from "chai";
 import { ethers } from "ethers";
 import { setupTestEnvironment, TestEnvironment } from "./setup";
 import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner";
+import { waitForTx } from "../helpers/helpers";
 import axios from "axios";
 
 describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", function () {
-  this.timeout(60000); // Set timeout to 60 seconds
+  this.timeout(60000);
 
   let env: TestEnvironment;
   let provider: ethers.JsonRpcProvider;
-  let dataProvider: ethers.Wallet; // Corporate training department
-  let aiProvider1: ethers.Wallet; // Predictive model provider
-  let aiProvider2: ethers.Wallet; // Recommendation engine provider
-  let serviceProvider: ethers.Wallet; // LMS integration provider
-  let orchestrator: ethers.Wallet; // HR consulting firm
+  let dataProvider: ethers.Wallet;
+  let aiProvider1: ethers.Wallet;
+  let aiProvider2: ethers.Wallet;
+  let serviceProvider: ethers.Wallet;
+  let orchestrator: ethers.Wallet;
   let incentiveSigner: IncentiveSigner;
 
   const LOCK_DURATION = 24 * 60 * 60; // 1 day lock
@@ -65,11 +66,9 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
     );
 
     // Transfer initial tokens to orchestrator
-    const transferTx = await env.token.transfer(
-      orchestrator.address,
-      ethers.parseEther("1000")
+    await waitForTx(
+      env.token.transfer(orchestrator.address, ethers.parseEther("1000"))
     );
-    await transferTx.wait();
 
     // Store initial balance
     orchestratorInitialBalance = await env.token.balanceOf(
@@ -88,10 +87,9 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
 
   it("should complete full cycle of corporate training scenario with multiple providers", async () => {
     // 1. Orchestrator creates the use case
-    const createTx = await env.useCase
-      .connect(orchestrator)
-      .createUseCase(USE_CASE_ID);
-    await createTx.wait();
+    await waitForTx(
+      env.useCase.connect(orchestrator).createUseCase(USE_CASE_ID)
+    );
 
     // 2. Set up participant shares
     const participants = [
@@ -108,10 +106,11 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
       SERVICE_PROVIDER_SHARE,
       ORCHESTRATOR_SHARE,
     ];
-    const sharesTx = await env.useCase
-      .connect(orchestrator)
-      .updateRewardShares(USE_CASE_ID, participants, shares);
-    await sharesTx.wait();
+    await waitForTx(
+      env.useCase
+        .connect(orchestrator)
+        .updateRewardShares(USE_CASE_ID, participants, shares)
+    );
 
     // 3. Create signed request for reward distribution
     const signedRequest = await incentiveSigner.createUseCaseDepositRequest(
@@ -127,41 +126,45 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
     );
     expect(response.status).to.equal(200);
 
+    // Wait for the API transaction to be mined
+    await provider.waitForTransaction(
+      (response.data as { data: { transactionHash: string } }).data
+        .transactionHash
+    );
+
+    // Add explicit wait for transaction confirmation
+    await provider.send("evm_mine", []); // Mine a new block
+    await provider.send("evm_mine", []); // Mine another block for good measure
+
     // 5. Lock the rewards
-    const lockTx = await env.useCase
-      .connect(orchestrator)
-      .lockRewards(USE_CASE_ID, LOCK_DURATION);
-    await lockTx.wait();
+    await waitForTx(
+      env.useCase.connect(orchestrator).lockRewards(USE_CASE_ID, LOCK_DURATION)
+    );
 
     // 6. Wait for lock duration to pass
     await provider.send("evm_increaseTime", [LOCK_DURATION + 1]);
     await provider.send("evm_mine", []);
 
     // 7. All participants claim their rewards - Sequential claims to avoid nonce issues
-    const claimTx1 = await env.useCase
-      .connect(dataProvider)
-      .claimRewards(USE_CASE_ID);
-    await claimTx1.wait();
+    await waitForTx(
+      env.useCase.connect(dataProvider).claimRewards(USE_CASE_ID)
+    );
+    await provider.send("evm_mine", []);
 
-    const claimTx2 = await env.useCase
-      .connect(aiProvider1)
-      .claimRewards(USE_CASE_ID);
-    await claimTx2.wait();
+    await waitForTx(env.useCase.connect(aiProvider1).claimRewards(USE_CASE_ID));
+    await provider.send("evm_mine", []);
 
-    const claimTx3 = await env.useCase
-      .connect(aiProvider2)
-      .claimRewards(USE_CASE_ID);
-    await claimTx3.wait();
+    await waitForTx(env.useCase.connect(aiProvider2).claimRewards(USE_CASE_ID));
+    await provider.send("evm_mine", []);
 
-    const claimTx4 = await env.useCase
-      .connect(serviceProvider)
-      .claimRewards(USE_CASE_ID);
-    await claimTx4.wait();
+    await waitForTx(
+      env.useCase.connect(serviceProvider).claimRewards(USE_CASE_ID)
+    );
+    await provider.send("evm_mine", []);
 
-    const claimTx5 = await env.useCase
-      .connect(orchestrator)
-      .claimRewards(USE_CASE_ID);
-    await claimTx5.wait();
+    await waitForTx(
+      env.useCase.connect(orchestrator).claimRewards(USE_CASE_ID)
+    );
 
     // 8. Verify final balances
     const dataProviderBalance = await env.token.balanceOf(dataProvider.address);

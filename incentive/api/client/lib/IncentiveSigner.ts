@@ -18,14 +18,23 @@ export class IncentiveSigner {
   private async createPermit(
     spender: string,
     value: string,
-    deadline: number = Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+    deadline?: number
   ): Promise<Permit> {
     const owner = this.wallet.address;
     const token = new ethers.Contract(
       this.tokenAddress,
-      ["function nonces(address) view returns (uint256)"],
+      [
+        "function nonces(address) view returns (uint256)",
+        "function DOMAIN_SEPARATOR() view returns (bytes32)",
+      ],
       this.wallet.provider!
     );
+
+    const currentBlockTimestamp = (await this.wallet.provider!.getBlock(
+      "latest"
+    ))!.timestamp;
+
+    const actualDeadline = deadline || currentBlockTimestamp + 7200;
 
     const nonce = await token.nonces(owner);
 
@@ -53,7 +62,7 @@ export class IncentiveSigner {
         spender,
         value: ethers.parseUnits(value, 18),
         nonce,
-        deadline,
+        deadline: actualDeadline,
       }
     );
 
@@ -63,7 +72,7 @@ export class IncentiveSigner {
       owner,
       spender,
       amount: ethers.parseUnits(value, 18).toString(),
-      deadline,
+      deadline: actualDeadline,
       v,
       r,
       s,

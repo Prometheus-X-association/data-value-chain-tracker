@@ -3,10 +3,11 @@ import { expect } from "chai";
 import { ethers } from "ethers";
 import { setupTestEnvironment, TestEnvironment } from "./setup";
 import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner";
+import { waitForTx } from "../helpers/helpers";
 import axios from "axios";
 
-describe("Scenario 1: Educational Data Provider and AI Service Provider", function () {
-  this.timeout(30000); // Set timeout to 30 seconds
+describe("Scenario 3: Educational Data Provider and AI Service Provider", function () {
+  this.timeout(60000); // Set timeout to 60 seconds
 
   let env: TestEnvironment;
   let provider: ethers.JsonRpcProvider;
@@ -46,11 +47,9 @@ describe("Scenario 1: Educational Data Provider and AI Service Provider", functi
     );
 
     // Transfer initial tokens to reward depositor
-    const transferTx = await env.token.transfer(
-      rewardDepositor.address,
-      ethers.parseEther("2000")
+    await waitForTx(
+      env.token.transfer(rewardDepositor.address, ethers.parseEther("2000"))
     );
-    await transferTx.wait();
   });
   after(async () => {
     if (env?.apiServer) {
@@ -60,18 +59,18 @@ describe("Scenario 1: Educational Data Provider and AI Service Provider", functi
 
   it("should complete full cycle of educational data sharing scenario", async () => {
     // 1. Data Provider creates the use case
-    const createTx = await env.useCase
-      .connect(dataProvider)
-      .createUseCase(USE_CASE_ID);
-    await createTx.wait();
+    await waitForTx(
+      env.useCase.connect(dataProvider).createUseCase(USE_CASE_ID)
+    );
 
     // 2. Set up participant shares
     const participants = [dataProvider.address, aiProvider.address];
     const shares = [DATA_PROVIDER_SHARE, AI_PROVIDER_SHARE];
-    const sharesTx = await env.useCase
-      .connect(dataProvider)
-      .updateRewardShares(USE_CASE_ID, participants, shares);
-    await sharesTx.wait();
+    await waitForTx(
+      env.useCase
+        .connect(dataProvider)
+        .updateRewardShares(USE_CASE_ID, participants, shares)
+    );
 
     console.log(
       "Shares set:",
@@ -102,31 +101,32 @@ describe("Scenario 1: Educational Data Provider and AI Service Provider", functi
     );
     expect(response.status).to.equal(200);
 
+    // Wait for the API transaction to be mined
+    await provider.waitForTransaction(
+      (response.data as { data: { transactionHash: string } }).data
+        .transactionHash
+    );
+
     const { totalRewardPool, remainingRewardPool } =
       await env.useCase.useCases(USE_CASE_ID);
     console.log("Total reward pool:", totalRewardPool);
     console.log("Remaining reward pool:", remainingRewardPool);
 
     // 5. Data Provider locks the rewards
-    const lockTx = await env.useCase
-      .connect(dataProvider)
-      .lockRewards(USE_CASE_ID, LOCK_DURATION);
-    await lockTx.wait();
+    await waitForTx(
+      env.useCase.connect(dataProvider).lockRewards(USE_CASE_ID, LOCK_DURATION)
+    );
 
     // 6. Wait for lock duration to pass
     await provider.send("evm_increaseTime", [LOCK_DURATION + 1]);
     await provider.send("evm_mine", []);
 
     // 7. Both providers claim their rewards
-    const claim1Tx = await env.useCase
-      .connect(dataProvider)
-      .claimRewards(USE_CASE_ID);
-    await claim1Tx.wait();
+    await waitForTx(
+      env.useCase.connect(dataProvider).claimRewards(USE_CASE_ID)
+    );
 
-    const claim2Tx = await env.useCase
-      .connect(aiProvider)
-      .claimRewards(USE_CASE_ID);
-    await claim2Tx.wait();
+    await waitForTx(env.useCase.connect(aiProvider).claimRewards(USE_CASE_ID));
 
     console.log(
       "Final AI balance:",
