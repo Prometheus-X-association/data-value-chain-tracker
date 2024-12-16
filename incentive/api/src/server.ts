@@ -5,7 +5,7 @@ import { createIncentiveRouter } from "./routes/IncentiveRoutes";
 export interface ApiConfig {
   port: number;
   privateKey: string;
-  factoryAddress: string;
+  useCaseAddress: string;
   tokenAddress: string;
   rpcUrl: string;
 }
@@ -19,9 +19,9 @@ export async function startServer(config: ApiConfig) {
   const wallet = new ethers.Wallet(config.privateKey, provider);
 
   const incentiveRouter = createIncentiveRouter(
-    provider,
     wallet,
-    config.factoryAddress
+    config.useCaseAddress,
+    config.tokenAddress
   );
 
   app.use("/api/incentives", incentiveRouter);

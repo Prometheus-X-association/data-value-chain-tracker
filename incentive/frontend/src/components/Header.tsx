@@ -33,7 +33,7 @@ export function Header() {
   });
 
   const handleDisconnect = () => {
-    disconnect();
+    void disconnect?.();
     router.push("/");
   };
 
@@ -49,6 +49,12 @@ export function Header() {
               <Link href="/">
                 <Home className="h-4 w-4" />
                 Dashboard
+              </Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/rewards">
+                <Wallet className="h-4 w-4" />
+                Rewards
               </Link>
             </Button>
             <Button onClick={() => router.push("/create")} className="gap-2">

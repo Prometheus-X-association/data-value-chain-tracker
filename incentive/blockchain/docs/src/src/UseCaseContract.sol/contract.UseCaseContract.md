@@ -1,504 +1,628 @@
 # UseCaseContract
-[Git Source](https://github.com/Prometheus-X-association/data-value-chain-tracker/blob/f5fc51f4370c215daf8b8d976e067a09a22686a3/src/UseCaseContract.sol)
+[Git Source](https://github.com/Prometheus-X-association/data-value-chain-tracker/blob/46cac2de8f2e7590f1792258a001516bd7e53e86/src/UseCaseContract.sol)
 
 **Inherits:**
-Ownable, ReentrancyGuard
+AccessControl, ReentrancyGuard
 
-Manages reward distribution for specific use cases with configurable events and lock periods
+Manages reward distribution use cases with configurable participant shares and lockup periods
 
-*Handles event notification, reward calculation, and distribution with safety features*
+*Implements access control and reentrancy protection for secure reward management*
 
 
 ## State Variables
-### factory
-Reference to the factory contract that created this use case
-
+### MAX_PARTICIPANTS
 
 ```solidity
-UseCaseFactory public immutable factory;
+uint256 public constant MAX_PARTICIPANTS = 100;
 ```
 
 
-### rewardToken
-Token used for rewards
-
+### MAX_TOTAL_SHARES
 
 ```solidity
-IPTXToken public immutable rewardToken;
+uint256 public constant MAX_TOTAL_SHARES = 10000;
 ```
 
 
-### lockDuration
-Duration rewards are locked before they can be claimed
-
+### MIN_LOCKUP_PERIOD
 
 ```solidity
-uint256 public immutable lockDuration;
+uint256 public constant MIN_LOCKUP_PERIOD = 1 days;
 ```
 
 
-### remainingRewardPool
-Remaining tokens in the reward pool
-
+### MAX_LOCKUP_PERIOD
 
 ```solidity
-uint256 public remainingRewardPool;
+uint256 public constant MAX_LOCKUP_PERIOD = 365 days;
 ```
 
 
-### eventConfigs
-Mapping of event hash to its configuration
+### ptxToken
+The PTX token contract used for reward distributions
 
 
 ```solidity
-mapping(bytes32 => EventConfig) public eventConfigs;
+IPTXToken public immutable ptxToken;
 ```
 
 
-### supportedEvents
-List of supported event hashes
+### useCases
+Mapping from use case ID to use case details
 
 
 ```solidity
-bytes32[] public supportedEvents;
+mapping(string => UseCase) public useCases;
 ```
 
 
-### participantRewards
-Mapping of participant address to their rewards
+### participants
+Mapping from use case ID to array of participants
 
 
 ```solidity
-mapping(address => Reward[]) public participantRewards;
+mapping(string => Participant[]) public participants;
 ```
 
 
-### MAX_FACTOR
-Maximum reward factor (100%)
+### totalRewardShares
+Mapping from use case ID to total reward shares
 
 
 ```solidity
-uint256 public constant MAX_FACTOR = 1e18;
-```
-
-
-### MIN_FACTOR
-Minimum reward factor (1%)
-
-
-```solidity
-uint256 public constant MIN_FACTOR = 1e16;
-```
-
-
-### MIN_LOCK_DURATION
-Minimum lock duration for rewards (if non-zero)
-
-
-```solidity
-uint256 public constant MIN_LOCK_DURATION = 1 hours;
-```
-
-
-### MAX_LOCK_DURATION
-Maximum lock duration for rewards
-
-
-```solidity
-uint256 public constant MAX_LOCK_DURATION = 30 days;
-```
-
-
-### ADMIN_ACTION_COOLDOWN
-Cooldown period between admin actions
-
-
-```solidity
-uint256 public constant ADMIN_ACTION_COOLDOWN = 1 days;
-```
-
-
-### MAX_REWARD_HISTORY
-Maximum number of rewards per participant
-
-
-```solidity
-uint256 public constant MAX_REWARD_HISTORY = 1000;
-```
-
-
-### lastAdminAction
-Timestamp of last admin action
-
-
-```solidity
-uint256 public lastAdminAction;
-```
-
-
-### paused
-Whether the contract is paused
-
-
-```solidity
-bool public paused;
-```
-
-
-### VERSION
-Version of the contract for tracking deployments
-
-
-```solidity
-string public constant VERSION = "1.0.0";
+mapping(string => uint256) public totalRewardShares;
 ```
 
 
 ## Functions
-### onlyNotifier
-
-Ensures caller is authorized to notify events
-
-
-```solidity
-modifier onlyNotifier();
-```
-
-### whenNotPaused
-
-Ensures contract is not paused
-
-
-```solidity
-modifier whenNotPaused();
-```
-
-### withCooldown
-
-Ensures cooldown period has passed
-
-
-```solidity
-modifier withCooldown();
-```
-
-### sufficientBalance
-
-Ensures contract has sufficient token balance
-
-
-```solidity
-modifier sufficientBalance(uint256 amount);
-```
-
 ### constructor
 
-Initializes the use case with event configurations
+Initializes the contract with the PTX token address
 
 
 ```solidity
-constructor(
-    address owner_,
-    uint256 rewardPool_,
-    uint256 lockDuration_,
-    address rewardToken_,
-    string[] memory eventNames,
-    uint256[] memory baseRewards
-) Ownable(owner_);
+constructor(address _ptxToken);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`owner_`|`address`|Address that will own this use case|
-|`rewardPool_`|`uint256`|Initial size of reward pool|
-|`lockDuration_`|`uint256`|Duration rewards are locked before claiming|
-|`rewardToken_`|`address`|Address of token used for rewards|
-|`eventNames`|`string[]`|List of event names to configure|
-|`baseRewards`|`uint256[]`|List of base rewards for each event|
+|`_ptxToken`|`address`|Address of the PTX token contract|
 
 
-### notifyEvent
+### createUseCase
 
-Notifies the contract of an event occurrence
+Creates a new use case with the given ID
 
 
 ```solidity
-function notifyEvent(string calldata eventName, address participant, uint256 factor)
+function createUseCase(string calldata useCaseId) external;
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|Unique identifier for the use case|
+
+
+### createUseCaseWithParticipants
+
+Creates a new use case with initial participants and their reward shares
+
+*Arrays must be of equal length, and total shares must not exceed MAX_TOTAL_SHARES*
+
+
+```solidity
+function createUseCaseWithParticipants(
+    string calldata useCaseId,
+    address[] calldata participants_,
+    uint96[] calldata shares_,
+    uint96[] calldata fixedRewards_
+) external;
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|Unique identifier for the use case|
+|`participants_`|`address[]`|Array of participant addresses|
+|`shares_`|`uint96[]`|Array of reward shares in basis points for each participant|
+|`fixedRewards_`|`uint96[]`|Array of fixed reward amounts for each participant|
+
+
+### transferUseCaseOwnership
+
+Transfers ownership of a use case to a new address
+
+
+```solidity
+function transferUseCaseOwnership(string calldata useCaseId, address newOwner) external;
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The ID of the use case|
+|`newOwner`|`address`|The address of the new owner|
+
+
+### useCaseExists
+
+Modifier to check if a use case exists
+
+
+```solidity
+modifier useCaseExists(string calldata useCaseId);
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The ID of the use case to check|
+
+
+### onlyUseCaseOwner
+
+Modifier to restrict function access to use case owner
+
+
+```solidity
+modifier onlyUseCaseOwner(string calldata useCaseId);
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The ID of the use case|
+
+
+### depositRewards
+
+Deposits rewards into a use case's reward pool
+
+
+```solidity
+function depositRewards(string calldata useCaseId, uint256 amount) external nonReentrant useCaseExists(useCaseId);
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The ID of the use case|
+|`amount`|`uint256`|The amount of tokens to deposit|
+
+
+### depositRewardsWithPermit
+
+Deposits rewards using EIP-2612 permit
+
+
+```solidity
+function depositRewardsWithPermit(
+    string calldata useCaseId,
+    address owner,
+    uint256 amount,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+) external nonReentrant useCaseExists(useCaseId);
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The ID of the use case|
+|`owner`|`address`|The address of the owner|
+|`amount`|`uint256`|The amount of tokens to deposit|
+|`deadline`|`uint256`|The deadline for the permit signature|
+|`v`|`uint8`|The v component of the permit signature|
+|`r`|`bytes32`|The r component of the permit signature|
+|`s`|`bytes32`|The s component of the permit signature|
+
+
+### updateRewardShares
+
+Updates reward shares for participants in a use case
+
+*Only callable by use case owner when rewards are not locked*
+
+
+```solidity
+function updateRewardShares(string calldata useCaseId, address[] calldata _participants, uint96[] calldata shares)
     external
-    onlyNotifier
-    whenNotPaused;
+    nonReentrant
+    useCaseExists(useCaseId)
+    onlyUseCaseOwner(useCaseId);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`eventName`|`string`|Name of the event that occurred|
-|`participant`|`address`|Address to receive the reward|
-|`factor`|`uint256`|Reward adjustment factor (between MIN_FACTOR and MAX_FACTOR)|
+|`useCaseId`|`string`|The ID of the use case|
+|`_participants`|`address[]`|Array of participant addresses|
+|`shares`|`uint96[]`|Array of reward shares in basis points|
 
 
-### rejectReward
+### addFixedRewards
 
-Allows owner to reject a pending reward
+Adds fixed rewards for participants
 
 
 ```solidity
-function rejectReward(address participant, uint256 rewardIndex) external onlyOwner;
+function addFixedRewards(string calldata useCaseId, address[] calldata _participants, uint96[] calldata amounts)
+    external
+    nonReentrant
+    useCaseExists(useCaseId)
+    onlyUseCaseOwner(useCaseId);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`participant`|`address`|Address whose reward is being rejected|
-|`rewardIndex`|`uint256`|Index of the reward in participant's reward array|
+|`useCaseId`|`string`|The ID of the use case|
+|`_participants`|`address[]`|Array of participant addresses|
+|`amounts`|`uint96[]`|Array of fixed reward amounts|
 
 
-### batchRejectRewards
+### lockRewards
 
-Allows owner to reject multiple rewards in one transaction
+Locks rewards for a specified period
 
 
 ```solidity
-function batchRejectRewards(address[] calldata participants, uint256[] calldata rewardIndices) external onlyOwner;
+function lockRewards(string calldata useCaseId, uint32 lockupPeriod)
+    external
+    useCaseExists(useCaseId)
+    onlyUseCaseOwner(useCaseId);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`participants`|`address[]`|Array of addresses whose rewards are being rejected|
-|`rewardIndices`|`uint256[]`|Array of reward indices corresponding to each participant|
+|`useCaseId`|`string`|The ID of the use case|
+|`lockupPeriod`|`uint32`|The duration to lock rewards for|
 
 
 ### claimRewards
 
-Allows participants to claim their unlocked rewards
+Allows participants to claim their rewards after lockup period
+
+*Implements reentrancy protection*
 
 
 ```solidity
-function claimRewards() external nonReentrant;
+function claimRewards(string calldata useCaseId) external nonReentrant useCaseExists(useCaseId);
 ```
-
-### getSupportedEvents
-
-Gets all supported events and their base rewards
-
-
-```solidity
-function getSupportedEvents() external view returns (string[] memory names, uint256[] memory rewards);
-```
-**Returns**
+**Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`names`|`string[]`|Array of event names|
-|`rewards`|`uint256[]`|Array of base rewards|
+|`useCaseId`|`string`|The ID of the use case|
 
-
-### pause
-
-Pauses the contract
-
-
-```solidity
-function pause() external onlyOwner;
-```
-
-### unpause
-
-Unpauses the contract
-
-
-```solidity
-function unpause() external onlyOwner;
-```
 
 ### emergencyWithdraw
 
-Emergency withdrawal of all tokens
+Emergency withdrawal of rewards by use case owner
+
+*Only available when rewards are not locked*
 
 
 ```solidity
-function emergencyWithdraw() external onlyOwner nonReentrant;
-```
-
-### topUpRewardPool
-
-Adds tokens to the reward pool
-
-
-```solidity
-function topUpRewardPool(uint256 amount) external onlyOwner;
+function emergencyWithdraw(string calldata useCaseId)
+    external
+    nonReentrant
+    useCaseExists(useCaseId)
+    onlyUseCaseOwner(useCaseId);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`amount`|`uint256`|Amount of tokens to add|
+|`useCaseId`|`string`|The ID of the use case|
 
 
-### withdrawUnusedRewards
+### getParticipantInfo
 
-Withdraws unused rewards
-
-
-```solidity
-function withdrawUnusedRewards() external onlyOwner withCooldown sufficientBalance(remainingRewardPool);
-```
-
-### getUseCaseId
-
-Gets the use case ID from the factory
+Retrieves information about a specific participant in a use case
 
 
 ```solidity
-function getUseCaseId() internal view returns (uint256);
-```
-**Returns**
-
-|Name|Type|Description|
-|----|----|-----------|
-|`<none>`|`uint256`|The ID of this use case|
-
-
-### getUseCaseStats
-
-Gets total stats for the use case
-
-
-```solidity
-function getUseCaseStats()
+function getParticipantInfo(string calldata useCaseId, address participant)
     external
     view
-    returns (
-        uint256 totalAllocated,
-        uint256 totalClaimed,
-        uint256 totalRejected,
-        uint256 totalPending,
-        uint256 rewardPool_,
-        uint256 remainingRewardPool_,
-        bool isActive
-    );
-```
-**Returns**
-
-|Name|Type|Description|
-|----|----|-----------|
-|`totalAllocated`|`uint256`|Total rewards allocated|
-|`totalClaimed`|`uint256`|Total rewards claimed|
-|`totalRejected`|`uint256`|Total rewards rejected|
-|`totalPending`|`uint256`|Total rewards pending|
-|`rewardPool_`|`uint256`|Initial reward pool amount|
-|`remainingRewardPool_`|`uint256`|Current remaining reward pool|
-|`isActive`|`bool`|Whether the contract is active|
-
-
-### getMultipleParticipantRewards
-
-Gets rewards for multiple participants
-
-
-```solidity
-function getMultipleParticipantRewards(address[] calldata participants)
-    external
-    view
-    returns (Reward[] memory rewards);
+    returns (Participant memory);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`participants`|`address[]`|Array of participant addresses|
+|`useCaseId`|`string`|The ID of the use case|
+|`participant`|`address`|The address of the participant|
 
 **Returns**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`rewards`|`Reward[]`|Array of Reward arrays for each participant|
+|`<none>`|`Participant`|Participant information including shares and fixed rewards|
 
 
-### getParticipantRewards
+### getUseCaseInfo
 
-Gets all rewards for a specific participant
+Retrieves complete information about a use case
 
 
 ```solidity
-function getParticipantRewards(address participant) external view returns (Reward[] memory);
+function getUseCaseInfo(string calldata useCaseId) external view returns (UseCaseInfo memory);
 ```
 **Parameters**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`participant`|`address`|Address of the participant|
+|`useCaseId`|`string`|The ID of the use case|
 
 **Returns**
 
 |Name|Type|Description|
 |----|----|-----------|
-|`<none>`|`Reward[]`|Array of Reward structs for the participant|
+|`<none>`|`UseCaseInfo`|Complete use case information including participants|
+
+
+### getMultipleUseCaseInfo
+
+Retrieves information about multiple use cases
+
+
+```solidity
+function getMultipleUseCaseInfo(string[] calldata useCaseIds) external view returns (UseCaseInfo[] memory);
+```
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseIds`|`string[]`|Array of use case IDs|
+
+**Returns**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`<none>`|`UseCaseInfo[]`|Array of use case information|
 
 
 ## Events
-### EventConfigured
-Emitted when an event type is configured
+### UseCaseCreated
+Emitted when a new use case is created
 
 
 ```solidity
-event EventConfigured(bytes32 indexed eventTypeHash, string eventName, uint256 baseReward);
+event UseCaseCreated(string id, address owner);
 ```
 
-### RewardAllocated
-Emitted when a reward is allocated
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`id`|`string`|The unique identifier of the use case|
+|`owner`|`address`|The address of the use case creator|
+
+### RewardsDeposited
+Emitted when rewards are deposited to a use case
 
 
 ```solidity
-event RewardAllocated(
-    address indexed participant, bytes32 indexed eventTypeHash, string eventName, uint256 amount, uint256 unlockTime
-);
+event RewardsDeposited(string useCaseId, uint256 amount);
 ```
 
-### RewardRejected
-Emitted when a reward is rejected
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The identifier of the use case|
+|`amount`|`uint256`|The amount of tokens deposited|
+
+### RewardSharesUpdated
+Emitted when a participant's reward shares are updated
 
 
 ```solidity
-event RewardRejected(address indexed participant, uint256 rewardIndex, uint256 amount);
+event RewardSharesUpdated(string useCaseId, address participant, uint256 shares);
 ```
 
-### RewardClaimed
-Emitted when rewards are claimed
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The identifier of the use case|
+|`participant`|`address`|The address of the participant|
+|`shares`|`uint256`|The new share amount in basis points|
+
+### FixedRewardAdded
+Emitted when a fixed reward is added for a participant
 
 
 ```solidity
-event RewardClaimed(address indexed participant, uint256 totalAmount);
+event FixedRewardAdded(string useCaseId, address participant, uint256 amount);
 ```
 
-### RewardPoolUpdated
-Emitted when reward pool balance changes
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The identifier of the use case|
+|`participant`|`address`|The address of the participant|
+|`amount`|`uint256`|The fixed reward amount|
+
+### RewardsClaimed
+Emitted when rewards are claimed by a participant
 
 
 ```solidity
-event RewardPoolUpdated(uint256 newBalance);
+event RewardsClaimed(string useCaseId, address participant, uint256 amount);
 ```
 
-### ParticipantStats
-Emitted with participant statistics
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The identifier of the use case|
+|`participant`|`address`|The address of the participant|
+|`amount`|`uint256`|The amount of tokens claimed|
+
+### RewardsLocked
+Emitted when rewards are locked for a period
 
 
 ```solidity
-event ParticipantStats(address indexed participant, uint256 totalRewarded, uint256 totalClaimed, uint256 totalRejected);
+event RewardsLocked(string useCaseId, uint256 lockupPeriod);
+```
+
+**Parameters**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`useCaseId`|`string`|The identifier of the use case|
+|`lockupPeriod`|`uint256`|The duration of the lockup in seconds|
+
+### UseCaseOwnershipTransferred
+Emitted when use case ownership is transferred
+
+
+```solidity
+event UseCaseOwnershipTransferred(string indexed useCaseId, address indexed previousOwner, address indexed newOwner);
+```
+
+### EmergencyWithdrawal
+Emitted when an emergency withdrawal occurs
+
+
+```solidity
+event EmergencyWithdrawal(string indexed useCaseId, address indexed owner, uint256 amount);
+```
+
+## Errors
+### UseCaseAlreadyExists
+
+```solidity
+error UseCaseAlreadyExists(string id);
+```
+
+### UseCaseDoesNotExist
+
+```solidity
+error UseCaseDoesNotExist(string id);
+```
+
+### ArrayLengthMismatch
+
+```solidity
+error ArrayLengthMismatch();
+```
+
+### ZeroAddress
+
+```solidity
+error ZeroAddress();
+```
+
+### ZeroAmount
+
+```solidity
+error ZeroAmount();
+```
+
+### TotalSharesExceeded
+
+```solidity
+error TotalSharesExceeded();
+```
+
+### RewardsAlreadyLocked
+
+```solidity
+error RewardsAlreadyLocked();
+```
+
+### RewardsNotLocked
+
+```solidity
+error RewardsNotLocked();
+```
+
+### InsufficientBalance
+
+```solidity
+error InsufficientBalance();
+```
+
+### InvalidLockupPeriod
+
+```solidity
+error InvalidLockupPeriod();
+```
+
+### NoRewardsToClaim
+
+```solidity
+error NoRewardsToClaim();
+```
+
+### MaxParticipantsExceeded
+
+```solidity
+error MaxParticipantsExceeded();
+```
+
+### RewardPoolOverflow
+
+```solidity
+error RewardPoolOverflow();
+```
+
+### NotUseCaseOwner
+
+```solidity
+error NotUseCaseOwner();
+```
+
+### LockupPeriodNotEnded
+
+```solidity
+error LockupPeriodNotEnded();
+```
+
+### TransferFailed
+
+```solidity
+error TransferFailed();
+```
+
+### ParticipantNotFound
+
+```solidity
+error ParticipantNotFound();
+```
+
+### EmergencyWithdrawalFailed
+
+```solidity
+error EmergencyWithdrawalFailed();
 ```
 
 ## Structs
-### EventConfig
-Configuration for each event type
+### UseCaseInfo
+Extended structure containing all use case information including participants
 
 
 ```solidity
-struct EventConfig {
-    bool isEnabled;
-    uint256 baseReward;
-    string eventName;
+struct UseCaseInfo {
+    string id;
+    address owner;
+    uint96 rewardPool;
+    uint32 lockupPeriod;
+    uint32 lockTime;
+    bool rewardsLocked;
+    uint256 totalShares;
+    Participant[] participants;
 }
 ```
 
@@ -506,23 +630,24 @@ struct EventConfig {
 
 |Name|Type|Description|
 |----|----|-----------|
-|`isEnabled`|`bool`|Whether this event type is valid for this use case|
-|`baseReward`|`uint256`|Base reward amount for this event type|
-|`eventName`|`string`|Name/description of the event|
+|`id`|`string`|Unique identifier for the use case|
+|`owner`|`address`|Address of the use case creator/owner|
+|`rewardPool`|`uint96`|Total amount of tokens allocated for rewards|
+|`lockupPeriod`|`uint32`|Duration for which rewards are locked|
+|`lockTime`|`uint32`|Timestamp when rewards were locked|
+|`rewardsLocked`|`bool`|Boolean indicating if rewards are currently locked|
+|`totalShares`|`uint256`|Sum of all participant shares|
+|`participants`|`Participant[]`|Array of all participants and their reward shares|
 
-### Reward
-Reward information for participants
+### Participant
+Structure defining a participant's reward allocation
 
 
 ```solidity
-struct Reward {
+struct Participant {
     address participant;
-    uint256 amount;
-    uint256 unlockTime;
-    bool rejected;
-    bool claimed;
-    bytes32 eventType;
-    string eventName;
+    uint96 rewardShare;
+    uint96 fixedReward;
 }
 ```
 
@@ -531,10 +656,32 @@ struct Reward {
 |Name|Type|Description|
 |----|----|-----------|
 |`participant`|`address`|Address of the participant|
-|`amount`|`uint256`|Amount of tokens to be rewarded|
-|`unlockTime`|`uint256`|Timestamp when the reward becomes claimable|
-|`rejected`|`bool`|Whether the reward was rejected by orchestrator|
-|`claimed`|`bool`|Whether the reward was claimed by participant|
-|`eventType`|`bytes32`|Hash of the event type that triggered this reward|
-|`eventName`|`string`|Name of the event for transparency|
+|`rewardShare`|`uint96`|Percentage share of rewards in basis points (100 = 1%)|
+|`fixedReward`|`uint96`|Additional fixed amount to be paid on claim|
+
+### UseCase
+Structure defining a use case's core properties
+
+
+```solidity
+struct UseCase {
+    string id;
+    address owner;
+    uint96 rewardPool;
+    uint32 lockupPeriod;
+    uint32 lockTime;
+    bool rewardsLocked;
+}
+```
+
+**Properties**
+
+|Name|Type|Description|
+|----|----|-----------|
+|`id`|`string`|Unique identifier for the use case|
+|`owner`|`address`|Address of the use case creator/owner|
+|`rewardPool`|`uint96`|Total amount of tokens allocated for rewards|
+|`lockupPeriod`|`uint32`|Duration for which rewards are locked|
+|`lockTime`|`uint32`|Timestamp when rewards were locked|
+|`rewardsLocked`|`bool`|Boolean indicating if rewards are currently locked|
 

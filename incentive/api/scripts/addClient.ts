@@ -1,6 +1,5 @@
 import { KeyManagementService } from "../src/services/KeyManagementService";
 import { FileKeyStorage } from "../src/storage/FileKeyStorage";
-import { IncentivePermission } from "../src/types/types";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -27,7 +26,7 @@ async function main() {
       process.exit(1);
     }
 
-    const permissions = [IncentivePermission.DISTRIBUTE];
+    const permissions = ["distribute"];
     const { privateKey, publicKey } = await keyManager.generateKeyPair(
       clientId,
       permissions

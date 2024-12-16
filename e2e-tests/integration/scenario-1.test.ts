@@ -1,47 +1,55 @@
 import { describe, it, before, after } from "mocha";
 import { expect } from "chai";
 import { ethers } from "ethers";
-import axios from "axios";
 import { setupTestEnvironment, TestEnvironment } from "./setup";
-import { UseCaseContract } from "../../incentive/blockchain/typechain-types";
-import UseCaseContractArtifact from "../../incentive/blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
 import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner";
-import { KeyManagementService } from "../../incentive/api/src/services/KeyManagementService";
-import { FileKeyStorage } from "../../incentive/api/src/storage/FileKeyStorage";
-import { IncentivePermission } from "../../incentive/api/src/types/types";
+import { waitForTx } from "../helpers/helpers";
+import axios from "axios";
 
-describe("Scenario 1: Full cycle from use case creation to reward claim", function () {
-  this.timeout(30000); // Set timeout to 30 seconds
+describe("Scenario 1: Educational Data Provider and AI Service Provider", function () {
+  this.timeout(60000); // Set timeout to 60 seconds
 
   let env: TestEnvironment;
   let provider: ethers.JsonRpcProvider;
-  let orchestrator: ethers.Wallet;
-  let participant: ethers.Wallet;
-  let keyManagement: KeyManagementService;
-  let apiClientId: string = "test-client";
-  let apiPrivateKey: string;
-  let apiPublicKey: string;
+  let dataProvider: ethers.Wallet; // Educational institution
+  let aiProvider: ethers.Wallet; // AI service company
+  let rewardDepositor: ethers.Wallet; // User providing rewards
+  let incentiveSigner: IncentiveSigner;
+
+  const LOCK_DURATION = 24 * 60 * 60; // 1 day lock
+  const REWARD_POOL = ethers.parseEther("1000"); // 1000 PTX tokens
+  const DATA_PROVIDER_SHARE = 6000; // 60%
+  const AI_PROVIDER_SHARE = 4000; // 40%
+  const USE_CASE_ID = "educational-data-sharing-1";
 
   before(async () => {
+    // Setup provider and wallets
     provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-    orchestrator = new ethers.Wallet(
+    dataProvider = new ethers.Wallet(
       "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
       provider
     );
-    participant = new ethers.Wallet(
+    aiProvider = new ethers.Wallet(
       "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
+      provider
+    );
+    rewardDepositor = new ethers.Wallet(
+      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
       provider
     );
     env = await setupTestEnvironment();
 
-    // Setup key management and register client
-    keyManagement = new KeyManagementService(new FileKeyStorage());
-    const { privateKey, publicKey } = await keyManagement.generateKeyPair(
-      apiClientId,
-      [IncentivePermission.DISTRIBUTE]
+    // Initialize IncentiveSigner
+    incentiveSigner = new IncentiveSigner(
+      rewardDepositor.privateKey,
+      await env.token.getAddress(),
+      provider
     );
-    apiPrivateKey = privateKey;
-    apiPublicKey = publicKey;
+
+    // Transfer initial tokens to reward depositor
+    await waitForTx(
+      env.token.transfer(rewardDepositor.address, ethers.parseEther("2000"))
+    );
   });
 
   after(async () => {
@@ -50,76 +58,96 @@ describe("Scenario 1: Full cycle from use case creation to reward claim", functi
     }
   });
 
-  it("should complete full cycle from use case creation to reward claim", async () => {
-    // 1. Create use case through blockchain
-    const eventNames = ["data_provider"];
-    const baseRewards = [ethers.parseEther("100")];
-    const rewardPool = ethers.parseEther("1000");
-
-    // Transfer and approve tokens for orchestrator with wait
-    const transferTx = await env.token.transfer(
-      orchestrator.address,
-      ethers.parseEther("2000")
-    );
-    await transferTx.wait();
-
-    const approveTx = await env.token
-      .connect(orchestrator)
-      .approve(env.contracts.factoryAddress, rewardPool);
-    await approveTx.wait();
-
-    // Create use case with wait
-    const tx = await env.factory.connect(orchestrator).createUseCase(
-      24 * 60 * 60, // 1 day lock
-      eventNames,
-      baseRewards,
-      rewardPool
-    );
-    const receipt = await tx.wait();
-
-    // Get use case ID from event
-    const event = receipt?.logs.find(
-      (log) =>
-        env.factory.interface.parseLog(log as any)?.name === "UseCaseCreated"
-    );
-    const useCaseId = env.factory.interface.parseLog(event as any)?.args[0];
-
-    // Create signer with registered client
-    const signer = new IncentiveSigner(apiPrivateKey, apiClientId);
-
-    // Create signed request
-    const signedRequest = signer.createSignedRequest(
-      useCaseId.toString(),
-      participant.address,
-      baseRewards[0].toString(),
-      "data_provider",
-      "0.8"
+  it("should complete full cycle of educational data sharing scenario", async () => {
+    // 1. Data Provider creates the use case
+    await waitForTx(
+      env.useCase.connect(dataProvider).createUseCase(USE_CASE_ID)
     );
 
+    // 2. Set up participant shares
+    const participants = [dataProvider.address, aiProvider.address];
+    const shares = [DATA_PROVIDER_SHARE, AI_PROVIDER_SHARE];
+    await waitForTx(
+      env.useCase
+        .connect(dataProvider)
+        .updateRewardShares(USE_CASE_ID, participants, shares)
+    );
+
+    console.log(
+      "Shares set:",
+      await env.useCase.totalRewardShares(USE_CASE_ID)
+    );
+    console.log(
+      "AI Provider share:",
+      (await env.useCase.getParticipantInfo(USE_CASE_ID, aiProvider.address))
+        .rewardShare
+    );
+    console.log(
+      "AI Provider share:",
+      (await env.useCase.getParticipantInfo(USE_CASE_ID, aiProvider.address))
+        .fixedReward
+    );
+
+    // 3. Create signed request for reward distribution using IncentiveSigner
+    const signedRequest = await incentiveSigner.createUseCaseDepositRequest(
+      USE_CASE_ID,
+      env.contracts.useCaseAddress,
+      ethers.formatEther(REWARD_POOL)
+    );
+
+    // 4. Send request to incentive API and wait for transaction
     const response = await axios.post(
       `${env.apiUrl}/api/incentives/distribute`,
       signedRequest
     );
-
     expect(response.status).to.equal(200);
 
-    // 3. Wait for lock duration and claim rewards
-    await provider.send("evm_increaseTime", [25 * 60 * 60]); // 25 hours
+    // Wait for the API transaction to be mined
+    await provider.waitForTransaction(
+      (response.data as { data: { transactionHash: string } }).data
+        .transactionHash
+    );
+
+    const { totalRewardPool, remainingRewardPool } =
+      await env.useCase.useCases(USE_CASE_ID);
+    console.log("Total reward pool:", totalRewardPool);
+    console.log("Remaining reward pool:", remainingRewardPool);
+
+    // 5. Data Provider locks the rewards
+    await waitForTx(
+      env.useCase.connect(dataProvider).lockRewards(USE_CASE_ID, LOCK_DURATION)
+    );
+
+    // 6. Wait for lock duration to pass
+    await provider.send("evm_increaseTime", [LOCK_DURATION + 1]);
     await provider.send("evm_mine", []);
 
-    const useCaseAddress = await env.factory.useCaseContracts(useCaseId);
-    const UseCaseContract = new ethers.ContractFactory(
-      UseCaseContractArtifact.abi,
-      UseCaseContractArtifact.bytecode,
-      participant
+    // 7. Both providers claim their rewards
+    await waitForTx(
+      env.useCase.connect(dataProvider).claimRewards(USE_CASE_ID)
     );
-    const useCase = UseCaseContract.attach(useCaseAddress) as UseCaseContract;
 
-    await useCase.connect(participant).claimRewards();
+    await waitForTx(env.useCase.connect(aiProvider).claimRewards(USE_CASE_ID));
 
-    // 4. Verify participant received tokens
-    const balance = await env.token.balanceOf(participant.address);
-    const expectedReward = (baseRewards[0] * 8n) / 10n; // 80% of base reward
-    expect(balance).to.equal(expectedReward);
+    console.log(
+      "Final AI balance:",
+      await env.token.balanceOf(aiProvider.address)
+    );
+    console.log(
+      "Final Data Provider balance:",
+      await env.token.balanceOf(dataProvider.address)
+    );
+
+    // 8. Verify final balances
+    const dataProviderBalance = await env.token.balanceOf(dataProvider.address);
+    const aiProviderBalance = await env.token.balanceOf(aiProvider.address);
+
+    const expectedDataProviderReward =
+      (REWARD_POOL * BigInt(DATA_PROVIDER_SHARE)) / 10000n;
+    const expectedAiProviderReward =
+      (REWARD_POOL * BigInt(AI_PROVIDER_SHARE)) / 10000n;
+
+    expect(dataProviderBalance).to.equal(expectedDataProviderReward);
+    expect(aiProviderBalance).to.equal(expectedAiProviderReward);
   });
 });

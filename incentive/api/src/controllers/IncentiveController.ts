@@ -1,19 +1,16 @@
+import { IncentiveService } from "@/services/IncentiveService";
+import { IncentiveRequest } from "@/types/types";
 import { Request, Response } from "express";
-import { IncentiveService } from "../services/IncentiveService";
-import { IncentiveRequest } from "../types/types";
 
 export class IncentiveController {
   constructor(private incentiveService: IncentiveService) {}
 
-  /**
-   * Handles incentive distribution requests by notifying events to the use case contract
-   */
   public distributeIncentive = async (
     req: Request,
     res: Response
   ): Promise<void> => {
     try {
-      const request: IncentiveRequest = req.body;
+      const request = req.body as IncentiveRequest;
 
       // Basic request validation
       if (!this.validateRequestBody(request)) {
@@ -25,22 +22,38 @@ export class IncentiveController {
         return;
       }
 
-      // Process the event notification
-      const txHash = await this.incentiveService.distributeIncentive(request);
+      let txHash: string;
+
+      // Determine which type of request it is and call appropriate service method
+      if ("useCaseId" in request) {
+        // This is a UseCase deposit request
+        if (request.permit) {
+          txHash =
+            await this.incentiveService.depositRewardsWithPermit(request);
+        } else {
+          txHash = await this.incentiveService.depositRewards(request);
+        }
+      } else if ("incentiveType" in request) {
+        // This is a token reward request
+        if (request.permit) {
+          txHash =
+            await this.incentiveService.transferRewardWithPermit(request);
+        } else {
+          txHash = await this.incentiveService.transferReward(request);
+        }
+      } else {
+        throw new Error("Invalid request type");
+      }
 
       res.status(200).json({
         success: true,
         data: {
           transactionHash: txHash,
-          useCaseId: request.useCaseId,
-          eventName: request.eventName,
-          recipient: request.recipient,
-          factor: request.factor,
+          ...request,
         },
       });
     } catch (error) {
       console.error("Incentive distribution error:", error);
-
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       const statusCode = this.getErrorStatusCode(errorMessage);
@@ -52,32 +65,28 @@ export class IncentiveController {
     }
   };
 
-  private validateRequestBody(request: any): request is IncentiveRequest {
-    return (
-      request &&
-      typeof request.clientId === "string" &&
-      typeof request.useCaseId === "string" &&
-      typeof request.recipient === "string" &&
-      typeof request.eventName === "string" &&
-      typeof request.factor === "string" &&
-      typeof request.nonce === "number" &&
-      typeof request.timestamp === "number" &&
-      typeof request.signature === "string" &&
-      // Additional validation for factor format
-      !isNaN(parseFloat(request.factor)) &&
-      parseFloat(request.factor) >= 0 &&
-      parseFloat(request.factor) <= 1
-    );
+  private validateRequestBody(request: IncentiveRequest): boolean {
+    // Common validations
+    if (!request.from || !request.to || !request.amount) {
+      return false;
+    }
+
+    // Specific validations based on request type
+    if ("useCaseId" in request) {
+      return !!request.useCaseId;
+    }
+
+    if ("incentiveType" in request) {
+      return !!request.incentiveType;
+    }
+
+    return false;
   }
 
   private getErrorStatusCode(error: string): number {
-    if (error.includes("Invalid signature")) return 401;
-    if (error.includes("does not have permission")) return 403;
     if (error.includes("Invalid request")) return 400;
-    if (error.includes("Request has expired")) return 400;
-    if (error.includes("Invalid use case ID")) return 404;
-    if (error.includes("Invalid factor")) return 400;
-    if (error.includes("Invalid recipient address")) return 400;
+    if (error.includes("Not authorized")) return 403;
+    if (error.includes("Not found")) return 404;
     return 500;
   }
 }

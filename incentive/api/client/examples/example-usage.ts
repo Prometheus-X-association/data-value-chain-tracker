@@ -1,19 +1,43 @@
+import { ethers } from "ethers";
 import { IncentiveSigner } from "../lib/IncentiveSigner";
 
-// Initialize signer with private key received from API
-const signer = new IncentiveSigner("YOUR_PRIVATE_KEY", "YOUR_CLIENT_ID");
+// Setup provider (example using local hardhat node)
+const provider = new ethers.JsonRpcProvider("http://localhost:8545");
 
-// Create signed request
-const request = signer.createSignedRequest(
-  "0x123...", // recipient address
-  "1.5", // amount
-  "data_provider", // event name
-  "0.8" // performance factor
+// Initialize signer with required parameters
+const signer = new IncentiveSigner(
+  "YOUR_PRIVATE_KEY",
+  "PTX_TOKEN_ADDRESS",
+  provider
 );
 
-// Send to API
-const response = await fetch("https://api.example.com/distribute", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(request),
-});
+async function examples() {
+  // Example 1: Create a use case deposit request
+  const useCaseRequest = await signer.createUseCaseDepositRequest(
+    "use-case-123", // use case ID
+    "USE_CASE_CONTRACT_ADDRESS", // use case contract address
+    "100.0" // amount in tokens
+  );
+
+  // Example 2: Create a direct token reward request
+  const tokenRequest = await signer.createTokenRewardRequest(
+    "RECIPIENT_ADDRESS", // recipient address
+    "50.0", // amount in tokens
+    "data_provider" // incentive type
+  );
+
+  // Example API calls
+  const response1 = await fetch("API_URL/distribute", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(useCaseRequest),
+  });
+
+  const response2 = await fetch("API_URL/distribute", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(tokenRequest),
+  });
+}
+
+examples().catch(console.error);

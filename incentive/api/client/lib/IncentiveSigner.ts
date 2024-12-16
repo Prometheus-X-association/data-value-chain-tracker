@@ -1,58 +1,121 @@
-import { IncentivePayload, IncentiveRequest } from "api/src/types/types";
-import crypto from "crypto";
+import { ethers } from "ethers";
+import { Permit } from "../../src/types/types";
 
 export class IncentiveSigner {
-  private privateKey: string;
-  private clientId: string;
-  private nonce: number;
+  private wallet: ethers.Wallet;
 
-  constructor(privateKey: string, clientId: string) {
-    this.privateKey = privateKey;
-    this.clientId = clientId;
-    this.nonce = 0;
+  constructor(
+    privateKey: string,
+    private tokenAddress: string,
+    provider: ethers.Provider
+  ) {
+    this.wallet = new ethers.Wallet(privateKey, provider);
   }
 
   /**
-   * Creates a signed incentive request
+   * Creates a signed permit for token approval
    */
-  createSignedRequest(
-    useCaseId: string,
-    recipient: string,
-    amount: string,
-    eventName: string,
-    factor: string
-  ): IncentiveRequest {
-    const payload: IncentivePayload = {
-      useCaseId,
-      recipient,
-      amount,
-      eventName,
-      factor,
-      nonce: this.nonce++,
-      timestamp: Date.now(),
-      clientId: this.clientId,
-    };
+  private async createPermit(
+    spender: string,
+    value: string,
+    deadline?: number
+  ): Promise<Permit> {
+    const owner = this.wallet.address;
+    const token = new ethers.Contract(
+      this.tokenAddress,
+      [
+        "function nonces(address) view returns (uint256)",
+        "function DOMAIN_SEPARATOR() view returns (bytes32)",
+      ],
+      this.wallet.provider!
+    );
 
-    const signature = this.sign(payload);
+    const currentBlockTimestamp = (await this.wallet.provider!.getBlock(
+      "latest"
+    ))!.timestamp;
+
+    const actualDeadline = deadline || currentBlockTimestamp + 7200;
+
+    const nonce = await token.nonces(owner);
+
+    const signature = await this.wallet.signTypedData(
+      // Domain
+      {
+        name: "PTXToken",
+        version: "1",
+        chainId: (await this.wallet.provider!.getNetwork()).chainId,
+        verifyingContract: this.tokenAddress,
+      },
+      // Types
+      {
+        Permit: [
+          { name: "owner", type: "address" },
+          { name: "spender", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+          { name: "deadline", type: "uint256" },
+        ],
+      },
+      // Value
+      {
+        owner,
+        spender,
+        value: ethers.parseUnits(value, 18),
+        nonce,
+        deadline: actualDeadline,
+      }
+    );
+
+    const { v, r, s } = ethers.Signature.from(signature);
 
     return {
-      ...payload,
-      signature,
+      owner,
+      spender,
+      amount: ethers.parseUnits(value, 18).toString(),
+      deadline: actualDeadline,
+      v,
+      r,
+      s,
     };
   }
 
-  private sign(payload: IncentivePayload): string {
-    // Create deterministic string representation
-    const message = this.createMessage(payload);
+  /**
+   * Creates a deposit request for use case rewards
+   */
+  async createUseCaseDepositRequest(
+    useCaseId: string,
+    useCaseAddress: string,
+    amount: string,
+    deadline?: number
+  ) {
+    const permit = await this.createPermit(useCaseAddress, amount, deadline);
 
-    // Sign the message
-    const signer = crypto.createSign("SHA256");
-    signer.update(message);
-    return signer.sign(this.privateKey, "base64");
+    return {
+      useCaseId,
+      from: this.wallet.address,
+      to: useCaseAddress,
+      amount,
+      permit,
+    };
   }
 
-  private createMessage(payload: IncentivePayload): string {
-    // Create deterministic string by sorting keys
-    return JSON.stringify(payload, Object.keys(payload).sort());
+  /**
+   * Creates a direct token reward request
+   */
+  async createTokenRewardRequest(
+    to: string,
+    amount: string,
+    incentiveType: string,
+    deadline?: number
+  ) {
+    const permit = await this.createPermit(to, amount, deadline);
+
+    return {
+      from: this.wallet.address,
+      to,
+      amount,
+      incentiveType,
+      permit,
+    };
   }
 }

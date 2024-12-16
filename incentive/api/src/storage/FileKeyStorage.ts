@@ -1,5 +1,5 @@
+import { KeyPair } from "@/types/types";
 import { IKeyStorage } from "../interfaces/IKeyStorage";
-import { KeyPair } from "../types/types";
 import fs from "fs/promises";
 import path from "path";
 
