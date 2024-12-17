@@ -341,7 +341,7 @@ In order to make the BB function, the integration with other BB is expected:
 
 ### Integrations via Connector
 
-- DVCT will need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain.
+- In line with the hybrid approach of the PTX dataspace connector, DVCT will need to be integrated directly into the **Connector** to extend the data exchange flows and perform the smart contract process to update the DVCT containing the value chain. In line with the hybrid approach of the PTX dataspace connector, DVCT needs to be directly integrated into the connector to extend the data exchange streams and to execute the smart contract process for updating the DVCT with the value chain. To trigger DVCT, a URI to the DVCT need to be included in the configuration of the connector.
   Where applicable the **Connector** will ping DVCT for token distribution before making data accessible.
 
 ## Relevant Standards
