@@ -337,9 +337,7 @@ In order to make the BB function, the integration with other BB is expected:
 - _Data veracity assurance._\
   The data veracity BB will focus on the data quality. Even though the DVCT
   will not access the data that is being shared between participants, it will
-  work with metadata. It might be relevant to assess the quality of the
-  metadata itself by some common criteria like completeness, data anonymity, timeliness etc.
-  We should also consider the possibility of automating this process if this
+  work with metadata. It might be relevant to assess the quality of the data based on the information contained in the metadata itself, according to some agreed criteria set in the metadata being checked, such as completeness, data anonymity, timeliness, etc. We should also consider the possibility of automating this process if this
   falls within the scope of this BB.
 
 ### Integrations via Connector
