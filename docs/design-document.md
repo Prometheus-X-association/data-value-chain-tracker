@@ -326,7 +326,7 @@ In order to make the BB function, the integration with other BB is expected:
 ### Direct Integrations with Other BBs
 
 - _Catalog._\
-  The DVCT requires input fields in the catalog so that providers can enter the number of points they offer/expect for their data/services. These input fields are additional information to the price defined in the catalog and in the contract.
+  The DVCT requires input fields in the catalog for providers to specify the number of points they offer or expect for their data or services, similar to how price input fields are used to define monetary values in the catalog and contract.
 
 - _Contract._\
   The DVCT needs to get data from the contract about the contract identifier, the data used/transferred and the share of the distribution of digital incentives. The information forms the basis for the distribution of digital incentives after the data usage process.
@@ -337,8 +337,7 @@ In order to make the BB function, the integration with other BB is expected:
 - _Data veracity assurance._\
   The data veracity BB will focus on the data quality. Even though the DVCT
   will not access the data that is being shared between participants, it will
-  work with metadata. It might be relevant to assess the quality of the data based on the information contained in the metadata itself, according to some agreed criteria set in the metadata being checked, such as completeness, data anonymity, timeliness, etc. We should also consider the possibility of automating this process if this
-  falls within the scope of this BB.
+  work with metadata. It might be relevant to assess the quality of the data based on the information contained in the metadata itself, according to some agreed criteria set in the metadata being checked, such as completeness, data anonymity, timeliness, etc. We should also consider the possibility of automating this process if this falls within the scope of this BB.
 
 ### Integrations via Connector
 
