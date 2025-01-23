@@ -1,6 +1,6 @@
 {
   "name": "dvct",
-  "type": "commonjs",
+  "type": "module",
   "version": "1.0.0",
   "description": "Data value chain tracker with incentive distribution through blockchain",
   "scripts": {
@@ -38,5 +38,8 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "express": "^5.0.0"
+  }
 }
