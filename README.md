@@ -206,6 +206,16 @@ Run `yarn deps` to install all dependencies. Or `npm run deps-npm` if you are us
 - `test:blockchain:forge` (unit tests that tests the smart contracts)
 - `test:incentive:api` (unit tests for the incentive api)
 
+### Unit testing
+#### Setup test environment
+#### Run tests
+#### Expected results
+
+### Component-level testing
+#### Setup test environment
+#### Run tests
+#### Expected results
+
 ## Makefile Commands
 
 The following commands can be used to manage the services defined in `docker-compose.yml`.
