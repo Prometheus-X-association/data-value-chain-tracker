@@ -7,26 +7,25 @@ import { waitForTx } from "../helpers/helpers";
 import axios from "axios";
 import * as fs from "fs";
 
-describe("Generic Scenario", function(){
-    this.timeout(60000);
-
     const configFilePath = process.env.CONFIG_FILE;
     var configData: any = null;
     if (configFilePath) {
       // Read the content of the JSON file
       configData = JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
-      console.log(configData); // Now you can use the config data in your tests
     } else {
       console.error("Config file path is not set.");
       process.exit(1); // Exit the process with an error code if config file is not found
     }
 
+describe(configData.useCaseName, function(){
+    this.timeout(60000);
     let env: TestEnvironment;
     let provider: ethers.JsonRpcProvider;
     let rewardDepositor: ethers.Wallet;
     let incentiveSigner: IncentiveSigner;
     const agents: { [key: string]: ethers.Wallet } = {};
     let agentShares: number[]= [];
+    let isOrchestrator: boolean = false;
 
     const LOCK_DURATION = 24 * 60 * 60; // 1 day lock
     const REWARD_POOL = ethers.parseEther("100");
@@ -37,6 +36,9 @@ describe("Generic Scenario", function(){
 
     provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
 
+    const wallet = ethers.Wallet.createRandom();
+    console.log(wallet);
+
     configData?.participantShare.map((data: any) =>{
         agents[data.role] = new ethers.Wallet(
             data.participantWallet,
@@ -45,6 +47,9 @@ describe("Generic Scenario", function(){
 
         if(data.rewardDepositor){
             rewardDepositor = agents[data.role];
+            if(data.role === "Orchestrator"){
+                isOrchestrator = true;
+            }
         }
 
         agentShares.push(data.numOfShare);
@@ -52,45 +57,47 @@ describe("Generic Scenario", function(){
 
     const agentAddresses = Object.values(agents).map((wallet: ethers.Wallet) => wallet.address);
 
-    console.log(agentAddresses);
-
-    before(async () =>{
-        provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-
-        
-        env = await setupTestEnvironment();
-
-        // Initialize IncentiveSigner with orchestrator as reward depositor
-        incentiveSigner = new IncentiveSigner(
-            rewardDepositor.privateKey,
-            await env.token.getAddress(),
-            provider
-        );
-
-        await waitForTx(
-            env.token.transfer(rewardDepositor.address, ethers.parseEther("2000"))
-        );
-
-        // Store initial balance
-        orchestratorInitialBalance = await env.token.balanceOf(
-            agents["Orchestrator"].address
-        );
-
-        // Store deposit amount for later calculations
-        orchestratorDepositAmount = REWARD_POOL;
+    before(async () => {
+        console.log("before() started");
+        try {
+            env = await setupTestEnvironment();
+    
+            // Initialize IncentiveSigner with orchestrator as reward depositor
+            incentiveSigner = new IncentiveSigner(
+                rewardDepositor.privateKey,
+                await env.token.getAddress(),
+                provider
+            );
+    
+            await waitForTx(
+                env.token.transfer(rewardDepositor.address, ethers.parseEther("2000"))
+            );
+    
+            if (agents["Orchestrator"]) {
+                orchestratorInitialBalance = await env.token.balanceOf(
+                    agents["Orchestrator"].address
+                );
+                orchestratorDepositAmount = REWARD_POOL;
+            }
+        } catch (err) {
+            console.error("Error in before hook:", err);
+            throw err;
+        }
     });
+    
 
     after(async () => {
+        console.log("after() started");
         if (env?.apiServer) {
           await env.apiServer.close();
         }
     });
 
-    it("should complete full cycle of corporate training scenario with multiple providers", async () => {
+    it("should complete full cycle of" + configData.useCaseName, async function(){
         const participants = agentAddresses;
         const shares = agentShares;
         
-        if(rewardDepositor){
+        if(rewardDepositor && isOrchestrator){
             await waitForTx(
                 env.useCase.connect(rewardDepositor).createUseCase(USE_CASE_ID)
             );
@@ -109,7 +116,8 @@ describe("Generic Scenario", function(){
                   .updateRewardShares(USE_CASE_ID, participants, shares)
               );
         }
-
+        
+    
         console.log(
             "Shares set:",
             await env.useCase.totalRewardShares(USE_CASE_ID)
@@ -157,7 +165,7 @@ describe("Generic Scenario", function(){
         console.log("Total reward pool:", totalRewardPool);
         console.log("Remaining reward pool:", remainingRewardPool);
 
-        if(rewardDepositor){
+        if(rewardDepositor && isOrchestrator){
             await waitForTx(env.useCase.connect(rewardDepositor).lockRewards(USE_CASE_ID, LOCK_DURATION))
         }else{
             // 5. Data Provider locks the rewards
@@ -169,12 +177,14 @@ describe("Generic Scenario", function(){
         await provider.send("evm_increaseTime", [LOCK_DURATION + 1]);
         await provider.send("evm_mine", []);
 
-
+       
         for(const obj in agents){
-            await waitForTx(
-                env.useCase.connect(agents[obj as keyof typeof agents]).claimRewards(USE_CASE_ID)
-            );
-            await provider.send("evm_mine", []);
+            if(obj !== 'RewardDepositor'){
+                await waitForTx(
+                    env.useCase.connect(agents[obj as keyof typeof agents]).claimRewards(USE_CASE_ID)
+                );
+                await provider.send("evm_mine", []);
+            }
         }
 
         type AgentMap = {
@@ -186,20 +196,23 @@ describe("Generic Scenario", function(){
         var iterator = 0;
 
         for(const obj in agents){
-            let role: string = obj
-            agentBalances[role] = await env.token.balanceOf(agents[obj as keyof typeof agents].address);
-            expectedRewards[role] = (REWARD_POOL * BigInt(shares[iterator])) / 10000n;
-            iterator = iterator + 1;
+            if(obj !== 'RewardDepositor'){
+                let role: string = obj
+                agentBalances[role] = await env.token.balanceOf(agents[obj as keyof typeof agents].address);
+                expectedRewards[role] = (REWARD_POOL * BigInt(shares[iterator])) / 10000n;
+                iterator = iterator + 1;
+            }
         }
+
+        if(rewardDepositor && isOrchestrator){
+            agentBalances["Orchestrator"] = agentBalances["Orchestrator"] - (orchestratorInitialBalance - orchestratorDepositAmount);
+        }
+
+        console.log(agentBalances);
 
         for(const obj in agents){
             expect(agentBalances[obj]).to.equal(expectedRewards[obj]);
         }
-
-
     })
-
-
-
 
 })

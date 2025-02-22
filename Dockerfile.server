@@ -1,0 +1,21 @@
+FROM node:20.18.0-bullseye
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y curl bash git
+
+WORKDIR /engine-server
+
+COPY . .
+
+RUN npm install
+
+# Install Foundry
+RUN curl -L https://foundry.paradigm.xyz | bash
+RUN /root/.foundry/bin/foundryup
+
+# Add Foundry to PATH
+ENV PATH="/root/.foundry/bin:$PATH"
+
+EXPOSE 9091
+
+CMD ["node", "./core-engine.js"]
