@@ -5,17 +5,23 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "test": "jest",
     "debug": "node --inspect src/server.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.20.0",
     "jsonld": "^8.3.2",
-    "mongoose": "^5.12.3",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6",
-    "winston": "^3.14.2"
+    "winston": "^3.17.0"
   },
   "author": "PTX-DVCT",
-  "license": "CC0-1.0"
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "@shelf/jest-mongodb": "^4.3.2",
+    "mongodb-memory-server": "^10.1.4",
+    "mongoose": "^8.10.1"
+  }
 }

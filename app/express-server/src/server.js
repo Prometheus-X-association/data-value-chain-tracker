@@ -8,6 +8,9 @@ const dataRoutes = require('./routes/dataRoutes');
 const app = express();
 const port = 9081;
 
+const cors = require('cors');
+app.use(cors());
+
 // Connect to MongoDB
 connectWithRetry();
 
@@ -31,3 +34,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+module.exports = app;

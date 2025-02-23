@@ -8,8 +8,8 @@ const connectWithRetry = () => {
   mongoose
     .connect(MONGODB_URI, {
       useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
+      useUnifiedTopology: true
+      //useFindAndModify: false,
     })
     .then(() => {
       console.log("MongoDB is connected");
