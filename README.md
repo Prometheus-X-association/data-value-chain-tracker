@@ -207,14 +207,102 @@ Run `yarn deps` to install all dependencies. Or `npm run deps-npm` if you are us
 - `test:incentive:api` (unit tests for the incentive api)
 
 ### Unit testing
+LOCATION: app/express-server/src/tests/api.test.js
+
 #### Setup test environment
+- cd app/express-server
+- run "npm install"
+- open new terminal under root (data-value-chain-tracker) and run "docker compose start mongodb"
+  
 #### Run tests
+ - in app/express-server run "npm test"
+   
 #### Expected results
+<img width="480" alt="image" src="https://github.com/user-attachments/assets/c6a17711-ce2c-4886-b275-e6708c56cec6" />
+
 
 ### Component-level testing
+REFERENCE: "incenti-trace" defined in the docker-compose.yml of project root (data-value-chain-tracker)
 #### Setup test environment
+- run "yarn deps-npm", if fails modify "@types/chai" version to 4.2.0 and "hardhat-gas-reporter"  to 1.0.8
+- run "pretest-integration" 
+- run "docker compose up --build  core-frontend core-api mongodb incenti-trace"
 #### Run tests
+- call POST http://localhost:3004/run-script
+- PAYLOAD fixed for traceibility property, but flexible towards the number of participants taking part in the use-case:
+  {
+  "traceibility":
+	  {
+		  "dvctId": "string",
+		  "usecaseContractId": "string",
+		  "usecaseContractTitle": "string",
+		  "extraIncentiveForAIProvider": {
+			  "numPoints": 0,
+			  "factor": 0,
+			  "factorCheck": true
+		  },
+		  "contractId": "string",
+		  "dataId": "string",
+		  "dataProviderId": "2134",
+		  "dataConsumerId": "2135",
+		  "dataConsumerIsAIProvider": true,
+		  "prevDataId": [""],
+		  "incentiveForDataProvider": {
+			  "numPoints": 0,
+			  "factor": 0,
+		  "factorCheck": true
+	  }
+  },
+  "reachEndFlow": true,
+  "providerUrl": "http://localhost:8543",
+  "useCaseID":"13532",
+  "useCaseName": "corporate-training-multi-provider",
+  "data-id": "iqwe80123oiu",
+  "data-Quality-Check": "yes",
+  "participantShare":[{
+        "partipicantName":"Organization A",
+        "rewardDepositor": "false",
+        "role":"Data-Provider", 
+        "participantID": "2134",
+        "participantWallet": "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+        "numOfShare": 3000
+      },
+      {
+        "partipicantName":"Organization B",
+        "rewardDepositor": "false",
+        "role":"AI-Provider-1",
+        "participantID": "2135",
+        "participantWallet": "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
+        "numOfShare": 2000
+     },
+    {
+      "partipicantName":"Organization C",
+      "rewardDepositor": "false",
+      "role":"AI-Provider-2",
+      "participantID": "2135",
+      "participantWallet": "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
+      "numOfShare": 2000
+    },
+    {
+      "partipicantName":"Organization D",
+      "rewardDepositor": "false",
+      "role":"Service-Provider",
+      "participantID": "2135",
+      "participantWallet": "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
+      "numOfShare": 1500
+    },
+    {
+      "partipicantName":"Organization E",
+      "rewardDepositor": "true",
+      "role":"Orchestrator",
+      "participantID": "Orchestrator",
+      "participantWallet": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+      "numOfShare": 1500
+    }]
+}
 #### Expected results
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/c1e421fe-7c70-4cf3-b18d-e261de80e047" />
+
 
 ## Makefile Commands
 
