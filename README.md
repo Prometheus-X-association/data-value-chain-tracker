@@ -301,6 +301,8 @@ REFERENCE: "incenti-trace" defined in the docker-compose.yml of project root (da
     }]
 }
 #### Expected results
+<img width="571" alt="image" src="https://github.com/user-attachments/assets/c2ffa528-ae50-4b13-b103-2f51adbffcb1" />
+
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/c1e421fe-7c70-4cf3-b18d-e261de80e047" />
 
 
