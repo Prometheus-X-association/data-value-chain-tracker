@@ -7,10 +7,10 @@ See the design document [here](docs/design-document.md).
 # Building instructions
 DVCT requires to build&start services like: core-api, core-frontend, incenti-trace alongside mongodb
 
-RUN `docker compose build core-api core-frontend incenti-trace
+RUN **docker compose build core-api core-frontend incenti-trace**
 
 ## Running instructions
-RUN `docker compose up -d core-api core-frontend incenti-trace mongodb
+RUN **docker compose up -d core-api core-frontend incenti-trace mongodb**
 
 ## Example usage
 For more detailed information, please check the [swagger](http://localhost:3001/api-docs/) (be sure that services are running)
