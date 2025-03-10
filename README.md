@@ -13,6 +13,7 @@ RUN docker compose build core-api core-frontend incenti-trace
 RUN docker compose up -d core-api core-frontend incenti-trace mongodb
 
 ## Example usage
+For more detailed information, please check the [swagger](http://localhost:3001/api-docs/) (be sure that services are running)
 
 | Endpoint                | HTTP Method | Params                        | Request Payload                                                                                                            | Result   |
 |-------------------------|-------------|-------------------------------|----------------------------------------------------------------------------------------------------------------------------|----------|
