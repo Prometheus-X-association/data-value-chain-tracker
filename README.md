@@ -13,7 +13,7 @@ RUN **docker compose build core-api core-frontend incenti-trace**
 RUN **docker compose up -d core-api core-frontend incenti-trace mongodb**
 - **core-frontend**: provides the data visualisation of nodes (listens on port 3000)
 - **core-api**: serves the endpoints or backend resources
-- **incenti-trace**:  constructs the traceability and incentive-mechanism by exposing an endpoint which can be called by a third party
+- **incenti-trace**:  constructs the traceability and incentive-mechanism by exposing an endpoint (POST /run-script) which can be called by a third party
 - **mongodb**: database where information is kept and saved
 
 ## Example usage
