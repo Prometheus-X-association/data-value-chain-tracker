@@ -253,7 +253,7 @@ LOCATION: app/express-server/src/tests/api.test.js
 ### Component-level testing
 REFERENCE: "incenti-trace" defined in the docker-compose.yml of project root (data-value-chain-tracker)
 #### Setup test environment
-- run "yarn deps-npm", if fails modify "@types/chai" version to 4.2.0 and "hardhat-gas-reporter"  to 1.0.8
+- run "yarn deps-npm", if fails modify "@types/chai" version to 4.2.0 and "hardhat-gas-reporter"  to 1.0.8 (location: /incentive/blockchain)
 - run "pretest-integration" 
 - run "docker compose up --build  core-frontend core-api mongodb incenti-trace"
 #### Run tests
