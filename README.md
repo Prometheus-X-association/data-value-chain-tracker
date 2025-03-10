@@ -12,6 +12,19 @@ RUN docker compose build core-api core-frontend incenti-trace
 ## Running instructions
 RUN docker compose up -d core-api core-frontend incenti-trace mongodb
 
+## Example usage
+
+| Endpoint                | HTTP Method | Params                        | Request Payload                                                                                                            | Result   |
+|-------------------------|-------------|-------------------------------|----------------------------------------------------------------------------------------------------------------------------|----------|
+| /api/node               | POST        | none                          | [input](https://github.com/Prometheus-X-association/data-value-chain-tracker/blob/main/docs/design-document.md#input-data) | 201      |
+| /api/data/{nodeId}      | GET         | {nodeId}, id of the node tree | none                                                                                                                       | 200      |
+| /api/data/{nodeId}      | DELETE      | {nodeId}, id of the node tree | none                                                                                                                       | 200      |
+| /api/data               | GET         | none                          | none                                                                                                                       | 200      |
+| /api/node-tree/{nodeId} | GET         | {nodeId}, id of the node tree | none                                                                                                                       | 200      |
+
+
+
+
 
 ## TLDR FOR TESTERS
 
