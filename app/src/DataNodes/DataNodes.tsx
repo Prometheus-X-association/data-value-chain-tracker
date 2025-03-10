@@ -7,13 +7,12 @@ import './DataNodes.css'
 
 
 export const getNodes = async() => {
-    return axios.get('api/data');
+    return axios.get('http://localhost:3001/api/data');
 };
 
 export const getNodesTree= async(nodeId: string) => {
-    return axios.get('api/node-tree/' + nodeId);
+    return axios.get('http://localhost:3001/api/node-tree/' + nodeId);
 };
-
 
 export const  DataNodes = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
