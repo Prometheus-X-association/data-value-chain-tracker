@@ -259,6 +259,7 @@ REFERENCE: "incenti-trace" defined in the docker-compose.yml of project root (da
 #### Run tests
 - call POST http://localhost:3004/run-script
 - PAYLOAD fixed for traceibility property, but flexible towards the number of participants taking part in the use-case:
+  ```json
   {
   "traceibility":
 	  {
