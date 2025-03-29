@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "standalone-setup": "cp -r public .next/standalone/public && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/static",
+    "start": "yarn standalone-setup && node .next/standalone/server.js",
     "check": "next lint && tsc --noEmit",
     "dev": "next dev --turbo",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
-    "start": "next start",
     "typecheck": "tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache"
