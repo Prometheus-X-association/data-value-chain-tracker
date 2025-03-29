@@ -478,6 +478,7 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
 
         uint96 amount = useCase.remainingRewardPool;
         useCase.remainingRewardPool = 0;
+        useCase.totalRewardPool = 0;
 
         if(!ptxToken.transfer(msg.sender, amount)) revert TransferFailed();
 

@@ -5,9 +5,9 @@ const INITIAL_SUPPLY = BigInt("1000000000000000000000000"); // 1M tokens
 export default buildModule("PTXProtocol", (m) => {
   const ptxToken = m.contract("PTXToken", [INITIAL_SUPPLY]);
 
-  const factory = m.contract("UseCaseFactory", [ptxToken], {
+  const useCaseContract = m.contract("UseCaseContract", [ptxToken], {
     after: [ptxToken],
   });
 
-  return { ptxToken, factory };
+  return { ptxToken, useCaseContract };
 });

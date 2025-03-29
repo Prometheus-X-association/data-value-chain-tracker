@@ -45,7 +45,7 @@ describe("UseCaseContract Integration Tests", function () {
       .updateRewardShares(USE_CASE_ID, participants, shares);
 
     const useCaseInfo = await useCase.getUseCaseInfo(USE_CASE_ID);
-    expect(useCaseInfo.rewardPool).to.equal(REWARD_POOL);
+    expect(useCaseInfo.totalRewardPool).to.equal(REWARD_POOL);
     expect(useCaseInfo.participants[0].participant).to.equal(
       participant.address
     );
@@ -89,6 +89,6 @@ describe("UseCaseContract Integration Tests", function () {
     // Attempt to claim rewards too early
     await expect(
       useCase.connect(participant).claimRewards(USE_CASE_ID)
-    ).to.be.revertedWith("Lockup period not ended");
+    ).to.be.revertedWithCustomError(useCase, "LockupPeriodNotEnded");
   });
 });
