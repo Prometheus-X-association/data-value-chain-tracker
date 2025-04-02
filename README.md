@@ -328,8 +328,7 @@ REFERENCE: "incenti-trace" defined in the docker-compose.yml of project root (da
       "participantID": "Orchestrator",
       "participantWallet": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
       "numOfShare": 1500
-    }]
-}
+    }]}
 #### Expected results
 <img width="571" alt="image" src="https://github.com/user-attachments/assets/c2ffa528-ae50-4b13-b103-2f51adbffcb1" />
 .
