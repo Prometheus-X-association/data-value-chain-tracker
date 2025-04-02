@@ -15,7 +15,8 @@
     "export-abis-to-api": "npx hardhat compile && npx ts-node script/exportAbisToApi.ts",
     "node": "npx hardhat node",
     "docs": "forge doc",
-    "clean": "npx hardhat clean"
+    "clean": "npx hardhat clean",
+    "copy-types": "npx hardhat compile && cp -R ./typechain-types ../api/src/typechain-types"
   },
   "author": "",
   "license": "ISC",

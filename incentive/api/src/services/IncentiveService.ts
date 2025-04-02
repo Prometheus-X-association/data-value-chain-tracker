@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
-import { UseCaseContract } from "../../../blockchain/typechain-types";
-import { PTXToken } from "../../../blockchain/typechain-types";
+import { UseCaseContract } from "../typechain-types";
+import { PTXToken } from "../typechain-types";
 import { TokenRewardRequest, UseCaseDepositRequest } from "../types/types";
 import { TOKEN_ABI, USECASE_ABI } from "../contracts/abis";
 
