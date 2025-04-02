@@ -385,7 +385,7 @@ In order to make the BB function, the integration with other BB is expected:
   "dataProviderId": "data_provider_id",
   "dataConsumerId": "data_consumer_id",
   "dataConsumerIsAIProvider": false,
-  "prevDataId": "data_id",
+  "prevDataId": ["data_id"],
   "incentiveForDataProvider": {
     "numPoints": 5,
     "factor": 1,
