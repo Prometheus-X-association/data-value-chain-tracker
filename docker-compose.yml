@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.frontend
     ports:
       - "3000:80" # http://localhost:3000
-    depends_on: 
+    depends_on:
       - core-api
     networks:
       - core-network
@@ -33,6 +33,8 @@ services:
       - "3002:3000" # http://localhost:3002
     environment:
       PORT: 3000
+      PRIVATE_KEY: 0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e
+      RPC_URL: http://localhost:8545
     depends_on:
       - hardhat
 
@@ -53,7 +55,7 @@ services:
     depends_on:
       - core-api
     networks:
-      - core-network  
+      - core-network
 
   mongodb:
     image: mongo
@@ -74,7 +76,7 @@ services:
 
 networks:
   core-network:
-    driver: bridge  
+    driver: bridge
 
 volumes:
   mongo_data:

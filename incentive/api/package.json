@@ -2,12 +2,11 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/api/src/index.js",
     "build": "tsc",
-    "dev": "concurrently \"nodemon\" \"nodemon -x tsc\""
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
   },
   "nodemonConfig": {
     "watch": [
@@ -22,23 +21,21 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^22.7.0",
+    "@types/node": "^22.14.0",
     "@types/swagger-ui-express": "^4.1.6",
     "concurrently": "^9.0.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@types/amqplib": "^0.10.5",
     "@types/axios": "^0.9.36",
-    "amqplib": "^0.10.4",
     "axios": "^1.7.7",
+    "dotenv": "^16.4.7",
     "ethers": "^6.13.4",
     "express": "^4.21.0",
     "joi": "^17.13.3",
     "morgan": "^1.10.0",
-    "swagger-ui-express": "^5.0.1",
-    "tsoa": "^6.4.0"
+    "swagger-ui-express": "^5.0.1"
   }
 }

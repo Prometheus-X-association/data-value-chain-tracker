@@ -13,6 +13,13 @@ async function main() {
   ] = await ethers.getSigners();
   console.log("Deploying contracts with account:", deployer.address);
 
+  console.log(
+    "Public key for incentive api: 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
+  );
+  console.log(
+    "Private key for incentive api: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+  );
+
   // Deploy PTX Token
   const PTXToken = await ethers.getContractFactory("PTXToken");
   const token = await PTXToken.deploy(ethers.parseEther("1000000"));
@@ -101,6 +108,16 @@ async function main() {
 
   fs.writeFileSync(
     path.join(configDir, "deployment.json"),
+    JSON.stringify(deploymentInfo, null, 2)
+  );
+
+  const configDirApi = path.join(__dirname, "../../api/src/config");
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+
+  fs.writeFileSync(
+    path.join(configDirApi, "deployment.json"),
     JSON.stringify(deploymentInfo, null, 2)
   );
 
