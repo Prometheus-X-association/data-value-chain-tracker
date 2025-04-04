@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { UseCaseContract } from "../typechain-types";
 import { PTXToken } from "../typechain-types";
 import { TokenRewardRequest, UseCaseDepositRequest } from "../types/types";
-import { TOKEN_ABI, USECASE_ABI } from "../contracts/abis";
+import { TOKEN_ABI, USECASE_ABI } from "../config/abis";
 
 export class IncentiveService {
   private token: PTXToken;
