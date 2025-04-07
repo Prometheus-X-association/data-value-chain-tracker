@@ -7,6 +7,7 @@
     "clean": "rimraf **/node_modules",
     "deps": "cd incentive/blockchain && yarn && cd ../api && yarn",
     "deps-npm": "cd incentive/blockchain && npm install && cd ../api && npm install",
+    "initialize": "cd incentive/blockchain && yarn && npx hardhat compile && cp -R ./typechain-types ../api/src/typechain-types && cd ../api && yarn",
     "pretest:integration": "cd incentive/blockchain && npx hardhat compile && cd ../api && npm run build",
     "test:blockchain:hardhat": "cd incentive/blockchain && npx hardhat test",
     "test:blockchain:forge": "cd incentive/blockchain && forge test",
