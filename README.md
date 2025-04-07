@@ -244,25 +244,24 @@ Run `yarn deps` to install all dependencies. Or `npm run deps-npm` if you are us
 LOCATION: app/express-server/src/tests/api.test.js
 
 #### Setup test environment
-- cd app/express-server
-- run "npm install"
-- open new terminal under root (data-value-chain-tracker) and run "docker compose start mongodb"
+- **cd app/express-server**
+- run **"npm install"**
+- open new terminal under root (data-value-chain-tracker) and run **"docker compose start mongodb"** or **"make up"** (build&start all components)
   
 #### Run tests
- - in app/express-server run "npm test"
+ - in app/express-server run **"npm test"**
    
 #### Expected results
 <img width="480" alt="image" src="https://github.com/user-attachments/assets/c6a17711-ce2c-4886-b275-e6708c56cec6" />
 
 
 ### Component-level testing
-REFERENCE: "incenti-trace" defined in the docker-compose.yml of project root (data-value-chain-tracker)
+REFERENCE: **"incenti-trace"** defined in the docker-compose.yml of project root (data-value-chain-tracker)
 #### Setup test environment
-- run "yarn deps-npm", if fails modify "@types/chai" version to 4.2.0 and "hardhat-gas-reporter"  to 1.0.8 (location: /incentive/blockchain)
-- run "yarn pretest-integration" 
-- run "docker compose up --build  core-frontend core-api mongodb incenti-trace"
+- run **"yarn initialize"**
+- run **"make up"**
 #### Run tests
-- call POST http://localhost:3004/run-script
+- call **POST http://localhost:3004/run-script**
 - PAYLOAD fixed for traceibility property, but flexible towards the number of participants taking part in the use-case:
   ```json
   {
