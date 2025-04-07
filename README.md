@@ -5,15 +5,18 @@
 See the design document [here](docs/design-document.md).
 
 # Building instructions
-DVCT requires to build&start services like: core-api, core-frontend, incenti-trace alongside mongodb
+DVCT requires to build&start services like: core-api, core-frontend, hardhat, incentive-api, incentive-frontend, incenti-trace alongside mongodb
 
-RUN **docker compose build core-api core-frontend incenti-trace**
+RUN **make build-all** 
 
 ## Running instructions
-RUN **docker compose up -d core-api core-frontend incenti-trace mongodb**
+RUN **make up**
 - **core-frontend**: provides the data visualisation of nodes (listens on port 3000)
 - **core-api**: serves the endpoints or backend resources
 - **incenti-trace**:  constructs the traceability and incentive-mechanism by exposing an endpoint (POST /run-script) which can be called by a third party
+- **incentive-api**: starts a server by exposing an endpoint (**POST /api/incentives/distribute**) that executes the distribution of points (tokens)
+- **incentive-frontend**: provides detailed information of the predefined use-cases higlighted in ./blockchain/script folder which are then deployed and presented in the UI
+- **hardhat**: provides the infrastructure for building, testing and deploying smart contracts on the ETH blockchain
 - **mongodb**: database where information is kept and saved
 
 ## Example usage
