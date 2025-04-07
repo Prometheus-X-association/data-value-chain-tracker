@@ -2,12 +2,12 @@ DOCKER_COMPOSE_FILE = docker-compose.yml
 
 .PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat build-all
 
-CORE_FRONTEND_IMAGE = dvct-core-frontend:latest
-CORE_API_IMAGE = dvct-core-api:latest
-INCENTIVE_API_IMAGE = dvct-incentive-api:latest
-INCENTIVE_FRONTEND_IMAGE = dvct-incentive-frontend:latest
-HARDHAT_IMAGE = dvct-hardhat:latest
-INCENTI_TRACE_IMAGE = dvct-incenti-trace:latest
+CORE_FRONTEND_IMAGE = data-value-chain-tracker-core-frontend:latest
+CORE_API_IMAGE = data-value-chain-tracker-core-api:latest
+INCENTIVE_API_IMAGE = data-value-chain-tracker-incentive-api:latest
+INCENTIVE_FRONTEND_IMAGE = data-value-chain-tracker-incentive-frontend:latest
+HARDHAT_IMAGE = data-value-chain-tracker-hardhat:latest
+INCENTI_TRACE_IMAGE = data-value-chain-tracker-incenti-trace:latest
 
 up:
 	@echo "Starting all services..."
