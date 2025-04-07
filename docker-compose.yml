@@ -50,6 +50,7 @@ services:
   incenti-trace:
     build:
       dockerfile: Dockerfile.server
+      context: ./
     ports:
       - "3004:9091" # http:localhost:3004
     depends_on:
