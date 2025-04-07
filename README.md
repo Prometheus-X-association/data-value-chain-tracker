@@ -246,7 +246,7 @@ LOCATION: app/express-server/src/tests/api.test.js
 #### Setup test environment
 - **cd app/express-server**
 - run **"npm install"**
-- open new terminal under root (data-value-chain-tracker) and run **"docker compose start mongodb"** or **"make up"** (build&start all components)
+- make sure all components are running, especially mongodb (**make up**)
   
 #### Run tests
  - in app/express-server run **"npm test"**
