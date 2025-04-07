@@ -1,12 +1,13 @@
 DOCKER_COMPOSE_FILE = docker-compose.yml
 
-.PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incentive-frontend build-hardhat build-all
+.PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat build-all
 
 CORE_FRONTEND_IMAGE = dvct-core-frontend:latest
 CORE_API_IMAGE = dvct-core-api:latest
 INCENTIVE_API_IMAGE = dvct-incentive-api:latest
 INCENTIVE_FRONTEND_IMAGE = dvct-incentive-frontend:latest
 HARDHAT_IMAGE = dvct-hardhat:latest
+INCENTI_TRACE_IMAGE = dvct-incenti-trace:latest
 
 up:
 	@echo "Starting all services..."
@@ -48,6 +49,10 @@ build-hardhat:
 	@echo "Building Hardhat node image..."
 	docker build -t $(HARDHAT_IMAGE) -f incentive/blockchain/Dockerfile ./incentive/blockchain
 
+build-incenti-trace:
+	@echo "Building incenti-trace API image..."
+	docker build -t $(INCENTI_TRACE_IMAGE) -f  ./Dockerfile.server .
+
 # Build all images
-build-all: build-core-frontend build-core-api build-incentive-api build-incentive-frontend build-hardhat
+build-all: build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat
 	@echo "All images built successfully!"
