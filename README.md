@@ -7,6 +7,8 @@ See the design document [here](docs/design-document.md).
 # Building instructions
 DVCT requires to build&start services like: core-api, core-frontend, hardhat, incentive-api, incentive-frontend, incenti-trace alongside mongodb
 
+RUN **yarn initialize**
+
 RUN **make build-all** 
 
 ## Running instructions
