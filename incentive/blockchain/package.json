@@ -42,8 +42,9 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/node": "^22.10.1",
-    "hardhat": "^2.22.17",
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+    "elliptic": "6.6.1",
+    "hardhat": "^2.22.17"
   }
 }
