@@ -11,6 +11,7 @@ INCENTI_TRACE_IMAGE = data-value-chain-tracker-incenti-trace:latest
 
 up:
 	@echo "Starting all services..."
+	yarn initialize
 	docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 down:
@@ -35,10 +36,12 @@ build-core-frontend:
 
 build-core-api:
 	@echo "Building core API image..."
+	yarn initialize
 	docker build -t $(CORE_API_IMAGE) -f app/Dockerfile.server ./app
 
 build-incentive-api:
 	@echo "Building incentive API image..."
+	yarn initialize
 	docker build -t $(INCENTIVE_API_IMAGE) -f incentive/api/Dockerfile ./incentive/api
 
 build-incentive-frontend:
