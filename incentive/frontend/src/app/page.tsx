@@ -10,6 +10,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePtxToken } from "@/hooks/use-ptx-token";
 import { useUseCaseContract } from "@/hooks/use-use-case-contract";
+import { formatEther } from "viem";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
@@ -56,7 +57,7 @@ export default function DashboardPage() {
       <div className="space-y-8">
         <PageHeader
           title="Dashboard"
-          description={`Address: ${address} | Balance: ${balance} PTX`}
+          description={`Address: ${address} | Balance: ${balance ? formatEther(balance) : "0"} PTX`}
         />
 
         <Tabs defaultValue="owned" className="w-full">

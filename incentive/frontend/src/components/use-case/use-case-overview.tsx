@@ -9,6 +9,18 @@ interface UseCaseOverviewProps {
 }
 
 export function UseCaseOverview({ useCase }: UseCaseOverviewProps) {
+  // Calculate total fixed rewards
+  const totalFixedRewards = useCase.participants.reduce(
+    (sum, participant) => sum + participant.fixedReward,
+    0n,
+  );
+
+  // Calculate remaining reward pool for shares, ensuring it never goes below 0
+  const remainingRewardPoolForShares =
+    useCase.remainingRewardPool > totalFixedRewards
+      ? useCase.remainingRewardPool - totalFixedRewards
+      : 0n;
+
   return (
     <div className="grid gap-6">
       <Card>
@@ -55,6 +67,22 @@ export function UseCaseOverview({ useCase }: UseCaseOverviewProps) {
               <p className="text-sm text-muted-foreground">Remaining Rewards</p>
               <p className="text-lg font-medium">
                 {formatEther(useCase.remainingRewardPool)} PTX
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Total Fixed Rewards
+              </p>
+              <p className="text-lg font-medium">
+                {formatEther(totalFixedRewards)} PTX
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Remaining for Shares
+              </p>
+              <p className="text-lg font-medium">
+                {formatEther(remainingRewardPoolForShares)} PTX
               </p>
             </div>
             <div>

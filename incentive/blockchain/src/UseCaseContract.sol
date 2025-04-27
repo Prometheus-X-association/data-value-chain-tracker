@@ -285,11 +285,14 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         if(ptxToken.balanceOf(msg.sender) < amount) revert InsufficientBalance();
 
         // Check for overflow for both pools
+        if (amount > type(uint96).max) revert RewardPoolOverflow();
+        
         uint256 newTotalPool = uint256(useCase.totalRewardPool) + amount;
         uint256 newRemainingPool = uint256(useCase.remainingRewardPool) + amount;
+        
         if(newTotalPool > type(uint96).max || newRemainingPool > type(uint96).max) revert RewardPoolOverflow();
 
-        ptxToken.transferReward(msg.sender, address(this), amount, keccak256(abi.encodePacked(useCaseId)));
+        if(!ptxToken.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
 
         useCase.totalRewardPool = uint96(newTotalPool);
         useCase.remainingRewardPool = uint96(newRemainingPool);
@@ -411,9 +414,22 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
         string calldata useCaseId, 
         uint32 lockupPeriod
     ) external useCaseExists(useCaseId) onlyUseCaseOwner(useCaseId) {
-        if(lockupPeriod < MIN_LOCKUP_PERIOD || lockupPeriod > MAX_LOCKUP_PERIOD) revert InvalidLockupPeriod();
+        if(lockupPeriod < MIN_LOCKUP_PERIOD || lockupPeriod > MAX_LOCKUP_PERIOD) 
+            revert InvalidLockupPeriod();
+        
         UseCase storage useCase = useCases[useCaseId];
         if(useCase.rewardsLocked) revert RewardsAlreadyLocked();
+        
+        // Calculate total fixed rewards
+        uint256 totalFixedRewards = 0;
+        for (uint256 i = 0; i < participants[useCaseId].length; i++) {
+            totalFixedRewards += participants[useCaseId][i].fixedReward;
+        }
+        
+        // Verify we have enough balance to cover fixed rewards
+        if (ptxToken.balanceOf(address(this)) < totalFixedRewards) {
+            revert InsufficientBalance();
+        }
         
         useCase.rewardsLocked = true;
         useCase.lockTime = uint32(block.timestamp);

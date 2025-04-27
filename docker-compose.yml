@@ -44,6 +44,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3003:3000" # http://localhost:3003
+    environment:
+      NEXT_PUBLIC_ENVIRONMENT: "development"
     depends_on:
       - hardhat
 
