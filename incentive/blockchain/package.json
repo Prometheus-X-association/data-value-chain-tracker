@@ -44,7 +44,7 @@
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/node": "^22.10.1",
-    "elliptic": "6.5.7",
+    "elliptic": "6.6.1",
     "hardhat": "^2.22.17"
   }
 }
