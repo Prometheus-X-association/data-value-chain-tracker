@@ -36,8 +36,8 @@ const generateJsonLdData = async (inputData) => {
       "dataConsumerId": inputData.dataConsumerId,
       "incentiveReceivedFrom": [
         {
-          "organizationId": inputData.dataProviderId,
-          "numPoints": inputData.incentiveForDataProvider.numPoints,
+          "organizationId": inputData.dataConsumerId,
+          "numPoints": inputData.extraIncentiveForAIProvider.numPoints,
           "contractId": inputData.contractId
         }
       ]
