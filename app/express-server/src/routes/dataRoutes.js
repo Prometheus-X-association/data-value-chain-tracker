@@ -158,7 +158,7 @@ router.post('/node', async (req, res) => {
           };
           await updateChildNode(prevId, childNodeData);
         } else {
-          const newNode = await generateNewNodeForPrevDataId(prevId);
+          const newNode = await generateNewNodeForPrevDataId(prevId, inputData);
           const childNodeData = {
             "nodeId": jsonLdData.nodeId,
             "@nodeUrl": `https://url-to-childNode/${jsonLdData.nodeId}`
