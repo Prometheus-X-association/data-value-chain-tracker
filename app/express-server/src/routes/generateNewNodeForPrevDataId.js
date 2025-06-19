@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Data = require('../models/data'); 
 
-const generateNewNodeForPrevDataId = async (prevDataId) => {
+const generateNewNodeForPrevDataId = async (prevDataId, inputData) => {
   const context = {
     "@vocab": "https://example.org/vocab#",
     "nodeId": "https://example.org/vocab#nodeId",
@@ -35,7 +35,11 @@ const generateNewNodeForPrevDataId = async (prevDataId) => {
       "usecaseContractId": "",
       "dataProviderId": "",
       "dataConsumerId": "",
-      "incentiveReceivedFrom": []
+      "incentiveReceivedFrom": { 
+        "organizationId": inputData.dataProviderId,
+        "numPoints": inputData.incentiveForDataProvider.numPoints,
+        "contractId": inputData.contractId
+      }
     },
     "prevNode": [],
     "childNode": []
