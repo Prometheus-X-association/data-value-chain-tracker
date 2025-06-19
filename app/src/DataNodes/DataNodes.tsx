@@ -108,14 +108,12 @@ export const  DataNodes = () => {
         });
       
         // Build edges
-        const edges = data.flatMap((node: any) =>
-          node.childNode.map((child: any) => ({
-            id: `${node.nodeId}-${child.nodeId}`,
-            source: node.nodeId,
-            target: child.nodeId,
-            label: JSON.stringify(node.nodeMetadata),
-          }))
-        );
+        const edges = data.slice(0, -1).map((node: any, index: number) => ({
+          id: `${node.nodeId}-${data[index + 1].nodeId}`,
+          source: node.nodeId,
+          target: data[index + 1].nodeId,
+          label: JSON.stringify(data[index + 1].nodeMetadata), // << use NEXT node's metadata
+        }));
       
         setNodes(positionedNodes);
         setNodesEdges(edges);
