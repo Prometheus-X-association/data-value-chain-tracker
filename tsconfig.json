@@ -10,6 +10,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
+      "@/*": ["incentive/api/src/*"], 
       "*": ["node_modules/*"]
     }
   },
