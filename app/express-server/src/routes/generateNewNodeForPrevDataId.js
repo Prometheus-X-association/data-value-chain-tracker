@@ -39,6 +39,7 @@ const generateNewNodeForPrevDataId = async (prevDataId, inputData) => {
         "organizationId": inputData.dataProviderId,
         "numPoints": inputData.incentiveForDataProvider.numPoints,
         "contractId": inputData.contractId
+        
       }
     },
     "prevNode": [],

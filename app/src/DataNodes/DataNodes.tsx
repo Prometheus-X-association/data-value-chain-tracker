@@ -8,11 +8,11 @@ import CustomEdge from './CustomEdge';
 import CustomEdgeStartEnd from './CustomEdgeStartEnd';
 
 export const getNodes = async() => {
-    return axios.get('http://localhost:3001/api/data');
+    return axios.get('http://localhost:9081/api/data');
 };
 
 export const getNodesTree= async(nodeId: string) => {
-    return axios.get('http://localhost:3001/api/node-tree/' + nodeId);
+    return axios.get('http://localhost:9081/api/node-tree/' + nodeId);
 };
 
 
@@ -108,12 +108,32 @@ export const  DataNodes = () => {
         });
       
         // Build edges
-        const edges = data.slice(0, -1).map((node: any, index: number) => ({
-          id: `${node.nodeId}-${data[index + 1].nodeId}`,
-          source: node.nodeId,
-          target: data[index + 1].nodeId,
-          label: JSON.stringify(data[index + 1].nodeMetadata), // << use NEXT node's metadata
-        }));
+        const edges: any = [];
+
+        data.forEach((node: any) => {
+          const sourceNodeId = node.nodeId;
+        
+          node.childNode?.forEach((child: any) => {
+            const targetNodeId = child.nodeId;
+            const targetNode = data.find(n => n.nodeId === targetNodeId);
+          
+            if (targetNode) {
+              const { incentiveReceivedFrom, ...rest } = targetNode.nodeMetadata;
+              const renamedNodeMetadata = {
+                ...rest,
+                incentive: incentiveReceivedFrom
+              };
+            
+              edges.push({
+                id: `${sourceNodeId}-${targetNodeId}`,
+                source: sourceNodeId,
+                target: targetNodeId,
+                label: JSON.stringify(renamedNodeMetadata),
+              });
+            }
+          });
+        });
+
       
         setNodes(positionedNodes);
         setNodesEdges(edges);

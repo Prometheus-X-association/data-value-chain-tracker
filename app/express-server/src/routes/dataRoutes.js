@@ -3,6 +3,7 @@ const winston = require("winston");
 const Data = require('../models/data'); 
 const { generateJsonLdData } = require('./generateJsonLdData');
 const { updateChildNode } = require('./updateChildNode');
+const { updateChildPrevNode } = require('./updateChildPrevNode');
 const { generateNewNodeForPrevDataId } = require('./generateNewNodeForPrevDataId');
 const { fetchNodeTree } = require('./fetchNodeTree'); // Ensure this function is available
 const router = express.Router();
@@ -195,8 +196,18 @@ router.get('/data/:nodeId', async (req, res) => {
 router.delete('/data/:nodeId', async (req, res) => {
   const { nodeId } = req.params;
   try {
+    const node = await Data.findOne({nodeId});
+    const allNodes = await Data.find();
     const data = await Data.findOneAndDelete({ nodeId });
-    if (data) {
+
+    if (data && node?.prevNode.length > 0) {
+      var newVal = {}
+      node.prevNode.map(async(obj) =>{
+          allNodes.map((obj) =>{
+            newVal = obj.prevNode.filter((_node) => _node.nodeId !== node.nodeId)
+          })
+          await updateChildPrevNode(obj.nodeId, newVal);
+      })
       res.json({ message: 'Node deleted successfully' });
     } else {
       res.status(404).json({ message: 'Node not found' });
