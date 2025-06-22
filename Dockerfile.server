@@ -18,4 +18,4 @@ ENV PATH="/root/.foundry/bin:$PATH"
 
 EXPOSE 9091
 
-CMD ["node", "./core-engine.js"]
+CMD ["node", "./execute-incenti-trace.js"]

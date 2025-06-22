@@ -57,6 +57,7 @@ services:
       - core-api
     networks:
       - core-network
+    
 
   mongodb:
     image: mongo
