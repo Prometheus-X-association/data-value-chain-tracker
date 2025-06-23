@@ -1,6 +1,6 @@
 DOCKER_COMPOSE_FILE = docker-compose.yml
 
-.PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat build-all
+.PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incenti-trace build-engine-test build-incentive-frontend build-hardhat build-all
 
 CORE_FRONTEND_IMAGE = data-value-chain-tracker-core-frontend:latest
 CORE_API_IMAGE = data-value-chain-tracker-core-api:latest
@@ -8,6 +8,7 @@ INCENTIVE_API_IMAGE = data-value-chain-tracker-incentive-api:latest
 INCENTIVE_FRONTEND_IMAGE = data-value-chain-tracker-incentive-frontend:latest
 HARDHAT_IMAGE = data-value-chain-tracker-hardhat:latest
 INCENTI_TRACE_IMAGE = data-value-chain-tracker-incenti-trace:latest
+ENGINE_TEST_IMAGE = data-value-chain-tracker-engine-test:latest
 
 up:
 	@echo "Starting all services..."
@@ -55,6 +56,10 @@ build-hardhat:
 build-incenti-trace:
 	@echo "Building incenti-trace API image..."
 	docker build -t $(INCENTI_TRACE_IMAGE) -f  ./Dockerfile.server .
+
+build-engine-test:
+	@echo "Building incenti-trace API image..."
+	docker build -t $(ENGINE_TEST_IMAGE) -f  ./Dockerfile.server .
 
 # Build all images
 build-all: build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat
