@@ -51,6 +51,19 @@ services:
     build:
       dockerfile: Dockerfile.server
       context: ./
+    command: ["node", "./execute-incenti-trace.js"]
+    ports:
+      - "3005:9091" # http:localhost:3004
+    depends_on:
+      - core-api
+    networks:
+      - core-network
+    
+  engine-test:
+    build:
+      dockerfile: Dockerfile.server
+      context: ./
+    command: ["node", "./core-engine.js"]
     ports:
       - "3004:9091" # http:localhost:3004
     depends_on:
