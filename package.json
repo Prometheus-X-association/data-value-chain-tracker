@@ -43,6 +43,7 @@
   "private": true,
   "dependencies": {
     "express": "^5.0.0",
+    "http-errors": "^2.0.0",
     "tree-kill": "^1.2.2"
   }
 }

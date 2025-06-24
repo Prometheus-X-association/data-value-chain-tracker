@@ -10,6 +10,9 @@ import kill from 'tree-kill';
 const app = express();
 const PORT = 9091;
 
+// Middleware to parse JSON requests
+app.use(express.json());
+
 const addresses = 
     ["0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
       "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
@@ -17,8 +20,35 @@ const addresses =
       "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
     ]
 
-// Middleware to parse JSON requests
-app.use(express.json());
+function validatePayload(payload) {
+  const requiredFields = [
+    "dvctId",
+    "contractId",
+    "useCaseContractTitle",
+    "dataId",
+    "dataProviderId",
+    "dataConsumerId",
+    "factorCheck",
+    "reachEndFlow",
+    "providerUrl",
+    "currentParticipantId",
+    "nextParticipantId",
+    "useCaseId",
+    "useCaseName",
+    "dataQualityCheck",
+    "participantShare",
+  ];
+
+  for (const field of requiredFields) {
+    if (
+      payload[field] === undefined ||
+      payload[field] === null ||
+      payload[field] === ""
+    ) {
+      throw createHttpError(400, `Missing or invalid field: ${field}`);
+    }
+  }
+}
 
 // Endpoint to trigger the test script
 app.post("/api/run-script", async (req, res) => {
@@ -46,6 +76,8 @@ app.post("/api/run-script", async (req, res) => {
           "factorCheck": true
         },
       }
+
+      validatePayload(req.body);
 
       const nodes = await axios.get("http://localhost:9081/api/data", {
         headers: { "Content-Type": "application/json" }
