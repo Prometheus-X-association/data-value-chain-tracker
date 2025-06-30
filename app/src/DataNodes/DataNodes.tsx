@@ -7,12 +7,18 @@ import './DataNodes.css'
 import CustomEdge from './CustomEdge';
 import CustomEdgeStartEnd from './CustomEdgeStartEnd';
 
+const environment = process.env.REACT_APP_ENVIRONMENT;
+
+const baseUrl = (environment === 'production' || environment === 'container')
+  ? process.env.REACT_APP_BASE_URL_PROD
+  : process.env.REACT_APP_BASE_URL_DEV;
+
 export const getNodes = async() => {
-    return axios.get('http://localhost:9081/api/data');
+    return axios.get(baseUrl + '/api/data');
 };
 
 export const getNodesTree= async(nodeId: string) => {
-    return axios.get('http://localhost:9081/api/node-tree/' + nodeId);
+    return axios.get(baseUrl + '/api/node-tree/' + nodeId);
 };
 
 
