@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@types/cytoscape": "^3.21.7",
+    "@types/node": "^24.0.7",
     "@types/react-cytoscapejs": "^1.2.5"
   }
 }
