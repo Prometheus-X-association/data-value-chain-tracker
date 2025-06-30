@@ -5,6 +5,10 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.frontend
+    environment:
+      - REACT_APP_ENVIRONMENT=production
+      - REACT_APP_BASE_URL_PROD=http://localhost:3001/
+      - REACT_APP_BASE_URL_DEV=http://localhost:9081/
     ports:
       - "3000:80" # http://localhost:3000
     depends_on:
@@ -51,6 +55,8 @@ services:
     build:
       dockerfile: Dockerfile.server
       context: ./
+    environment:
+      - ENVIRONMENT=production
     command: ["node", "./execute-incenti-trace.js"]
     ports:
       - "3005:9091" # http:localhost:3004
@@ -63,6 +69,8 @@ services:
     build:
       dockerfile: Dockerfile.server
       context: ./
+    environment:
+      - ENVIRONMENT=production
     command: ["node", "./core-engine.js"]
     ports:
       - "3004:9091" # http:localhost:3004
