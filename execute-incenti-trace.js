@@ -10,6 +10,7 @@ import createHttpError from "http-errors";
 
 const app = express();
 const PORT = 9091;
+const environment = process.env.ENVIRONMENT;
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -79,8 +80,13 @@ app.post("/api/run-script", async (req, res) => {
       }
 
       validatePayload(req.body);
+      let baseUrl = 'http://localhost:9081';
 
-      const nodes = await axios.get("http://localhost:9081/api/data", {
+      if(environment === 'production'){
+        baseUrl = 'http://core-api:9081';
+      }
+
+      const nodes = await axios.get(baseUrl + "/api/data", {
         headers: { "Content-Type": "application/json" }
       });
 
@@ -93,7 +99,7 @@ app.post("/api/run-script", async (req, res) => {
         payload.extraIncentiveForAIProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.currentParticipantId)[0]?.numOfShare;
       }
 
-      const response = await axios.post("http://localhost:9081/api/node", payload, {
+      const response = await axios.post(baseUrl + "/api/node", payload, {
         headers: { "Content-Type": "application/json" }
       });
       console.log("Success:", response.data);
