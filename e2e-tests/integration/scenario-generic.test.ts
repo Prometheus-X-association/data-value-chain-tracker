@@ -193,13 +193,13 @@ describe(configData.useCaseName, function(){
 
         const agentBalances: AgentMap = {};
         const expectedRewards: AgentMap = {};
+        var totalShare = BigInt(agentShares.reduce((a, b) => a + b, 0));
         var iterator = 0;
 
-        for(const obj in agents){
-            if(obj !== 'RewardDepositor'){
-                let role: string = obj
-                agentBalances[role] = await env.token.balanceOf(agents[obj as keyof typeof agents].address);
-                expectedRewards[role] = (REWARD_POOL * BigInt(shares[iterator])) / 10000n;
+        for(const role in agents){
+            if(role !== 'RewardDepositor'){
+                agentBalances[role] = await env.token.balanceOf(agents[role as keyof typeof agents].address);
+                expectedRewards[role] = (REWARD_POOL * BigInt(shares[iterator])) / totalShare;
                 iterator = iterator + 1;
             }
         }
