@@ -7,212 +7,144 @@ import { waitForTx } from "../helpers/helpers";
 import axios from "axios";
 import * as fs from "fs";
 
-    const configFilePath = process.env.CONFIG_FILE;
-    var configData: any = null;
-    if (configFilePath) {
-      // Read the content of the JSON file
-      configData = JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
-    } else {
-      console.error("Config file path is not set.");
-      process.exit(1); // Exit the process with an error code if config file is not found
+const configFilePath = process.env.CONFIG_FILE;
+if (!configFilePath) {
+  console.error("Config file path is not set.");
+  process.exit(1);
+}
+
+const configData = JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
+
+describe(configData.useCaseName, function () {
+  this.timeout(60000);
+
+  let env: TestEnvironment;
+  const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+  const agents: Record<string, ethers.Wallet> = {};
+  const agentShares: number[] = [];
+  let rewardDepositor: ethers.Wallet;
+  let incentiveSigner: IncentiveSigner;
+  let isOrchestrator = false;
+
+  const LOCK_DURATION = 24 * 60 * 60; // 1 day
+  const REWARD_POOL = ethers.parseEther("100");
+  const USE_CASE_ID = configData.useCaseName;
+
+  let orchestratorInitialBalance = 0n;
+  let orchestratorDepositAmount = 0n;
+
+  // Set up agents
+  for (const data of configData.participantShare) {
+    agents[data.role] = new ethers.Wallet(data.participantWallet, provider);
+    agentShares.push(data.numOfShare);
+
+    if (data.rewardDepositor) {
+      rewardDepositor = agents[data.role];
+      if (data.role === "Orchestrator") {
+        isOrchestrator = true;
+      }
+    }
+  }
+
+  const agentAddresses = Object.values(agents).map(a => a.address);
+
+  before(async () => {
+    console.log("before() started");
+    env = await setupTestEnvironment();
+
+    incentiveSigner = new IncentiveSigner(
+      rewardDepositor.privateKey,
+      await env.token.getAddress(),
+      provider
+    );
+
+    await waitForTx(env.token.transfer(rewardDepositor.address, ethers.parseEther("2000")));
+
+    if (agents["Orchestrator"]) {
+      orchestratorInitialBalance = await env.token.balanceOf(agents["Orchestrator"].address);
+      orchestratorDepositAmount = REWARD_POOL;
+    }
+  });
+
+  after(async () => {
+    console.log("after() started");
+    if (env.apiServer) await env.apiServer.close();
+  });
+
+  it(`should complete full cycle of ${configData.useCaseName}`, async () => {
+    // Create use case + set shares
+    const creator = rewardDepositor && isOrchestrator
+      ? rewardDepositor
+      : agents["Data-Provider"];
+
+    await waitForTx(env.useCase.connect(creator).createUseCase(USE_CASE_ID));
+    await waitForTx(env.useCase.connect(creator).updateRewardShares(USE_CASE_ID, agentAddresses, agentShares));
+
+    console.log("Total shares:", await env.useCase.totalRewardShares(USE_CASE_ID));
+
+    for (const role in agents) {
+      if (role.includes("AI-Provider")) {
+        const info = await env.useCase.getParticipantInfo(USE_CASE_ID, agents[role]);
+        console.log(`${role} rewardShare:`, info.rewardShare.toString());
+        console.log(`${role} fixedReward:`, info.fixedReward.toString());
+      }
     }
 
-describe(configData.useCaseName, function(){
-    this.timeout(60000);
-    let env: TestEnvironment;
-    let provider: ethers.JsonRpcProvider;
-    let rewardDepositor: ethers.Wallet;
-    let incentiveSigner: IncentiveSigner;
-    const agents: { [key: string]: ethers.Wallet } = {};
-    let agentShares: number[]= [];
-    let isOrchestrator: boolean = false;
+    // Deposit reward pool
+    const signedRequest = await incentiveSigner.createUseCaseDepositRequest(
+      USE_CASE_ID,
+      env.contracts.useCaseAddress,
+      ethers.formatEther(REWARD_POOL)
+    );
 
-    const LOCK_DURATION = 24 * 60 * 60; // 1 day lock
-    const REWARD_POOL = ethers.parseEther("100");
-    const USE_CASE_ID = configData.useCaseName;
+    const response = await axios.post(`${env.apiUrl}/api/incentives/distribute`, signedRequest);
+    expect(response.status).to.equal(200);
 
-    let orchestratorInitialBalance: bigint;
-    let orchestratorDepositAmount: bigint;
+    await provider.waitForTransaction(response.data.data.transactionHash);
+    await provider.send("evm_mine", []);
+    await provider.send("evm_mine", []);
 
-    provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+    const useCaseInfo = await env.useCase.useCases(USE_CASE_ID);
+    console.log("Total reward pool:", useCaseInfo.totalRewardPool.toString());
+    console.log("Remaining reward pool:", useCaseInfo.remainingRewardPool.toString());
 
-    const wallet = ethers.Wallet.createRandom();
-    console.log(wallet);
+    // Lock rewards
+    await waitForTx(env.useCase.connect(creator).lockRewards(USE_CASE_ID, LOCK_DURATION));
 
-    configData?.participantShare.map((data: any) =>{
-        agents[data.role] = new ethers.Wallet(
-            data.participantWallet,
-            provider
-        );
+    // Fast forward time
+    await provider.send("evm_increaseTime", [LOCK_DURATION + 1]);
+    await provider.send("evm_mine", []);
 
-        if(data.rewardDepositor){
-            rewardDepositor = agents[data.role];
-            if(data.role === "Orchestrator"){
-                isOrchestrator = true;
-            }
-        }
-
-        agentShares.push(data.numOfShare);
-    })
-
-    const agentAddresses = Object.values(agents).map((wallet: ethers.Wallet) => wallet.address);
-
-    before(async () => {
-        console.log("before() started");
-        try {
-            env = await setupTestEnvironment();
-    
-            // Initialize IncentiveSigner with orchestrator as reward depositor
-            incentiveSigner = new IncentiveSigner(
-                rewardDepositor.privateKey,
-                await env.token.getAddress(),
-                provider
-            );
-    
-            await waitForTx(
-                env.token.transfer(rewardDepositor.address, ethers.parseEther("2000"))
-            );
-    
-            if (agents["Orchestrator"]) {
-                orchestratorInitialBalance = await env.token.balanceOf(
-                    agents["Orchestrator"].address
-                );
-                orchestratorDepositAmount = REWARD_POOL;
-            }
-        } catch (err) {
-            console.error("Error in before hook:", err);
-            throw err;
-        }
-    });
-    
-
-    after(async () => {
-        console.log("after() started");
-        if (env?.apiServer) {
-          await env.apiServer.close();
-        }
-    });
-
-    it("should complete full cycle of" + configData.useCaseName, async function(){
-        const participants = agentAddresses;
-        const shares = agentShares;
-        
-        if(rewardDepositor && isOrchestrator){
-            await waitForTx(
-                env.useCase.connect(rewardDepositor).createUseCase(USE_CASE_ID)
-            );
-            await waitForTx(
-                env.useCase
-                  .connect(rewardDepositor)
-                  .updateRewardShares(USE_CASE_ID, participants, shares)
-            );
-        }else{
-            await waitForTx(
-                env.useCase.connect(agents["Data-Provider"]).createUseCase(USE_CASE_ID)
-            );
-            await waitForTx(
-                env.useCase
-                  .connect(agents["Data-Provider"])
-                  .updateRewardShares(USE_CASE_ID, participants, shares)
-              );
-        }
-        
-    
-        console.log(
-            "Shares set:",
-            await env.useCase.totalRewardShares(USE_CASE_ID)
-        );
-
-        for(const obj in agents){
-            if(obj.includes('AI-Provider')){
-                console.log(
-                    "AI Provider share:",
-                    (await env.useCase.getParticipantInfo(USE_CASE_ID, agents[obj as keyof typeof agents]))
-                      .rewardShare
-                );
-                  console.log(
-                    "AI Provider share:",
-                    (await env.useCase.getParticipantInfo(USE_CASE_ID, agents[obj as keyof typeof agents]))
-                      .fixedReward
-                );
-            }
-        }
-
-
-        const signedRequest = await incentiveSigner.createUseCaseDepositRequest(
-            USE_CASE_ID,
-            env.contracts.useCaseAddress,
-            ethers.formatEther(REWARD_POOL)
-        );
-
-        const response = await axios.post(
-            `${env.apiUrl}/api/incentives/distribute`,
-            signedRequest
-        );
-        expect(response.status).to.equal(200);
-
-        // Wait for the API transaction to be mined
-        await provider.waitForTransaction(
-        (response.data as { data: { transactionHash: string } }).data
-            .transactionHash
-        );
-
-        await provider.send("evm_mine", []); // Mine a new block
+    // Claim rewards
+    for (const role in agents) {
+      if (role !== "RewardDepositor") {
+        await waitForTx(env.useCase.connect(agents[role]).claimRewards(USE_CASE_ID));
         await provider.send("evm_mine", []);
+      }
+    }
 
-        const { totalRewardPool, remainingRewardPool } =
-        await env.useCase.useCases(USE_CASE_ID);
-        console.log("Total reward pool:", totalRewardPool);
-        console.log("Remaining reward pool:", remainingRewardPool);
+    // Verify rewards
+    const totalShares = BigInt(agentShares.reduce((a, b) => a + b, 0));
+    const expectedRewards: Record<string, bigint> = {};
+    const actualBalances: Record<string, bigint> = {};
 
-        if(rewardDepositor && isOrchestrator){
-            await waitForTx(env.useCase.connect(rewardDepositor).lockRewards(USE_CASE_ID, LOCK_DURATION))
-        }else{
-            // 5. Data Provider locks the rewards
-            await waitForTx(
-                env.useCase.connect(agents['Data-Provider']).lockRewards(USE_CASE_ID, LOCK_DURATION)
-            );
-        }
+    let i = 0;
+    for (const role in agents) {
+      if (role !== "RewardDepositor") {
+        expectedRewards[role] = (REWARD_POOL * BigInt(agentShares[i])) / totalShares;
+        actualBalances[role] = await env.token.balanceOf(agents[role].address);
+        i++;
+      }
+    }
 
-        await provider.send("evm_increaseTime", [LOCK_DURATION + 1]);
-        await provider.send("evm_mine", []);
+    if (isOrchestrator) {
+      actualBalances["Orchestrator"] -= (orchestratorInitialBalance - orchestratorDepositAmount);
+    }
 
-       
-        for(const obj in agents){
-            if(obj !== 'RewardDepositor'){
-                await waitForTx(
-                    env.useCase.connect(agents[obj as keyof typeof agents]).claimRewards(USE_CASE_ID)
-                );
-                await provider.send("evm_mine", []);
-            }
-        }
+    console.log("Final balances:", actualBalances);
 
-        type AgentMap = {
-            [key: string]: any; // Allows string keys with Wallet type values
-        };
-
-        const agentBalances: AgentMap = {};
-        const expectedRewards: AgentMap = {};
-        var totalShare = BigInt(agentShares.reduce((a, b) => a + b, 0));
-        var iterator = 0;
-
-        for(const role in agents){
-            if(role !== 'RewardDepositor'){
-                agentBalances[role] = await env.token.balanceOf(agents[role as keyof typeof agents].address);
-                expectedRewards[role] = (REWARD_POOL * BigInt(shares[iterator])) / totalShare;
-                iterator = iterator + 1;
-            }
-        }
-
-        if(rewardDepositor && isOrchestrator){
-            agentBalances["Orchestrator"] = agentBalances["Orchestrator"] - (orchestratorInitialBalance - orchestratorDepositAmount);
-        }
-
-        console.log(agentBalances);
-
-        for(const obj in agents){
-            expect(agentBalances[obj]).to.equal(expectedRewards[obj]);
-        }
-    })
-
-})
+    for (const role in expectedRewards) {
+      expect(actualBalances[role]).to.equal(expectedRewards[role], `Mismatch for ${role}`);
+    }
+  });
+});
