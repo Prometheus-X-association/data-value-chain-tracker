@@ -40,7 +40,7 @@ build-core-api:
 
 build-incentive-api:
 	@echo "Building incentive API image..."
-	docker build -t $(INCENTIVE_API_IMAGE)  -f incentive/api/Dockerfile ./incentive/api
+	docker build -t $(INCENTIVE_API_IMAGE)  -f incentive/api/Dockerfile .
 
 build-incentive-frontend:
 	@echo "Building incentive frontend image..."
