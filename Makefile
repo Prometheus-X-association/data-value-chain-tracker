@@ -12,7 +12,6 @@ ENGINE_TEST_IMAGE = data-value-chain-tracker-engine-test:latest
 
 up:
 	@echo "Starting all services..."
-	yarn initialize
 	docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 down:
@@ -37,13 +36,11 @@ build-core-frontend:
 
 build-core-api:
 	@echo "Building core API image..."
-	yarn initialize
 	docker build -t $(CORE_API_IMAGE) -f app/Dockerfile.server ./app
 
 build-incentive-api:
 	@echo "Building incentive API image..."
-	yarn initialize
-	docker build -t $(INCENTIVE_API_IMAGE) -f incentive/api/Dockerfile ./incentive/api
+	docker build -t $(INCENTIVE_API_IMAGE)  -f incentive/api/Dockerfile ./incentive/api
 
 build-incentive-frontend:
 	@echo "Building incentive frontend image..."
