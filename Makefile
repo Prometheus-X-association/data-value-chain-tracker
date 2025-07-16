@@ -59,5 +59,5 @@ build-engine-test:
 	docker build -t $(ENGINE_TEST_IMAGE) -f  ./Dockerfile.server .
 
 # Build all images
-build-all: build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat
+build-all: build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat build-engine-test
 	@echo "All images built successfully!"
