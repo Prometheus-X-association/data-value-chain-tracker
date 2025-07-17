@@ -338,6 +338,52 @@ REFERENCE: **"incenti-trace"** defined in the docker-compose.yml of project root
 .
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/c1e421fe-7c70-4cf3-b18d-e261de80e047" />
 
+- call **POST http://localhost:3005/api/run-script** which PDC will execute each time there is a data-exchange
+- payload is handled by PDC based on the data residing in the contract
+
+```json
+  {
+	"dvctId": "123",
+	"contractId": "6842ae6be580d1de74b20026",
+	"useCaseContractTitle": "DVCT AGAIN",
+	"dataId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec08",
+	"dataProviderId": "http://localhost:3335/",
+	"dataConsumerId": "http://localhost:3339/",
+	"factorCheck": true,
+	"reachEndFlow": false,
+	"providerUrl": "TBD",
+	"currentParticipantId": "http://localhost:4040/v1/catalog/participants/66d18724ee71f9f096bae810",
+	"nextParticipantId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec07",
+	"useCaseId": "http://localhost:4040/v1/catalog/ecosystems/6842ae6a877da765ec2f38bf",
+	"useCaseName": "DVCT AGAIN",
+	"dataQualityCheck": "TBD",
+	"participantShare": [
+	{
+	"participantName": "ParticipantOne",
+	"rewardDepositor": true,
+	"role": "orchestrator",
+	"participantId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec08",
+	"participantWallet": "TBD",
+	"numOfShare": 17
+	},
+	{
+	"participantName": "Test-DataProvider",
+	"rewardDepositor": false,
+	"role": "participant",
+	"participantId": "http://localhost:4040/v1/catalog/participants/66d18724ee71f9f096bae810",
+	"participantWallet": "TBD",
+	"numOfShare": 41
+	},
+	{
+	"participantName": "Test-Infrastructure",
+	"rewardDepositor": false,
+	"role": "infrastructure provider",
+	"participantId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec07",
+	"participantWallet": "TBD",
+	"numOfShare": 10
+	}
+]}
+
 
 ## Makefile Commands
 
