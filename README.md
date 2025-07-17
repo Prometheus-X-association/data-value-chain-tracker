@@ -337,8 +337,8 @@ REFERENCE: **"incenti-trace"** defined in the docker-compose.yml of project root
 .
 .
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/c1e421fe-7c70-4cf3-b18d-e261de80e047" />
-.
-.
+   <br><br>
+   <br><br>
 - call **POST http://localhost:3005/api/run-script** which PDC will execute each time there is a data-exchange
 - payload is handled by PDC based on the data residing in the contract
 
