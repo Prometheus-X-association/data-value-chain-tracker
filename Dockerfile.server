@@ -16,6 +16,8 @@ RUN /root/.foundry/bin/foundryup
 # Add Foundry to PATH
 ENV PATH="/root/.foundry/bin:$PATH"
 
+RUN yarn initialize
+
 EXPOSE 9091
 
 CMD ["node", "./execute-incenti-trace.js"]
