@@ -38,7 +38,6 @@ async function main(): Promise<FinalResult> {
   const USE_CASE_ID = configData.useCaseName;
 
   const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-  await provider.send("hardhat_reset", []);
   let REWARD_POOL = ethers.parseEther("1000");
   let isOrchestrator = false;
   
