@@ -34,8 +34,6 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
     // Setup provider and wallets
     provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
 
-    await provider.send("hardhat_reset", []);
-
     // Initialize wallets with test private keys
     dataProvider = new ethers.Wallet(
       "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
