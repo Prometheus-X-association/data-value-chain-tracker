@@ -34,6 +34,8 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
     // Setup provider and wallets
     provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
 
+    await provider.send("hardhat_reset", []);
+
     // Initialize wallets with test private keys
     dataProvider = new ethers.Wallet(
       "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
@@ -126,11 +128,11 @@ describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", fu
     );
     expect(response.status).to.equal(200);
 
-    // Wait for the API transaction to be mined
-    await provider.waitForTransaction(
-      (response.data as { data: { transactionHash: string } }).data
-        .transactionHash
-    );
+    const txHash = (response.data as { data: { transactionHash: string } }).data.transactionHash;
+
+    // ✅ Wait until the tx is mined AND confirmed
+    const receipt = await provider.waitForTransaction(txHash, 1); // wait for 1 confirmation
+    expect(receipt?.status).to.equal(1); // ensure it was successful
 
     // Add explicit wait for transaction confirmation
     await provider.send("evm_mine", []); // Mine a new block
