@@ -25,9 +25,7 @@ describe("Scenario 1: Educational Data Provider and AI Service Provider", functi
   before(async () => {
     // Setup provider and wallets
     provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-
-    await provider.send("hardhat_reset", []);
-
+    
     dataProvider = new ethers.Wallet(
       "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
       provider
