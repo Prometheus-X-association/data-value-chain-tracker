@@ -894,7 +894,7 @@ Test the logic and execution of digital incentives distribution to ensure it com
 
 ## Partners & roles
 
-**imc AG ([website](https://www.im-c.com)):**
+**Scheer IMC ([website](https://www.scheer-imc.com)):**
 As Building Block Lead, responsible for leading the design of the DVCT Building Block, drafting the initial design specifications for value tracking and ensuring that the development is in line with Prometheus-X and other Dataspaces standards such as IDSA and GAIA-X. imc AG is responsible for these components:
 
 - DVCT_Core
