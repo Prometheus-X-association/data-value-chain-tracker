@@ -4,6 +4,7 @@ import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner"
 import { waitForTx } from "../helpers/helpers";
 import axios from "axios";
 import * as fs from "fs";
+import { expect } from "chai";
 
 interface ParticipantResult {
   role: string;
@@ -37,6 +38,7 @@ async function main(): Promise<FinalResult> {
   const USE_CASE_ID = configData.useCaseName;
 
   const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+  await provider.send("hardhat_reset", []);
   let REWARD_POOL = ethers.parseEther("1000");
   let isOrchestrator = false;
   
@@ -115,7 +117,9 @@ async function main(): Promise<FinalResult> {
   }
 
   try {
-    await provider.waitForTransaction((response.data as { data: { transactionHash: string } }).data.transactionHash);
+    const txHash = (response.data as { data: { transactionHash: string } }).data.transactionHash;
+    const receipt = await provider.waitForTransaction(txHash, 1); // wait for 1 confirmation
+    expect(receipt?.status).to.equal(1); // ensure it was successful
     await provider.send("evm_mine", []);
     await provider.send("evm_mine", []);
   } catch (err) {
