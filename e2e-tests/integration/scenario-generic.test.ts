@@ -50,6 +50,9 @@ describe(configData.useCaseName, function () {
 
   before(async () => {
     console.log("before() started");
+
+    await provider.send("hardhat_reset", []);
+
     env = await setupTestEnvironment();
 
     incentiveSigner = new IncentiveSigner(
@@ -100,9 +103,11 @@ describe(configData.useCaseName, function () {
     const response = await axios.post(`${env.apiUrl}/api/incentives/distribute`, signedRequest);
     expect(response.status).to.equal(200);
 
-    await provider.waitForTransaction(response.data.data.transactionHash);
-    await provider.send("evm_mine", []);
-    await provider.send("evm_mine", []);
+    const txHash = (response.data as { data: { transactionHash: string } }).data.transactionHash;
+
+    const receipt = await provider.waitForTransaction(txHash, 1); 
+    expect(receipt?.status).to.equal(1); 
+
 
     const useCaseInfo = await env.useCase.useCases(USE_CASE_ID);
     console.log("Total reward pool:", useCaseInfo.totalRewardPool.toString());
