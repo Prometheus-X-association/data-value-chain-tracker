@@ -50,9 +50,6 @@ describe(configData.useCaseName, function () {
 
   before(async () => {
     console.log("before() started");
-
-    await provider.send("hardhat_reset", []);
-
     env = await setupTestEnvironment();
 
     incentiveSigner = new IncentiveSigner(
