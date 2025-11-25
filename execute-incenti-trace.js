@@ -96,7 +96,7 @@ app.post("/api/run-script", async (req, res) => {
         payload.extraIncentiveForAIProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.nextParticipantId)[0]?.numOfShare;
       }else{
         payload.prevDataId = [nodes.data.filter((obj)=> obj.nodeMetadata.incentiveReceivedFrom[0].organizationId === req.body.dataProviderId )[0]?.nodeId];
-        payload.extraIncentiveForAIProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.currentParticipantId)[0]?.numOfShare;
+        payload.extraIncentiveForAIProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.nextParticipantId)[0]?.numOfShare;
       }
 
       const response = await axios.post(baseUrl + "/api/node", payload, {
