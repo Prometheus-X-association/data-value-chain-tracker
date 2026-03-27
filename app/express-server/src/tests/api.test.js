@@ -25,6 +25,11 @@ describe('POST /api/node', () => {
       dataConsumerId: "consumer123",
       dataConsumerIsAIProvider: false,
       prevDataId: [],
+      extraIncentiveForAIProvider: {
+        numPoints: 10,
+        factor: 1,
+        factorCheck: false
+      },
       incentiveForDataProvider: {
         numPoints: 10,
         factor: 1.5,
@@ -39,15 +44,49 @@ describe('POST /api/node', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('message', 'Data saved successfully');
     expect(response.body.data).toHaveProperty('nodeId');
+    expect(response.body.data).toHaveProperty('canonicalKey', 'data:data123');
     expect(response.body.data).toHaveProperty('dataId', inputData.dataId);
   });
 
-  it('should return 500 if there is an error in generating the JSON-LD data', async () => {
+  it('should reuse the canonical node for repeated traceability events', async () => {
+    const inputData = {
+      dvctId: "dvct123",
+      usecaseContractId: "contract123",
+      usecaseContractTitle: "Test Contract",
+      contractId: "contract123",
+      dataId: "data123",
+      dataProviderId: "provider123",
+      dataConsumerId: "consumer123",
+      dataConsumerIsAIProvider: false,
+      prevDataId: [],
+      extraIncentiveForAIProvider: {
+        numPoints: 10,
+        factor: 1,
+        factorCheck: false
+      },
+      incentiveForDataProvider: {
+        numPoints: 10,
+        factor: 1.5,
+        factorCheck: true
+      }
+    };
+
+    await request(app).post('/api/node').send(inputData);
+    await request(app).post('/api/node').send({
+      ...inputData,
+      contractId: 'contract456'
+    });
+
+    const savedNodes = await Data.find({ canonicalKey: 'data:data123' });
+    expect(savedNodes).toHaveLength(1);
+  });
+
+  it('should return 400 if there is no canonical identity in the payload', async () => {
     const response = await request(app)
       .post('/api/node')
       .send({});
     
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(400);
     expect(response.body).toHaveProperty('error');
   });
 });
@@ -57,6 +96,8 @@ describe('GET /api/data/:nodeId', () => {
   it('should retrieve JSON-LD data for an existing node', async () => {
     const data = new Data({
       nodeId: "node123",
+      canonicalKey: "data:data123",
+      nodeType: "raw_data",
       dataId: "data123",
       nodeMetadata: {
         dvctId: "dvct123",
@@ -88,6 +129,8 @@ describe('DELETE /api/data/:nodeId', () => {
   it('should delete the node and return success', async () => {
     const data = new Data({
       nodeId: "node123",
+      canonicalKey: "data:data123",
+      nodeType: "raw_data",
       dataId: "data123",
       nodeMetadata: {
         dvctId: "dvct123",
@@ -119,6 +162,8 @@ describe('GET /api/data', () => {
   it('should retrieve all JSON-LD data', async () => {
     const data = new Data({
       nodeId: "node123",
+      canonicalKey: "data:data123",
+      nodeType: "raw_data",
       dataId: "data123",
       nodeMetadata: {
         dvctId: "dvct123",
@@ -153,6 +198,8 @@ describe('GET /api/node-tree/:nodeId', () => {
   it('should retrieve the node tree with total incentive', async () => {
     const data = new Data({
       nodeId: "node123",
+      canonicalKey: "data:data123",
+      nodeType: "raw_data",
       dataId: "data123",
       nodeMetadata: {
         dvctId: "dvct123",

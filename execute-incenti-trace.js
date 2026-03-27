@@ -52,33 +52,108 @@ function validatePayload(payload) {
   }
 }
 
+function buildTraceabilitySequence(body) {
+  const participants = Array.isArray(body.participantShare) ? body.participantShare : [];
+  const shareById = new Map(participants.map((participant) => [participant.participantId, participant]));
+
+  return {
+    currentParticipant: shareById.get(body.currentParticipantId) || null,
+    nextParticipant: shareById.get(body.nextParticipantId) || null,
+  };
+}
+
+function buildParticipantNodeReference(body, participantId) {
+  const useCaseId = body.useCaseId || body.usecaseContractId || body.contractId || body.dvctId;
+
+  if (body.dataId && useCaseId && participantId) {
+    return `trace-node:${useCaseId}:${body.dataId}:${participantId}`;
+  }
+
+  if (body.dataId && body.dvctId && participantId) {
+    return `trace-node:${body.dvctId}:${body.dataId}:${participantId}`;
+  }
+
+  if (body.dataId && participantId) {
+    return `trace-node:${body.dataId}:${participantId}`;
+  }
+
+  return participantId || "";
+}
+
+function buildTraceabilityPayloads(body, existingNodes) {
+  const { currentParticipant, nextParticipant } = buildTraceabilitySequence(body);
+  const providerReference = buildParticipantNodeReference(body, body.dataProviderId);
+  const consumerReference = buildParticipantNodeReference(body, body.dataConsumerId);
+  const providerExists = (existingNodes || []).some(
+    (node) => node.canonicalKey === providerReference || node.participantId === body.dataProviderId
+  );
+  const consumerExists = (existingNodes || []).some(
+    (node) => node.canonicalKey === consumerReference || node.participantId === body.dataConsumerId
+  );
+  const payloads = [];
+  const providerShare = currentParticipant?.numOfShare || 0;
+  const consumerShare = nextParticipant?.numOfShare || 0;
+
+  if (!providerExists) {
+    payloads.push({
+      dvctId: body.dvctId,
+      usecaseContractId: body.useCaseId,
+      usecaseContractTitle: body.useCaseContractTitle,
+      contractId: body.contractId,
+      dataId: body.dataId,
+      participantId: body.dataProviderId,
+      participantSourceId: body.currentParticipantId,
+      participantShare: providerShare,
+      dataProviderId: body.dataProviderId,
+      dataConsumerId: body.dataConsumerId,
+      dataConsumerIsAIProvider: false,
+      prevDataId: [],
+      incentiveForDataProvider: {
+        numPoints: providerShare,
+        factor: 1,
+        factorCheck: true,
+      },
+      extraIncentiveForAIProvider: {
+        numPoints: providerShare,
+        factor: 1,
+        factorCheck: true,
+      },
+    });
+  }
+
+  payloads.push({
+    dvctId: body.dvctId,
+    usecaseContractId: body.useCaseId,
+    usecaseContractTitle: body.useCaseContractTitle,
+    contractId: body.contractId,
+    dataId: body.dataId,
+    participantId: body.dataConsumerId,
+    participantSourceId: body.nextParticipantId,
+    participantShare: consumerShare,
+    dataProviderId: body.dataProviderId,
+    dataConsumerId: body.dataConsumerId,
+    dataConsumerIsAIProvider: true,
+    prevDataId: providerReference ? [providerReference] : [],
+    incentiveForDataProvider: {
+      numPoints: providerShare,
+      factor: 1,
+      factorCheck: true,
+    },
+    extraIncentiveForAIProvider: {
+      numPoints: consumerShare,
+      factor: 1,
+      factorCheck: true,
+    },
+  });
+
+  return payloads;
+}
+
 // Endpoint to trigger the test script
 app.post("/api/run-script", async (req, res) => {
   try {    
     // Always send traceability data
     try {
-      const payload={
-        "dvctId": "string",
-        "usecaseContractTitle": req.body.usecaseContractTitle,
-        "contractId": req.body.contactId,
-        "dataId": req.body.dataId,
-        "dataProviderId": req.body.dataProviderId,
-        "dataConsumerId": req.body.dataConsumerId,
-        "prevDataId": [
-          ""
-        ],
-        "incentiveForDataProvider": {
-          "numPoints": 0,
-          "factor": 0,
-          "factorCheck": true
-        },
-        "extraIncentiveForAIProvider": {
-          "numPoints": 0,
-          "factor": 0,
-          "factorCheck": true
-        },
-      }
-
       validatePayload(req.body);
       let baseUrl = 'http://localhost:9081';
 
@@ -90,19 +165,21 @@ app.post("/api/run-script", async (req, res) => {
         headers: { "Content-Type": "application/json" }
       });
 
-      if(nodes.data.length === 0){
-        payload.prevDataId = [''];
-        payload.incentiveForDataProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.currentParticipantId)[0]?.numOfShare;
-        payload.extraIncentiveForAIProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.nextParticipantId)[0]?.numOfShare;
-      }else{
-        payload.prevDataId = [nodes.data.filter((obj)=> obj.nodeMetadata.incentiveReceivedFrom[0].organizationId === req.body.dataProviderId )[0]?.nodeId];
-        payload.extraIncentiveForAIProvider.numPoints = req.body.participantShare.filter((obj) => obj.participantId === req.body.nextParticipantId)[0]?.numOfShare;
-      }
+      const traceabilityPayloads = buildTraceabilityPayloads(
+        {
+          ...req.body,
+          contractId: req.body.contractId,
+          useCaseContractTitle: req.body.useCaseContractTitle,
+        },
+        nodes.data
+      );
 
-      const response = await axios.post(baseUrl + "/api/node", payload, {
-        headers: { "Content-Type": "application/json" }
-      });
-      console.log("Success:", response.data);
+      for (const payload of traceabilityPayloads) {
+        const response = await axios.post(baseUrl + "/api/node", payload, {
+          headers: { "Content-Type": "application/json" }
+        });
+        console.log("Success:", response.data);
+      }
     } catch (error) {
       console.error("Error sending traceability data:", error);
       return res.status(500).send({ message: "Failed to send traceability data", error: error.message });
@@ -187,4 +264,3 @@ app.post("/api/run-script", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-

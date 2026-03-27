@@ -4,7 +4,13 @@ const dataSchema = new mongoose.Schema({
   "@context": Object,
   "@type": String,
   nodeId: String,
+  canonicalKey: { type: String, index: true },
+  nodeType: String,
   dataId: String,
+  participantId: String,
+  participantShare: Number,
+  participantSourceId: String,
+  usecaseContractTitle: String,
   nodeMetadata: {
     dvctId: String,
     usecaseContractId: String,
@@ -24,6 +30,6 @@ const dataSchema = new mongoose.Schema({
     nodeId: String,
     "@nodeUrl": String
   }]
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Data', dataSchema);

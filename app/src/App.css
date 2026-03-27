@@ -1,7 +1,108 @@
-.App {
-  text-align: center;
+.app-shell {
+  min-height: 100vh;
+  padding: 32px;
+  overflow-x: hidden;
 }
 
-.react-flow__node {
-  width: fit-content !important;
+.app-shell__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.app-shell__headline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  max-width: 1120px;
+}
+
+.app-shell__eyebrow {
+  margin: 0;
+  color: var(--color-accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.app-shell__header h1 {
+  margin: 0;
+  width: 100%;
+  color: var(--color-text-strong);
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-size: 50px;
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.app-shell__summary {
+  margin: 0;
+  width: 100%;
+  color: var(--color-text-muted);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+  align-self: start;
+}
+
+.app-shell__content {
+  min-height: calc(100vh - 190px);
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    padding: 20px;
+  }
+
+  .app-shell__header {
+    margin-bottom: 20px;
+  }
+
+  .app-shell__headline {
+    gap: 12px;
+  }
+
+  .app-shell__header h1 {
+    max-width: 13ch;
+    font-size: clamp(2.4rem, 11vw, 4.2rem);
+  }
+
+  .app-shell__summary {
+    max-width: 100%;
+  }
+
+  .app-shell__content {
+    min-height: calc(100vh - 220px);
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 16px;
+  }
+
+  .app-shell__header {
+    margin-bottom: 16px;
+  }
+
+  .app-shell__headline {
+    gap: 8px;
+  }
+
+  .app-shell__header h1 {
+    max-width: none;
+    font-size: clamp(2.25rem, 12vw, 3.5rem);
+    line-height: 0.98;
+  }
+
+  .app-shell__summary {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
 }
