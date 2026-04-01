@@ -1,8 +1,18 @@
-import { useReadContract, useWriteContract } from "wagmi";
-import { USECASE_CONTRACT_ADDRESS, USECASE_ABI } from "@/config/contracts";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { useAccount, usePublicClient, useReadContract, useWriteContract } from "wagmi";
+import {
+  TOKEN_ABI,
+  TOKEN_ADDRESS,
+  USECASE_CONTRACT_ADDRESS,
+  USECASE_ABI,
+} from "@/config/contracts";
+import { config } from "@/providers/web3";
 import { Address } from "viem";
 
 export function useUseCase(id: string) {
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+
   // Read use case data
   const {
     data: useCaseData,
@@ -37,6 +47,32 @@ export function useUseCase(id: string) {
   // Contract actions
   const actions = {
     depositRewards: async (amount: bigint) => {
+      if (address === undefined) {
+        throw new Error("Connect a wallet before depositing rewards");
+      }
+
+      if (publicClient === undefined) {
+        throw new Error("Public client is not available");
+      }
+
+      const currentAllowance = await publicClient.readContract({
+        address: TOKEN_ADDRESS,
+        abi: TOKEN_ABI,
+        functionName: "allowance",
+        args: [address, USECASE_CONTRACT_ADDRESS],
+      });
+
+      if (currentAllowance < amount) {
+        const approvalHash = await writeContractAsync({
+          address: TOKEN_ADDRESS,
+          abi: TOKEN_ABI,
+          functionName: "approve",
+          args: [USECASE_CONTRACT_ADDRESS, amount],
+        });
+
+        await waitForTransactionReceipt(config, { hash: approvalHash });
+      }
+
       return writeContractAsync({
         address: USECASE_CONTRACT_ADDRESS,
         abi: USECASE_ABI,

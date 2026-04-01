@@ -18,6 +18,29 @@ interface FinalResult {
   participants: ParticipantResult[];
 }
 
+const resolveRewardPool = (configData: any): bigint => {
+  const rawRewardPool =
+    configData.rewardPool ??
+    configData.rewardPoolAmount ??
+    configData.rewardAmount ??
+    "1000";
+
+  if (typeof rawRewardPool === "number") {
+    return ethers.parseEther(rawRewardPool.toString());
+  }
+
+  if (typeof rawRewardPool === "string") {
+    const normalized = rawRewardPool.trim();
+    if (normalized.length === 0) {
+      throw new Error("Reward pool value is empty");
+    }
+
+    return ethers.parseEther(normalized);
+  }
+
+  throw new Error("Reward pool must be provided as a number or string");
+};
+
 const getInputData = () => {
   const configFilePath = process.env.CONFIG_FILE;
   if (!configFilePath) {
@@ -32,13 +55,14 @@ const getInputData = () => {
 
 async function main(): Promise<FinalResult> {
   const configData = getInputData();
+  const rpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
   const agents: { [key: string]: ethers.Wallet } = {};
   const agentShares: Record<string, number> = {};
   const LOCK_DURATION = 24 * 60 * 60;
   const USE_CASE_ID = configData.useCaseName;
 
-  const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-  let REWARD_POOL = ethers.parseEther("1000");
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const REWARD_POOL = resolveRewardPool(configData);
   let isOrchestrator = false;
   
   let env;
@@ -83,7 +107,7 @@ async function main(): Promise<FinalResult> {
   }
 
   try {
-    await waitForTx(env.token.transfer(rewardDepositor.address, ethers.parseEther("1000")));
+    await waitForTx(env.token.transfer(rewardDepositor.address, REWARD_POOL));
   } catch (err) {
     console.error("Error transferring tokens to rewardDepositor:", err);
     process.exit(1);

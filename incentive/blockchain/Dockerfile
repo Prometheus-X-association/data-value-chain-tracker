@@ -22,6 +22,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 ENV SHELL=/bin/bash
+ENV NODE_ENV=docker
 
 RUN curl -L https://foundry.paradigm.xyz | bash
 
@@ -29,15 +30,16 @@ RUN /root/.foundry/bin/foundryup
 
 ENV PATH="/root/.foundry/bin:${PATH}"
 
+RUN cd /app && npx hardhat compile
+
 # Expose hardhat node port
 EXPOSE 8545
 
 # Create a startup script using npx
 RUN echo '#!/bin/sh' > /app/startup.sh && \
-    echo 'cd /app && npx hardhat compile && ' >> /app/startup.sh && \
     echo 'cd /app && npx hardhat node & ' >> /app/startup.sh && \
     echo 'sleep 5' >> /app/startup.sh && \
-    echo 'cd /app && npx hardhat run script/deployTestEnv.ts --network localhost' >> /app/startup.sh && \
+    echo 'cd /app && npx hardhat run script/deployTestEnv.ts --network localhost --no-compile' >> /app/startup.sh && \
     echo 'wait' >> /app/startup.sh && \
     chmod +x /app/startup.sh
 

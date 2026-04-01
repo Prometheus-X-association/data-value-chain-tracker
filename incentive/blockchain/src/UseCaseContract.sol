@@ -63,7 +63,7 @@ contract UseCaseContract is AccessControl, ReentrancyGuard {
     // Constants
     uint256 public constant MAX_PARTICIPANTS = 100;
     uint256 public constant MAX_TOTAL_SHARES = 10000; // 100%
-    uint256 public constant MIN_LOCKUP_PERIOD = 1 days;
+    uint256 public constant MIN_LOCKUP_PERIOD = 60;
     uint256 public constant MAX_LOCKUP_PERIOD = 365 days;
 
     /// @notice The PTX token contract used for reward distributions

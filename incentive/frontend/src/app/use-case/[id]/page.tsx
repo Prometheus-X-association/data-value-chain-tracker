@@ -15,7 +15,8 @@ import { Loader2 } from "lucide-react";
 export default function UseCasePage() {
   const { id } = useParams();
   const { address } = useAccount();
-  const { useCase, isLoading, error } = useUseCase(id as string);
+  const decodedUseCaseId = decodeURIComponent(String(id));
+  const { useCase, isLoading, error } = useUseCase(decodedUseCaseId);
 
   if (isLoading) {
     return (
@@ -37,7 +38,7 @@ export default function UseCasePage() {
     <Container>
       <div className="space-y-8">
         <PageHeader
-          title={`Use Case #${String(id)}`}
+          title={`Use Case #${decodedUseCaseId}`}
           description={`Created by ${useCase.owner}`}
         />
 
@@ -54,16 +55,16 @@ export default function UseCasePage() {
           </TabsContent>
 
           <TabsContent value="participants">
-            <UseCaseParticipants useCaseId={id as string} isOwner={isOwner} />
+            <UseCaseParticipants useCaseId={decodedUseCaseId} isOwner={isOwner} />
           </TabsContent>
 
           <TabsContent value="deposit">
-            <UseCaseDeposit useCaseId={id as string} />
+            <UseCaseDeposit useCaseId={decodedUseCaseId} />
           </TabsContent>
 
           {isOwner && (
             <TabsContent value="manage">
-              <UseCaseActions useCaseId={id as string} />
+              <UseCaseActions useCaseId={decodedUseCaseId} />
             </TabsContent>
           )}
         </Tabs>

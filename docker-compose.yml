@@ -38,9 +38,11 @@ services:
     environment:
       PORT: 3000
       PRIVATE_KEY: "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
-      RPC_URL: http://localhost:8545
+      RPC_URL: http://hardhat:8545
     depends_on:
       - hardhat
+    networks:
+      - core-network
 
   incentive-frontend:
     build:
@@ -50,6 +52,8 @@ services:
       - "3003:3000" # http://localhost:3003
     depends_on:
       - hardhat
+    networks:
+      - core-network
 
   incenti-trace:
     build:
@@ -57,11 +61,16 @@ services:
       context: ./
     environment:
       - ENVIRONMENT=production
+      - INCENTIVE_RPC_URL=http://hardhat:8545
+      - INCENTIVE_API_URL=http://incentive-api:3000
+      - USE_EXTERNAL_HARDHAT=true
     command: ["node", "./execute-incenti-trace.js"]
     ports:
       - "3005:9091" # http:localhost:3004
     depends_on:
       - core-api
+      - incentive-api
+      - hardhat
     networks:
       - core-network
     
@@ -96,6 +105,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8545:8545"
+    networks:
+      - core-network
 
 networks:
   core-network:

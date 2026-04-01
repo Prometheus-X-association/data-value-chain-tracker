@@ -112,14 +112,17 @@ async function main() {
   );
 
   const configDirApi = path.join(__dirname, "../../api/src/config");
-  if (!fs.existsSync(configDir)) {
-    fs.mkdirSync(configDir, { recursive: true });
-  }
+  const apiRootDir = path.join(__dirname, "../../api");
+  if (fs.existsSync(apiRootDir)) {
+    if (!fs.existsSync(configDirApi)) {
+      fs.mkdirSync(configDirApi, { recursive: true });
+    }
 
-  fs.writeFileSync(
-    path.join(configDirApi, "deployment.json"),
-    JSON.stringify(deploymentInfo, null, 2)
-  );
+    fs.writeFileSync(
+      path.join(configDirApi, "deployment.json"),
+      JSON.stringify(deploymentInfo, null, 2)
+    );
+  }
 
   console.log("Test environment deployed successfully!");
   console.log("Test accounts:");

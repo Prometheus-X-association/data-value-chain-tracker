@@ -11,6 +11,9 @@ import createHttpError from "http-errors";
 const app = express();
 const PORT = 9091;
 const environment = process.env.ENVIRONMENT;
+const incentiveRpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
+const incentiveApiUrl = process.env.INCENTIVE_API_URL;
+const useExternalHardhat = process.env.USE_EXTERNAL_HARDHAT === "true";
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -210,30 +213,37 @@ app.post("/api/run-script", async (req, res) => {
     const configPath = path.join(__dirname, "temp-config.json");
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
-    console.log("Starting Hardhat node...");
-    const hardhatNode = spawn("npm", ["run", "start:node"]);
+    let hardhatNode;
+    if (!useExternalHardhat) {
+      console.log("Starting Hardhat node...");
+      hardhatNode = spawn("npm", ["run", "start:node"]);
 
-    hardhatNode.stdout.on("data", (data) => {
-      console.log(`[Hardhat]: ${data}`);
-    });
+      hardhatNode.stdout.on("data", (data) => {
+        console.log(`[Hardhat]: ${data}`);
+      });
 
-    hardhatNode.stderr.on("data", (data) => {
-      console.error(`[Hardhat ERROR]: ${data}`);
-    });
+      hardhatNode.stderr.on("data", (data) => {
+        console.error(`[Hardhat ERROR]: ${data}`);
+      });
 
-    hardhatNode.on("error", (err) => {
-      console.error("Failed to start Hardhat node:", err);
-    });
+      hardhatNode.on("error", (err) => {
+        console.error("Failed to start Hardhat node:", err);
+      });
 
-    // Wait for Hardhat to start (naive method: sleep 5-10 seconds)
-    await new Promise((resolve) => setTimeout(resolve, 8000)); // Adjust as needed
+      // Wait for Hardhat to start (naive method: sleep 5-10 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 8000));
+    } else {
+      console.log(`Using external Hardhat node at ${incentiveRpcUrl}`);
+    }
   
     const command = `npx ts-node -P ./tsconfig.json './e2e-tests/integration/incentiveAndTraceability.ts'`;
 
     const execOptions = {
       env: { 
         ...process.env, 
-        CONFIG_FILE: configPath 
+        CONFIG_FILE: configPath,
+        INCENTIVE_RPC_URL: incentiveRpcUrl,
+        ...(incentiveApiUrl ? { INCENTIVE_API_URL: incentiveApiUrl } : {}),
       }
     };
 
@@ -246,8 +256,10 @@ app.post("/api/run-script", async (req, res) => {
       }
 
       console.log("Script stdout:", stdout);
-      console.log("Killing Hardhat node...");
-      kill(hardhatNode.pid, 'SIGTERM');
+      if (hardhatNode?.pid) {
+        console.log("Killing Hardhat node...");
+        kill(hardhatNode.pid, 'SIGTERM');
+      }
 
       res.status(200).send({ message: "Script executed successfully", stdout, stderr });
 

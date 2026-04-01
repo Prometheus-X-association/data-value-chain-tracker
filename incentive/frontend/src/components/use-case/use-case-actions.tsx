@@ -19,7 +19,7 @@ import { useTransaction } from "@/hooks/use-transaction";
 import { parseEther } from "viem";
 
 const managementSchema = z.object({
-  lockupPeriod: z.number().min(3600, "Minimum 1 hour required"),
+  lockupPeriod: z.number().min(60, "Minimum 60 seconds required"),
   participants: z.array(
     z.object({
       address: z
@@ -48,7 +48,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
   const form = useForm<ManagementForm>({
     resolver: zodResolver(managementSchema),
     defaultValues: {
-      lockupPeriod: 3600,
+      lockupPeriod: 60,
       participants:
         useCase?.participants.map((p) => ({
           address: p.participant,
@@ -150,7 +150,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="3600"
+                        placeholder="60"
                         {...field}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9]/g, "");

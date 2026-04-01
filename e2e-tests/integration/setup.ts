@@ -4,12 +4,14 @@ import {
   PTXToken,
 } from "../../incentive/blockchain/typechain-types";
 import { Server } from "http";
+import fs from "fs";
+import path from "path";
 import { startServer } from "../../incentive/api/src/server";
 import PTXTokenArtifact from "../../incentive/blockchain/artifacts/src/PTXToken.sol/PTXToken.json";
 import UseCaseContractArtifact from "../../incentive/blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
 
 export interface TestEnvironment {
-  apiServer: Server;
+  apiServer: Server | null;
   useCase: UseCaseContract;
   token: PTXToken;
   apiUrl: string;
@@ -20,8 +22,53 @@ export interface TestEnvironment {
 }
 
 export async function setupTestEnvironment(): Promise<TestEnvironment> {
+  const rpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
+  const apiPort = parseInt(process.env.INCENTIVE_API_PORT || "3001", 10);
+  const externalApiUrl = process.env.INCENTIVE_API_URL;
+
   // Setup provider and wallet
-  const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+  if (externalApiUrl) {
+    const deploymentPath = path.join(
+      process.cwd(),
+      "incentive/api/src/config/deployment.json"
+    );
+    const deploymentInfo = JSON.parse(
+      fs.readFileSync(deploymentPath, "utf-8")
+    ) as {
+      PTX_TOKEN_ADDRESS: string;
+      USECASE_CONTRACT_ADDRESS: string;
+    };
+
+    const owner = new ethers.Wallet(
+      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+      provider
+    );
+
+    const token = new ethers.Contract(
+      deploymentInfo.PTX_TOKEN_ADDRESS,
+      PTXTokenArtifact.abi,
+      owner
+    ) as unknown as PTXToken;
+
+    const useCase = new ethers.Contract(
+      deploymentInfo.USECASE_CONTRACT_ADDRESS,
+      UseCaseContractArtifact.abi,
+      owner
+    ) as unknown as UseCaseContract;
+
+    return {
+      apiServer: null,
+      useCase,
+      token,
+      apiUrl: externalApiUrl,
+      contracts: {
+        useCaseAddress: deploymentInfo.USECASE_CONTRACT_ADDRESS,
+        tokenAddress: deploymentInfo.PTX_TOKEN_ADDRESS,
+      },
+    };
+  }
 
   await provider.send("hardhat_reset", []);
 
@@ -58,11 +105,11 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
   await useCase.waitForDeployment();
 
   const apiConfig = {
-    port: 3001,
+    port: apiPort,
     privateKey: apiSigner.privateKey,
     useCaseAddress: await useCase.getAddress(),
     tokenAddress: await token.getAddress(),
-    rpcUrl: "http://127.0.0.1:8545",
+    rpcUrl,
   };
 
   const apiServer = await startServer(apiConfig);
@@ -71,7 +118,7 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
     apiServer,
     useCase,
     token,
-    apiUrl: `http://localhost:${apiConfig.port}`,
+    apiUrl: `http://127.0.0.1:${apiConfig.port}`,
     contracts: {
       useCaseAddress: await useCase.getAddress(),
       tokenAddress: await token.getAddress(),
