@@ -18,6 +18,31 @@ interface FinalResult {
   participants: ParticipantResult[];
 }
 
+const DEV_GAS_BALANCE = ethers.parseEther("1000");
+
+const ensureDevGasBalance = async (
+  provider: ethers.JsonRpcProvider,
+  address: string,
+  targetBalance: bigint = DEV_GAS_BALANCE,
+) => {
+  const currentBalance = await provider.getBalance(address);
+
+  if (currentBalance >= targetBalance) {
+    return;
+  }
+
+  const targetHex = ethers.toQuantity(targetBalance);
+
+  try {
+    await provider.send("anvil_setBalance", [address, targetHex]);
+    return;
+  } catch (_error) {
+    // Fall back for local chains that expose Hardhat's RPC extensions.
+  }
+
+  await provider.send("hardhat_setBalance", [address, targetHex]);
+};
+
 const resolveRewardPool = (configData: any): bigint => {
   const rawRewardPool =
     configData.rewardPool ??
@@ -93,6 +118,12 @@ async function main(): Promise<FinalResult> {
   });
 
   const agentAdresses = Object.values(agents).map((wallet: ethers.Wallet) => wallet.address);
+
+  await ensureDevGasBalance(provider, rewardDepositor.address);
+
+  for (const wallet of Object.values(agents)) {
+    await ensureDevGasBalance(provider, wallet.address);
+  }
 
   let incentiveSigner;
   try {

@@ -24,12 +24,7 @@ import CustomEdge from './CustomEdge';
 import { DataNodeCard } from './DataNodeCard';
 import { ApiNode, FlowEdgeData, FlowNodeData, Incentive, TreeApiNode } from './types';
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
-
-const baseUrl =
-  environment === 'production' || environment === 'container'
-    ? process.env.REACT_APP_BASE_URL_PROD
-    : process.env.REACT_APP_BASE_URL_DEV || '';
+const apiUrl = (path: string) => path;
 
 const edgeTypes: EdgeTypes = {
   custom: CustomEdge,
@@ -40,12 +35,12 @@ const nodeTypes: NodeTypes = {
 };
 
 const getNodes = async () => {
-  const response = await axios.get<ApiNode[]>(`${baseUrl}/api/data`);
+  const response = await axios.get<ApiNode[]>(apiUrl('/api/data'));
   return response.data;
 };
 
 const getNodesTree = async (nodeId: string) => {
-  const response = await axios.get<TreeApiNode>(`${baseUrl}/api/node-tree/${nodeId}`);
+  const response = await axios.get<TreeApiNode>(apiUrl(`/api/node-tree/${nodeId}`));
   return response.data;
 };
 

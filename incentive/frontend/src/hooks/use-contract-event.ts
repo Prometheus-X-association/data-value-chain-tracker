@@ -13,6 +13,14 @@ type ContractEvent = Log & {
   };
 };
 
+const getRpcUrl = () => {
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/rpc`;
+  }
+
+  return process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";
+};
+
 export function useContractEvents<T = Log>(
   config: UseWatchContractEventParameters & {
     onLogs?: EventHandler<T>;
@@ -28,7 +36,7 @@ export function useContractEvents<T = Log>(
 
     const client = createPublicClient({
       chain: hardhat,
-      transport: http(),
+      transport: http(getRpcUrl()),
     });
 
     async function getHistoricalLogs() {

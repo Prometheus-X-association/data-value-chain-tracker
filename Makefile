@@ -12,7 +12,7 @@ ENGINE_TEST_IMAGE = data-value-chain-tracker-engine-test:latest
 
 up:
 	@echo "Starting all services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
+	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 down:
 	@echo "Stopping all services..."
@@ -20,7 +20,7 @@ down:
 
 rebuild:
 	@echo "Rebuilding and starting all services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up --build -d
+	docker compose -f $(DOCKER_COMPOSE_FILE) up --build -d
 
 clean:
 	@echo "Cleaning up containers, networks, and volumes..."
