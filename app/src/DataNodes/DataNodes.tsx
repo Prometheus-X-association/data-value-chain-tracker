@@ -94,9 +94,10 @@ const buildEdgeSummary = (node: ApiNode) => {
 
   const summaryParts = [
     dvctId ? `DVCT ${dvctId}` : null,
-    usecaseContractId ? `Contract ${formatReference(usecaseContractId, 32)}` : null,
-    dataProviderId ? `From ${formatReference(dataProviderId, 28)}` : null,
-    dataConsumerId ? `To ${formatReference(dataConsumerId, 28)}` : null,
+    dataProviderId && dataConsumerId
+      ? `${formatReference(dataProviderId, 18)} -> ${formatReference(dataConsumerId, 18)}`
+      : null,
+    usecaseContractId ? formatReference(usecaseContractId, 22) : null,
     incentiveReceivedFrom.length > 0 ? `${getIncentiveTotal(incentiveReceivedFrom)} pts` : null,
   ].filter(Boolean);
 
@@ -340,6 +341,31 @@ const buildGraph = (data: ApiNode[]) => {
   const horizontalSpacing = Math.max(400, Math.min(620, 340 + widestLevelCount * 28));
   const verticalSpacing = Math.max(420, Math.min(620, 360 + maxDepth * 32));
 
+  const getDisplayConsumerIds = (node?: ApiNode) => {
+    if (!node) {
+      return [];
+    }
+
+    const childConsumers = (node.childNode || [])
+      .map((child) => nodeMap.get(child.nodeId))
+      .filter(Boolean)
+      .map(
+        (childNode) =>
+          childNode?.participantId ||
+          childNode?.nodeMetadata?.dataConsumerId ||
+          childNode?.nodeMetadata?.dataProviderId,
+      )
+      .filter((value): value is string => Boolean(value));
+
+    const uniqueConsumers = Array.from(new Set(childConsumers));
+
+    if (uniqueConsumers.length > 0) {
+      return uniqueConsumers;
+    }
+
+    return [];
+  };
+
   const flowNodes: Node<FlowNodeData>[] = Object.entries(groupedLevels).flatMap(
     ([levelValue, nodeIds]) => {
       const level = Number(levelValue);
@@ -380,8 +406,12 @@ const buildGraph = (data: ApiNode[]) => {
             nodeType: (node?.nodeType || 'trace_node').replace(/_/g, ' '),
             incentiveTotal,
             participantShare: node?.participantShare || incentiveTotal,
+            isRoot: !node?.prevNode || node.prevNode.length === 0,
             providerId: formatReference(metadata.dataProviderId || 'Unknown', 34),
-            consumerId: formatReference(metadata.dataConsumerId || 'Unknown', 34),
+            consumerIds:
+              !node?.prevNode || node.prevNode.length === 0
+                ? []
+                : getDisplayConsumerIds(node).map((consumerId) => formatReference(consumerId, 34)),
           },
         };
       });
@@ -623,7 +653,7 @@ export const DataNodes = () => {
             <p className="graph-panel__label">Network view</p>
             <h2>{activeRoot ? `Subtree: ${activeRoot}` : 'Full chain overview'}</h2>
             <p className="graph-canvas-shell__hint">
-              Select a node to inspect metadata.
+              Select a node or edge to inspect metadata without crowding the canvas.
             </p>
           </div>
         </div>

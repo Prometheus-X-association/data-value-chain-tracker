@@ -52,8 +52,9 @@ export interface FlowNodeData extends Record<string, unknown> {
   nodeType: string;
   incentiveTotal: number;
   participantShare: number;
+  isRoot: boolean;
   providerId: string;
-  consumerId: string;
+  consumerIds: string[];
 }
 
 export interface FlowEdgeData extends Record<string, unknown> {

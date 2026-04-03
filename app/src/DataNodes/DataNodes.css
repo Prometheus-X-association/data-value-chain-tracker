@@ -297,6 +297,18 @@
   text-align: left;
 }
 
+.data-node-card__consumer-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.data-node-card__consumer-list li {
+  overflow-wrap: anywhere;
+}
+
 .data-node-card__handle {
   width: 10px;
   height: 10px;
@@ -305,19 +317,20 @@
 }
 
 .edge-label-renderer__custom-edge {
-  max-width: min(220px, calc(100vw - 160px));
-  padding: 7px 11px;
+  max-width: min(158px, calc(100vw - 220px));
+  padding: 5px 8px;
   border: 1px solid rgba(139, 94, 24, 0.18);
-  border-radius: 16px;
+  border-radius: 12px;
   background: rgba(255, 251, 244, 0.99);
   color: var(--color-text);
-  font-size: 0.66rem;
+  font-size: 0.56rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.25;
   white-space: normal;
   overflow-wrap: anywhere;
   text-align: center;
-  box-shadow: 0 12px 24px rgba(70, 46, 17, 0.14);
+  pointer-events: none;
+  box-shadow: 0 8px 16px rgba(70, 46, 17, 0.1);
 }
 
 .graph-detail-card__header {
