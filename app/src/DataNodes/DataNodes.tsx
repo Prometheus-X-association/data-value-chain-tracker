@@ -24,6 +24,10 @@ import CustomEdge from './CustomEdge';
 import { DataNodeCard } from './DataNodeCard';
 import { ApiNode, FlowEdgeData, FlowNodeData, Incentive, TreeApiNode } from './types';
 
+type DataNodesProps = {
+  organizationId: string;
+};
+
 const apiUrl = (path: string) => path;
 
 const edgeTypes: EdgeTypes = {
@@ -35,12 +39,16 @@ const nodeTypes: NodeTypes = {
 };
 
 const getNodes = async () => {
-  const response = await axios.get<ApiNode[]>(apiUrl('/api/data'));
+  const response = await axios.get<ApiNode[]>(apiUrl('/api/data'), {
+    withCredentials: true,
+  });
   return response.data;
 };
 
 const getNodesTree = async (nodeId: string) => {
-  const response = await axios.get<TreeApiNode>(apiUrl(`/api/node-tree/${nodeId}`));
+  const response = await axios.get<TreeApiNode>(apiUrl(`/api/node-tree/${nodeId}`), {
+    withCredentials: true,
+  });
   return response.data;
 };
 
@@ -443,7 +451,7 @@ const buildGraph = (data: ApiNode[]) => {
   return { flowNodes, flowEdges, normalizedData };
 };
 
-export const DataNodes = () => {
+export const DataNodes = ({ organizationId }: DataNodesProps) => {
   const [sourceNodes, setSourceNodes] = useState<ApiNode[]>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<FlowNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<FlowEdgeData>>([]);
@@ -595,6 +603,7 @@ export const DataNodes = () => {
             Switch between the full network and a focused subtree, then inspect
             details in the side panel instead of reading raw JSON on the canvas.
           </p>
+          <p className="graph-status">Scoped to {organizationId}.</p>
         </div>
 
         <div className="graph-panel__section graph-panel__section--surface">

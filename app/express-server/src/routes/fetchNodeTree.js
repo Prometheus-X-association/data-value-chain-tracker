@@ -1,7 +1,9 @@
 const Data = require('../models/data');
 
 // Recursive function to fetch node, its child nodes, and calculate the total incentive
-const fetchNodeTree = async (nodeId, visited = new Set()) => {
+const fetchNodeTree = async (nodeId, options = {}, visited = new Set()) => {
+  const { allowedNodeIds } = options;
+
   if (visited.has(nodeId)) {
     return null;
   }
@@ -13,6 +15,10 @@ const fetchNodeTree = async (nodeId, visited = new Set()) => {
   });
 
   if (!node) {
+    return null;
+  }
+
+  if (allowedNodeIds && !allowedNodeIds.has(node.nodeId)) {
     return null;
   }
 
@@ -30,7 +36,7 @@ const fetchNodeTree = async (nodeId, visited = new Set()) => {
 
   // Recursively fetch all child nodes and their incentives
   for (const child of node.childNode) {
-    const childData = await fetchNodeTree(child.nodeId, visited);
+    const childData = await fetchNodeTree(child.nodeId, options, visited);
     if (childData) {
       childNodes.push(childData);
       totalIncentive += childData.totalIncentive; // Add the incentive from child nodes to the total incentive

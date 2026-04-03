@@ -14,6 +14,7 @@ const environment = process.env.ENVIRONMENT;
 const incentiveRpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
 const incentiveApiUrl = process.env.INCENTIVE_API_URL;
 const useExternalHardhat = process.env.USE_EXTERNAL_HARDHAT === "true";
+const internalApiToken = process.env.DVCT_INTERNAL_API_TOKEN || "";
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -164,8 +165,11 @@ app.post("/api/run-script", async (req, res) => {
         baseUrl = 'http://core-api:9081';
       }
 
-      const nodes = await axios.get(baseUrl + "/api/data", {
-        headers: { "Content-Type": "application/json" }
+      const nodes = await axios.get(baseUrl + "/api/internal/data", {
+        headers: {
+          "Content-Type": "application/json",
+          "X-DVCT-Internal-Token": internalApiToken,
+        }
       });
 
       const traceabilityPayloads = buildTraceabilityPayloads(

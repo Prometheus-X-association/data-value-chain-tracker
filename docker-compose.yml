@@ -24,6 +24,7 @@ services:
       - "3001:9081" # http:localhost:3001
     environment:
       MONGODB_URI: "mongodb://mongodb:27017/jsonldDB"
+      DVCT_INTERNAL_API_TOKEN: "dvct-internal-dev-token"
     depends_on:
       - mongodb
     networks:
@@ -64,6 +65,7 @@ services:
       - INCENTIVE_RPC_URL=http://hardhat:8545
       - INCENTIVE_API_URL=http://incentive-api:3000
       - USE_EXTERNAL_HARDHAT=true
+      - DVCT_INTERNAL_API_TOKEN=dvct-internal-dev-token
     command: ["node", "./execute-incenti-trace.js"]
     ports:
       - "3005:9091" # http:localhost:3004

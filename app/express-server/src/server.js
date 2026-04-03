@@ -9,7 +9,12 @@ const app = express();
 const port = 9081;
 
 const cors = require('cors');
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 
 // Connect to MongoDB
 connectWithRetry();

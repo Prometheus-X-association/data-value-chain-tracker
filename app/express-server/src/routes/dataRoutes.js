@@ -6,6 +6,18 @@ const { updateChildNode } = require('./updateChildNode');
 const { updateChildPrevNode } = require('./updateChildPrevNode');
 const { fetchNodeTree } = require('./fetchNodeTree'); // Ensure this function is available
 const {
+  attachSessionCookie,
+  authenticateCredentials,
+  clearSessionCookie,
+  createSession,
+  destroySession,
+  expandToAuthorizedHierarchy,
+  getSessionFromRequest,
+  nodeBelongsToOrganization,
+  requireAuthenticatedSession,
+  requireInternalApiToken,
+} = require('../lib/auth');
+const {
   buildCanonicalKey,
   dedupeIncentives,
   dedupeLinks,
@@ -280,13 +292,51 @@ router.post('/node', async (req, res) => {
 });
 
 // API to retrieve JSON-LD data based on nodeId
-router.get('/data/:nodeId', async (req, res) => {
+router.post('/auth/login', async (req, res) => {
+  const { username = '', password = '' } = req.body || {};
+  const authenticatedUser = authenticateCredentials(
+    String(username).trim(),
+    String(password),
+  );
+
+  if (!authenticatedUser) {
+    clearSessionCookie(res);
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  const nextSessionId = createSession(authenticatedUser);
+  attachSessionCookie(res, nextSessionId);
+  return res.json(authenticatedUser);
+});
+
+router.post('/auth/logout', async (req, res) => {
+  const activeSession = getSessionFromRequest(req);
+
+  if (activeSession?.sessionId) {
+    destroySession(activeSession.sessionId);
+  }
+
+  clearSessionCookie(res);
+  res.status(204).send();
+});
+
+router.get('/auth/me', requireAuthenticatedSession, async (req, res) => {
+  res.json({
+    username: req.auth.username,
+    organizationId: req.auth.organizationId,
+    displayName: req.auth.displayName,
+  });
+});
+
+router.get('/data/:nodeId', requireAuthenticatedSession, async (req, res) => {
   const { nodeId } = req.params;
   try {
+    const allData = await Data.find({});
+    const authorizedGraph = expandToAuthorizedHierarchy(allData, req.auth.organizationId);
     const data = await Data.findOne({
       $or: [{ nodeId }, { canonicalKey: nodeId }, { dataId: nodeId }],
     });
-    if (data) {
+    if (data && authorizedGraph.some((node) => node.nodeId === data.nodeId)) {
       res.json(data);
     } else {
       res.status(404).json({ message: 'Node not found' });
@@ -296,12 +346,17 @@ router.get('/data/:nodeId', async (req, res) => {
   }
 });
 
-router.delete('/data/:nodeId', async (req, res) => {
+router.delete('/data/:nodeId', requireAuthenticatedSession, async (req, res) => {
   const { nodeId } = req.params;
   try {
     const node = await Data.findOne({
       $or: [{ nodeId }, { canonicalKey: nodeId }, { dataId: nodeId }],
     });
+
+    if (!node || !nodeBelongsToOrganization(node, req.auth.organizationId)) {
+      return res.status(404).json({ message: 'Node not found' });
+    }
+
     const allNodes = await Data.find();
     const data = node
       ? await Data.findOneAndDelete({ nodeId: node.nodeId })
@@ -325,7 +380,17 @@ router.delete('/data/:nodeId', async (req, res) => {
 });
 
 // API to retrieve all JSON-LD data
-router.get('/data', async (req, res) => {
+router.get('/data', requireAuthenticatedSession, async (req, res) => {
+  try {
+    const allData = await Data.find({});
+    const authorizedGraph = expandToAuthorizedHierarchy(allData, req.auth.organizationId);
+    res.json(authorizedGraph);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/internal/data', requireInternalApiToken, async (req, res) => {
   try {
     const allData = await Data.find({});
     res.json(allData);
@@ -335,10 +400,21 @@ router.get('/data', async (req, res) => {
 });
 
 // API to retrieve node and all connected child and grandchild nodes, with total incentive calculation
-router.get('/node-tree/:nodeId', async (req, res) => {
+router.get('/node-tree/:nodeId', requireAuthenticatedSession, async (req, res) => {
   const { nodeId } = req.params;
   try {
-    const nodeTree = await fetchNodeTree(nodeId);
+    const allData = await Data.find({});
+    const authorizedGraph = expandToAuthorizedHierarchy(allData, req.auth.organizationId);
+    const allowedNodeIds = new Set(authorizedGraph.map((node) => node.nodeId));
+    const requestedNode = await Data.findOne({
+      $or: [{ nodeId }, { canonicalKey: nodeId }, { dataId: nodeId }],
+    });
+
+    if (!requestedNode || !allowedNodeIds.has(requestedNode.nodeId)) {
+      return res.status(404).json({ message: 'Node not found' });
+    }
+
+    const nodeTree = await fetchNodeTree(requestedNode.nodeId, { allowedNodeIds });
     if (nodeTree) {
       res.json(nodeTree); // Return node tree with total incentive
     } else {
