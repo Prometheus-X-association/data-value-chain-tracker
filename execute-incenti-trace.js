@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import axios from "axios";
+import { ethers } from "ethers";
 import { spawn } from "child_process";
 import kill from 'tree-kill';
 import createHttpError from "http-errors";
@@ -15,16 +16,13 @@ const incentiveRpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545"
 const incentiveApiUrl = process.env.INCENTIVE_API_URL;
 const useExternalHardhat = process.env.USE_EXTERNAL_HARDHAT === "true";
 const internalApiToken = process.env.DVCT_INTERNAL_API_TOKEN || "";
+const organizationWalletsJson = process.env.DVCT_ORGANIZATION_WALLETS_JSON || "[]";
+const organizationWalletsFile = process.env.DVCT_ORGANIZATION_WALLETS_FILE || "";
 
 // Middleware to parse JSON requests
 app.use(express.json());
 
-const addresses = 
-    ["0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
-      "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
-      "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
-      "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
-    ]
+const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
 
 function validatePayload(payload) {
   const requiredFields = [
@@ -54,6 +52,98 @@ function validatePayload(payload) {
       throw createHttpError(400, `Missing or invalid field: ${field}`);
     }
   }
+}
+
+function getConfiguredOrganizationWallets() {
+  try {
+    const registrySource = organizationWalletsFile
+      ? fs.readFileSync(path.resolve(process.cwd(), organizationWalletsFile), "utf8")
+      : organizationWalletsJson;
+    const parsedWallets = JSON.parse(registrySource);
+
+    if (!Array.isArray(parsedWallets)) {
+      throw createHttpError(500, "Organization wallet registry must be an array");
+    }
+
+    return parsedWallets.map((wallet) => ({
+      organizationId: wallet.organizationId || wallet.participantId || "",
+      privateKey: wallet.privateKey || "",
+      aliases: Array.isArray(wallet.aliases) ? wallet.aliases.filter(Boolean) : [],
+      label: wallet.label || wallet.organizationId || wallet.participantId || "wallet",
+    }));
+  } catch (error) {
+    if (error?.status) {
+      throw error;
+    }
+
+    if (organizationWalletsFile) {
+      throw createHttpError(
+        500,
+        `Unable to read organization wallet registry file: ${organizationWalletsFile}`,
+      );
+    }
+
+    throw createHttpError(500, "DVCT_ORGANIZATION_WALLETS_JSON is not valid JSON");
+  }
+}
+
+function buildOrganizationWalletLookup() {
+  const walletLookup = new Map();
+
+  getConfiguredOrganizationWallets().forEach((walletRecord) => {
+    const identifiers = [
+      walletRecord.organizationId,
+      ...walletRecord.aliases,
+    ]
+      .map((value) => String(value || "").trim())
+      .filter(Boolean);
+
+    if (!walletRecord.organizationId || !PRIVATE_KEY_PATTERN.test(walletRecord.privateKey)) {
+      throw createHttpError(
+        500,
+        `Wallet registry entry "${walletRecord.label}" is missing a valid organizationId or privateKey`,
+      );
+    }
+
+    walletRecord.walletAddress = new ethers.Wallet(walletRecord.privateKey).address;
+
+    identifiers.forEach((identifier) => {
+      if (walletLookup.has(identifier)) {
+        throw createHttpError(
+          500,
+          `Duplicate wallet registry identifier detected: ${identifier}`,
+        );
+      }
+
+      walletLookup.set(identifier, walletRecord);
+    });
+  });
+
+  return walletLookup;
+}
+
+function resolveParticipantWallets(body) {
+  const walletLookup = buildOrganizationWalletLookup();
+  const participants = Array.isArray(body.participantShare) ? body.participantShare : [];
+
+  return participants.map((participant) => {
+    const participantId = String(participant.participantId || "").trim();
+    const walletRecord = walletLookup.get(participantId);
+
+    if (!walletRecord) {
+      throw createHttpError(
+        400,
+        `No wallet mapping found for participant "${participantId || participant.participantName || participant.role}"`,
+      );
+    }
+
+    return {
+      ...participant,
+      participantWallet: walletRecord.privateKey,
+      participantWalletAddress: walletRecord.walletAddress,
+      walletOrganizationId: walletRecord.organizationId,
+    };
+  });
 }
 
 function buildTraceabilitySequence(body) {
@@ -198,18 +288,10 @@ app.post("/api/run-script", async (req, res) => {
     }
 
     // If reachEndFlow is true, continue with script execution
-    const body = req.body;
-    var index = 0;
-    body.participantShare.forEach((participant) =>{
-      if(participant.rewardDepositor){
-        participant.participantWallet = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-      }else{
-        participant.participantWallet = addresses[index];
-        index = index + 1;
-      }
-    })
-
-    const config = body;
+    const config = {
+      ...req.body,
+      participantShare: resolveParticipantWallets(req.body),
+    };
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 

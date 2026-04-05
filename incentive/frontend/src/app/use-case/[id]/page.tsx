@@ -12,6 +12,15 @@ import { UseCaseActions } from "@/components/use-case/use-case-actions";
 import { UseCaseDeposit } from "@/components/use-case/use-case-deposit";
 import { Loader2 } from "lucide-react";
 
+function getDisplayUseCaseName(id: string) {
+  if (!id) return id;
+  if (!id.startsWith("http://") && !id.startsWith("https://") && id.includes(":")) {
+    return id.split(":")[0];
+  }
+
+  return id;
+}
+
 export default function UseCasePage() {
   const { id } = useParams();
   const { address } = useAccount();
@@ -33,12 +42,13 @@ export default function UseCasePage() {
   if (!useCase) return <div>Use case not found</div>;
 
   const isOwner = address?.toLowerCase() === useCase.owner.toLowerCase();
+  const displayName = getDisplayUseCaseName(decodedUseCaseId);
 
   return (
     <Container>
       <div className="space-y-8">
         <PageHeader
-          title={`Use Case #${decodedUseCaseId}`}
+          title={`Use Case #${displayName}`}
           description={`Created by ${useCase.owner}`}
         />
 

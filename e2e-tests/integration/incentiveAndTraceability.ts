@@ -76,15 +76,17 @@ const getInputData = () => {
   return JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
 };
 
-
-
 async function main(): Promise<FinalResult> {
   const configData = getInputData();
   const rpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
   const agents: { [key: string]: ethers.Wallet } = {};
   const agentShares: Record<string, number> = {};
   const LOCK_DURATION = 24 * 60 * 60;
-  const USE_CASE_ID = configData.useCaseName;
+  const USE_CASE_ID = String(configData.useCaseName ?? "").trim();
+
+  if (!USE_CASE_ID) {
+    throw new Error("Missing useCaseName for incentive execution");
+  }
 
   const provider = new ethers.JsonRpcProvider(rpcUrl);
   const REWARD_POOL = resolveRewardPool(configData);

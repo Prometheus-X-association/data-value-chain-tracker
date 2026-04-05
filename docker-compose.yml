@@ -66,6 +66,7 @@ services:
       - INCENTIVE_API_URL=http://incentive-api:3000
       - USE_EXTERNAL_HARDHAT=true
       - DVCT_INTERNAL_API_TOKEN=dvct-internal-dev-token
+      - DVCT_ORGANIZATION_WALLETS_FILE=config/organization-wallets.dev.json
     command: ["node", "./execute-incenti-trace.js"]
     ports:
       - "3005:9091" # http:localhost:3004
@@ -82,6 +83,7 @@ services:
       context: ./
     environment:
       - ENVIRONMENT=production
+      - DVCT_ORGANIZATION_WALLETS_FILE=config/organization-wallets.dev.json
     command: ["node", "./core-engine.js"]
     ports:
       - "3004:9091" # http:localhost:3004

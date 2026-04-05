@@ -9,7 +9,7 @@ import { hardhat } from "wagmi/chains";
 
 const getRpcUrl = () => {
   if (typeof window !== "undefined") {
-    return `${window.location.origin}/rpc`;
+    return `${window.location.origin}/incentive/rpc`;
   }
 
   return process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";

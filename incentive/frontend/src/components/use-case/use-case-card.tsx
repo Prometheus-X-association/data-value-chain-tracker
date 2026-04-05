@@ -19,6 +19,15 @@ interface UseCaseCardProps {
   currentAddress: `0x${string}` | undefined;
 }
 
+function getDisplayUseCaseName(id: string) {
+  if (!id) return id;
+  if (!id.startsWith("http://") && !id.startsWith("https://") && id.includes(":")) {
+    return id.split(":")[0];
+  }
+
+  return id;
+}
+
 export function UseCaseCard({ useCase, currentAddress }: UseCaseCardProps) {
   const isOwner =
     currentAddress &&
@@ -29,9 +38,9 @@ export function UseCaseCard({ useCase, currentAddress }: UseCaseCardProps) {
     useCase.rewardsLocked &&
     useCase.lockTime > 0n &&
     currentTime >= useCase.lockTime + useCase.lockupPeriod;
+  const displayName = getDisplayUseCaseName(useCase.id);
 
   const getStatus = () => {
-    console.log(useCase.id, useCase.lockTime, useCase.lockupPeriod, currentTime);
     if (isFinished) return { label: "Finished", variant: "secondary" as const };
     if (useCase.rewardsLocked)
       return { label: "Locked", variant: "secondary" as const };
@@ -44,7 +53,7 @@ export function UseCaseCard({ useCase, currentAddress }: UseCaseCardProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Use Case #{useCase.id}</CardTitle>
+          <CardTitle>Use Case #{displayName}</CardTitle>
           <div className="flex gap-2">
             {isOwner && <Badge variant="secondary">Owner</Badge>}
             <Badge variant={status.variant}>{status.label}</Badge>
@@ -93,7 +102,7 @@ export function UseCaseCard({ useCase, currentAddress }: UseCaseCardProps) {
             </div>
           </div>
           <Button asChild className="w-full">
-            <Link href={`/use-case/${useCase.id}`}>
+            <Link href={`/use-case/${encodeURIComponent(useCase.id)}`}>
               <Eye className="mr-2 h-4 w-4" />
               View Details
             </Link>

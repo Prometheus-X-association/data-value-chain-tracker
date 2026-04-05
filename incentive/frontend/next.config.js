@@ -8,6 +8,18 @@ import "./src/env.js";
 const config = {
   output: "standalone",
   basePath: "/incentive",
+  async rewrites() {
+    return [
+      {
+        source: "/rpc",
+        destination: "http://hardhat:8545",
+      },
+      {
+        source: "/rpc/:path*",
+        destination: "http://hardhat:8545/:path*",
+      },
+    ];
+  },
 };
 
 export default config;

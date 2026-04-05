@@ -17,3 +17,4 @@ incentive/api/private-keys/*
 incentive/api/scripts/storage/*
 incentive/api/src/storage/*
 storage/keypairs.json
+config/organization-wallets.dev.json
