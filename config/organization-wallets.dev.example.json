@@ -1,0 +1,152 @@
+[
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec01",
+    "label": "Participant ec01",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_01"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec02",
+    "label": "Participant ec02",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_02"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec03",
+    "label": "Participant ec03",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_03"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec04",
+    "label": "Participant ec04",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_04"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec05",
+    "label": "Participant ec05",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_05"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec06",
+    "label": "Participant ec06",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_06"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec07",
+    "label": "Participant ec07",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_07"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec08",
+    "label": "Participant ec08",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_08"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec09",
+    "label": "Participant ec09",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_09"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18a1dee71f9f096baec10",
+    "label": "Participant ec10",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_10"
+  },
+  {
+    "organizationId": "http://localhost:4040/v1/catalog/participants/66d18724ee71f9f096bae810",
+    "label": "Participant bae810",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_11"
+  },
+  {
+    "organizationId": "dev-org-12",
+    "label": "Dev wallet 12",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_12"
+  },
+  {
+    "organizationId": "dev-org-13",
+    "label": "Dev wallet 13",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_13"
+  },
+  {
+    "organizationId": "dev-org-14",
+    "label": "Dev wallet 14",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_14"
+  },
+  {
+    "organizationId": "dev-org-15",
+    "label": "Dev wallet 15",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_15"
+  },
+  {
+    "organizationId": "dev-org-16",
+    "label": "Dev wallet 16",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_16"
+  },
+  {
+    "organizationId": "dev-org-17",
+    "label": "Dev wallet 17",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_17"
+  },
+  {
+    "organizationId": "dev-org-18",
+    "label": "Dev wallet 18",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_18"
+  },
+  {
+    "organizationId": "dev-org-19",
+    "label": "Dev wallet 19",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_19"
+  },
+  {
+    "organizationId": "dev-org-20",
+    "label": "Dev wallet 20",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_20"
+  },
+  {
+    "organizationId": "dev-org-21",
+    "label": "Dev wallet 21",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_21"
+  },
+  {
+    "organizationId": "dev-org-22",
+    "label": "Dev wallet 22",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_22"
+  },
+  {
+    "organizationId": "dev-org-23",
+    "label": "Dev wallet 23",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_23"
+  },
+  {
+    "organizationId": "dev-org-24",
+    "label": "Dev wallet 24",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_24"
+  },
+  {
+    "organizationId": "dev-org-25",
+    "label": "Dev wallet 25",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_25"
+  },
+  {
+    "organizationId": "dev-org-26",
+    "label": "Dev wallet 26",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_26"
+  },
+  {
+    "organizationId": "dev-org-27",
+    "label": "Dev wallet 27",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_27"
+  },
+  {
+    "organizationId": "dev-org-28",
+    "label": "Dev wallet 28",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_28"
+  },
+  {
+    "organizationId": "dev-org-29",
+    "label": "Dev wallet 29",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_29"
+  },
+  {
+    "organizationId": "dev-org-30",
+    "label": "Dev wallet 30",
+    "privateKey": "0xREPLACE_WITH_PRIVATE_KEY_30"
+  }
+]

@@ -12,10 +12,20 @@ import { UseCaseActions } from "@/components/use-case/use-case-actions";
 import { UseCaseDeposit } from "@/components/use-case/use-case-deposit";
 import { Loader2 } from "lucide-react";
 
+function getDisplayUseCaseName(id: string) {
+  if (!id) return id;
+  if (!id.startsWith("http://") && !id.startsWith("https://") && id.includes(":")) {
+    return id.split(":")[0];
+  }
+
+  return id;
+}
+
 export default function UseCasePage() {
   const { id } = useParams();
   const { address } = useAccount();
-  const { useCase, isLoading, error } = useUseCase(id as string);
+  const decodedUseCaseId = decodeURIComponent(String(id));
+  const { useCase, isLoading, error } = useUseCase(decodedUseCaseId);
 
   if (isLoading) {
     return (
@@ -32,12 +42,13 @@ export default function UseCasePage() {
   if (!useCase) return <div>Use case not found</div>;
 
   const isOwner = address?.toLowerCase() === useCase.owner.toLowerCase();
+  const displayName = getDisplayUseCaseName(decodedUseCaseId);
 
   return (
     <Container>
       <div className="space-y-8">
         <PageHeader
-          title={`Use Case #${String(id)}`}
+          title={`Use Case #${displayName}`}
           description={`Created by ${useCase.owner}`}
         />
 
@@ -54,16 +65,16 @@ export default function UseCasePage() {
           </TabsContent>
 
           <TabsContent value="participants">
-            <UseCaseParticipants useCaseId={id as string} isOwner={isOwner} />
+            <UseCaseParticipants useCaseId={decodedUseCaseId} isOwner={isOwner} />
           </TabsContent>
 
           <TabsContent value="deposit">
-            <UseCaseDeposit useCaseId={id as string} />
+            <UseCaseDeposit useCaseId={decodedUseCaseId} />
           </TabsContent>
 
           {isOwner && (
             <TabsContent value="manage">
-              <UseCaseActions useCaseId={id as string} />
+              <UseCaseActions useCaseId={decodedUseCaseId} />
             </TabsContent>
           )}
         </Tabs>

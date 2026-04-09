@@ -9,14 +9,15 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "ptx-deploy": "npx hardhat ignition deploy ./ignition/modules/PTXProtocol.ts --network localhost",
-    "ptx-deploy-test": "npx hardhat run script/deployTestEnv.ts --network localhost",
-    "export-abis": "npx hardhat compile && npx ts-node script/exportAbis.ts",
-    "export-abis-to-api": "npx hardhat compile && npx ts-node script/exportAbisToApi.ts",
-    "node": "npx hardhat node",
+    "ptx-deploy": "hardhat ignition deploy ./ignition/modules/PTXProtocol.ts --network localhost",
+    "ptx-deploy-test": "hardhat run script/deployTestEnv.ts --network localhost",
+    "ptx-fund-wallet": "hardhat run script/fundWallet.ts --network localhost",
+    "export-abis": "hardhat compile && ts-node script/exportAbis.ts",
+    "export-abis-to-api": "hardhat compile && ts-node script/exportAbisToApi.ts",
+    "node": "hardhat node",
     "docs": "forge doc",
-    "clean": "npx hardhat clean",
-    "copy-types": "npx hardhat compile && cp -R ./typechain-types ../api/src/typechain-types"
+    "clean": "hardhat clean",
+    "copy-types": "hardhat compile && cp -R ./typechain-types ../api/src/typechain-types"
   },
   "author": "",
   "license": "ISC",

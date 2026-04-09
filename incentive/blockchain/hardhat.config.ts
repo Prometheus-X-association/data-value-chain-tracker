@@ -1,3 +1,4 @@
+import path from "path";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-ethers";
@@ -24,6 +25,7 @@ const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.27",
     settings: {
+      evmVersion: "cancun",
       optimizer: {
         enabled: true,
         runs: 200, // Adjust the number of runs for optimization
@@ -32,15 +34,16 @@ const config: HardhatUserConfig = {
     },
   },
   paths: {
-    sources: "./src", // Make sure this matches where your .sol files are
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts",
+    sources: path.resolve(__dirname, "src"), // Make sure this matches where your .sol files are
+    tests: path.resolve(__dirname, "test"),
+    cache: path.resolve(__dirname, "cache"),
+    artifacts: path.resolve(__dirname, "artifacts"),
   },
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
+      gas: 12000000,
     },
   },
 };

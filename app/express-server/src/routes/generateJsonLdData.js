@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const jsonld = require('jsonld');
+const { buildCanonicalKey, buildNodeType } = require('../lib/traceability');
 
 const generateJsonLdData = async (inputData) => {
   const nodeId = new mongoose.Types.ObjectId().toString(); // Generate a unique node ID
@@ -28,7 +29,13 @@ const generateJsonLdData = async (inputData) => {
     "@context": context,
     "@type": "Node",
     "nodeId": nodeId,
+    "canonicalKey": buildCanonicalKey(inputData),
+    "nodeType": buildNodeType(inputData),
     "dataId": inputData.dataId,
+    "participantId": inputData.participantId || "",
+    "participantShare": inputData.participantShare || 0,
+    "participantSourceId": inputData.participantSourceId || "",
+    "usecaseContractTitle": inputData.usecaseContractTitle,
     "nodeMetadata": {
       "dvctId": inputData.dvctId,
       "usecaseContractId": inputData.usecaseContractId,
@@ -36,8 +43,8 @@ const generateJsonLdData = async (inputData) => {
       "dataConsumerId": inputData.dataConsumerId,
       "incentiveReceivedFrom": [
         {
-          "organizationId": inputData.dataConsumerId,
-          "numPoints": inputData.extraIncentiveForAIProvider.numPoints,
+          "organizationId": inputData.participantSourceId || inputData.participantId || inputData.dataConsumerId,
+          "numPoints": inputData.participantShare || inputData.extraIncentiveForAIProvider?.numPoints || 0,
           "contractId": inputData.contractId
         }
       ]
@@ -45,8 +52,12 @@ const generateJsonLdData = async (inputData) => {
     "childNode": [] // Assuming no child nodes initially
   };
 
-  if (inputData.prevDataId) {
-    jsonLdData.prevNode = inputData.prevDataId.map(prevId => ({
+  const validPrevDataIds = Array.isArray(inputData.prevDataId)
+    ? inputData.prevDataId.filter((prevId) => typeof prevId === 'string' && prevId.trim())
+    : [];
+
+  if (validPrevDataIds.length > 0) {
+    jsonLdData.prevNode = validPrevDataIds.map(prevId => ({
       "nodeId": prevId,
       "@nodeUrl": `https://url-to-prevNode/${prevId}`
     }));

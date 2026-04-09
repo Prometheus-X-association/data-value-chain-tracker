@@ -54,7 +54,10 @@ const swaggerOptions = {
             "@context": { type: 'object' },
             "@type": { type: 'string' },
             nodeId: { type: 'string' },
+            canonicalKey: { type: 'string' },
+            nodeType: { type: 'string' },
             dataId: { type: 'string' },
+            usecaseContractTitle: { type: 'string' },
             nodeMetadata: {
               type: 'object',
               properties: {

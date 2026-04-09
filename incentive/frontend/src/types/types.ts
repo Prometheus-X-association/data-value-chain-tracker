@@ -6,6 +6,22 @@ export interface Participant {
   fixedReward: bigint;
 }
 
+export interface UseCaseParticipantMetadata {
+  participantId: string;
+  participantName: string;
+  role: string;
+  walletAddress: string;
+  numOfShare: number;
+}
+
+export interface UseCaseMetadata {
+  useCaseId: string;
+  useCaseName: string;
+  sourceUseCaseId: string;
+  rewardPool: string;
+  participants: UseCaseParticipantMetadata[];
+}
+
 export interface UseCaseInfo {
   id: string;
   owner: Address;
@@ -16,6 +32,7 @@ export interface UseCaseInfo {
   rewardsLocked: boolean;
   totalShares: bigint;
   participants: readonly Participant[];
+  metadata?: UseCaseMetadata | null;
 }
 
 export interface RewardTransfer {

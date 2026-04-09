@@ -1,13 +1,9 @@
 import React, { type FC } from 'react';
-import {
-  getBezierPath,
-  EdgeLabelRenderer,
-  BaseEdge,
-  type EdgeProps,
-  type Edge,
-} from '@xyflow/react';
+import { BaseEdge, getBezierPath, type Edge, type EdgeProps } from '@xyflow/react';
 
-const CustomEdge: FC<EdgeProps<Edge<{ label: string }>>> = ({
+import { FlowEdgeData } from './types';
+
+const CustomEdge: FC<EdgeProps<Edge<FlowEdgeData>>> = ({
   id,
   sourceX,
   sourceY,
@@ -17,7 +13,7 @@ const CustomEdge: FC<EdgeProps<Edge<{ label: string }>>> = ({
   targetPosition,
   data,
 }) => {
-  const [edgePath, labelX, labelY] = getBezierPath({
+  const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -26,21 +22,7 @@ const CustomEdge: FC<EdgeProps<Edge<{ label: string }>>> = ({
     targetPosition,
   });
 
-  return (
-    <>
-      <BaseEdge id={id} path={edgePath} />
-      <EdgeLabelRenderer>
-        <div
-          style={{
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-          }}
-          className="edge-label-renderer__custom-edge nodrag nopan"
-        >
-          {data?.label}
-        </div>
-      </EdgeLabelRenderer>
-    </>
-  );
+  return <BaseEdge id={id} path={edgePath} style={{ stroke: '#8b5e18', strokeWidth: 1.6 }} />;
 };
 
 export default CustomEdge;

@@ -11,6 +11,7 @@ async function main() {
     participant2,
     participant3,
   ] = await ethers.getSigners();
+  const apiSignerAddress = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199";
   console.log("Deploying contracts with account:", deployer.address);
 
   console.log(
@@ -35,6 +36,12 @@ async function main() {
   // Transfer tokens to use case owners for testing
   await token.transfer(useCaseOwner1.address, ethers.parseEther("10000"));
   await token.transfer(useCaseOwner2.address, ethers.parseEther("10000"));
+
+  // Fund the incentive API signer with native ETH on the local dev chain.
+  await deployer.sendTransaction({
+    to: apiSignerAddress,
+    value: ethers.parseEther("1000"),
+  });
 
   // Setup test use cases
   const useCaseContract = useCase.connect(useCaseOwner1);
@@ -112,14 +119,17 @@ async function main() {
   );
 
   const configDirApi = path.join(__dirname, "../../api/src/config");
-  if (!fs.existsSync(configDir)) {
-    fs.mkdirSync(configDir, { recursive: true });
-  }
+  const apiRootDir = path.join(__dirname, "../../api");
+  if (fs.existsSync(apiRootDir)) {
+    if (!fs.existsSync(configDirApi)) {
+      fs.mkdirSync(configDirApi, { recursive: true });
+    }
 
-  fs.writeFileSync(
-    path.join(configDirApi, "deployment.json"),
-    JSON.stringify(deploymentInfo, null, 2)
-  );
+    fs.writeFileSync(
+      path.join(configDirApi, "deployment.json"),
+      JSON.stringify(deploymentInfo, null, 2)
+    );
+  }
 
   console.log("Test environment deployed successfully!");
   console.log("Test accounts:");
