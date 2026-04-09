@@ -22,6 +22,59 @@ RUN **make up**
 ## Example usage
 For more detailed information, please check the [swagger](http://localhost:3001/api-docs/) (be sure that services are running)
 
+Important note:
+
+Some graph-reading endpoints are now protected and may require authentication before they can be accessed.
+
+Protected endpoints include:
+- `GET /api/data`
+- `GET /api/data/{nodeId}`
+- `GET /api/node-tree/{nodeId}`
+
+Authentication endpoints:
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+
+Protected endpoints called from Swagger may still work if the browser already has a valid session cookie from a previous login.
+
+In a fresh browser session, unauthenticated requests to protected endpoints should return:
+- `401 Unauthorized`
+
+### Browser login and session cookie usage
+
+The protected graph endpoints do not use the old browser Basic Auth popup.
+
+Authentication is now done through:
+- `POST /api/auth/login`
+
+This endpoint creates an `HttpOnly` session cookie in the browser.
+
+Practical browser flow:
+- open the DVCT core frontend on `http://localhost:3000`
+- sign in using the login form
+- after successful login, the browser stores the session cookie
+- the browser can then access protected endpoints such as:
+  - `GET /api/data`
+  - `GET /api/data/{nodeId}`
+  - `GET /api/node-tree/{nodeId}`
+
+If testing directly from the browser or Swagger:
+- use the same browser session in which the login was performed
+- if needed, first call `POST /api/auth/login` from a tool such as Postman or curl and preserve the returned cookie
+
+Example login payload:
+
+```json
+{
+  "username": "org3335",
+  "password": "your-password"
+}
+```
+
+Important note:
+- no browser popup will appear, because this is session-cookie authentication, not HTTP Basic Auth
+
 | Endpoint                | HTTP Method | Params                        | Request Payload                                                                                                            | Result   |
 |-------------------------|-------------|-------------------------------|----------------------------------------------------------------------------------------------------------------------------|----------|
 | /api/node               | POST        | none                          | [input](https://github.com/Prometheus-X-association/data-value-chain-tracker/blob/main/docs/design-document.md#input-data) | 201      |
@@ -53,6 +106,14 @@ If needed, more commands and specifics are documented below.
 
 - **Link to Documentation**: [docs](app/express-server/Readme.md)
 
+Additional notes:
+
+The core server now supports authenticated and organization-scoped access to the DVCT graph.
+
+A logged-in organization will only be able to view the node hierarchies in which it takes part.
+
+This filtering is enforced in the backend.
+
 ### DVCT Core mongodb
 
 DVCT Core server uses mongodb to store data.
@@ -62,6 +123,14 @@ DVCT Core server uses mongodb to store data.
 This is the React frontend application.
 
 - **Link to Documentation**: [TBD]()
+
+Additional notes:
+
+The core frontend on port `3000` now works together with the authenticated core API.
+
+It displays the raw `numOfShare` value from the payload as the traceability points / weight value.
+
+This means that the traceability UI keeps the original payload interpretation and does not convert the value into blockchain percentage shares.
 
 ## [DVCT Incentive Blockchain](./incentive/blockchain/)
 
@@ -163,6 +232,25 @@ Right now this is a simple website that lets you connect your wallet. From you w
 
 You will also be able to create a use case in this UI. This is in development. This will most likely not be something you do through this UI, but rather in the overall Use Case creation process. Hopefully, this ui can provide a good starting point for the developers of the use case form.
 
+Additional notes:
+
+The incentive frontend on port `3003` reads use case information from blockchain events.
+
+Behavior:
+- `All Use Cases` shows all created use cases found on-chain
+- `My Use Cases` shows the use cases owned by the connected wallet
+- `Participated` shows the use cases where the connected wallet is one of the participants
+
+The incentive frontend now combines:
+- stored participant metadata
+- on-chain reward claim information
+
+This allows the UI to display:
+- the original raw `numOfShare` value
+- the actual claimed PTX amount
+
+This makes it easier to compare the original DVCT payload input with the final blockchain reward result.
+
 ### Scripts
 
 Workspace:
@@ -200,6 +288,20 @@ The aim of the incentive api is to provide simple access to the smart contracts 
 **IKeyStorage**: Interface used for the storage implementation. We will probably use a cloud-based secure key-value vault in production. We created this interface so that it is easy to swap storage solutions. Right now we have only implemented a **FileKeyStorage**, used for testing.
 
 **IncentiveService**: This is the core incentive distribution service. This handles a request by validating the request, verifying the signature, and if all is good, then submits the transaction to the blockchain. Meaning that the wallet connected to the incentive api is paying for gas. This is to be seen as a direct operational cost, and can be reduced by using the **notifier** concept we discussed above.
+
+Additional notes:
+
+Internal service-to-service communication is now separated from browser authentication.
+
+The `incenti-trace` service uses:
+- `GET /api/internal/data`
+
+This internal endpoint is protected through:
+- `DVCT_INTERNAL_API_TOKEN`
+
+This means:
+- browser users authenticate through the session-cookie flow
+- internal services authenticate through the internal api token
 
 ### Tools/clients
 
@@ -341,6 +443,24 @@ REFERENCE: **"incenti-trace"** defined in the docker-compose.yml of project root
 - call **POST http://localhost:3005/api/run-script**, this is the official endpoint which PDC will execute each time there is a data-exchange
 - payload is handled by PDC based on the data found in the contract and must conform to the following format
 
+Additional notes:
+
+Wallet assignment is no longer based on participant order in the payload.
+
+Wallets are now resolved through:
+- `DVCT_ORGANIZATION_WALLETS_FILE`
+- `DVCT_ORGANIZATION_WALLETS_JSON`
+
+This allows stable participant-to-wallet mapping even when the number of participants changes.
+
+For public repositories and demo environments, real wallet/private-key mappings should not be committed.
+
+Use:
+- `config/organization-wallets.dev.example.json`
+
+Do not commit:
+- `config/organization-wallets.dev.json`
+
 ```json
 {
 	"dvctId": "123",
@@ -384,6 +504,33 @@ REFERENCE: **"incenti-trace"** defined in the docker-compose.yml of project root
 	}
 ]}
 ```
+
+Important note about `numOfShare`:
+
+The field `numOfShare` is now interpreted as a raw points / weight value.
+
+This means:
+- the core DVCT frontend (`3000`) displays the raw value from the payload
+- the incentive execution flow converts these values internally into basis-point shares before calling the smart contract
+- the smart contract still distributes rewards proportionally
+
+In short:
+- payload value = raw points / weight
+- smart contract value = normalized reward share
+- claimed reward = token amount calculated from the reward pool
+
+Example:
+- reward pool = `3200`
+- participant weights = `800`, `500`, `900`, `1000`
+- total weight = `3200`
+
+Result:
+- participant 1 claims `800`
+- participant 2 claims about `500.16`
+- participant 3 claims about `899.84`
+- participant 4 claims `1000`
+
+The small difference comes from normalizing the raw weights into the percentage-based format expected by the smart contract.
 
 
 ## Makefile Commands
