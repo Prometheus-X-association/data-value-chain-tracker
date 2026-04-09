@@ -11,6 +11,10 @@ const config = {
   async rewrites() {
     return [
       {
+        source: "/core-api/:path*",
+        destination: "http://core-api:9081/:path*",
+      },
+      {
         source: "/rpc",
         destination: "http://hardhat:8545",
       },

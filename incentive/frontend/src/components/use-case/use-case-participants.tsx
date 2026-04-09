@@ -15,6 +15,7 @@ import { useAccount } from "wagmi";
 import { Loader2 } from "lucide-react";
 import { useTransaction } from "@/hooks/use-transaction";
 import { useBlockTime } from "@/hooks/use-block-time";
+import { useUseCaseClaims } from "@/hooks/use-use-case-claims";
 
 interface UseCaseParticipantsProps {
   useCaseId: string;
@@ -29,8 +30,18 @@ export function UseCaseParticipants({
   const { address } = useAccount();
   const { handleTransaction, isLoading: isClaimLoading } = useTransaction();
   const currentTime = useBlockTime();
+  const { claimedByParticipant } = useUseCaseClaims(useCaseId);
 
   if (!useCase) return null;
+
+  const metadataByAddress = new Map(
+    (useCase.metadata?.participants || [])
+      .filter((participant) => participant.walletAddress)
+      .map((participant) => [
+        participant.walletAddress.toLowerCase(),
+        participant,
+      ]),
+  );
 
   const handleClaimRewards = async () => {
     await handleTransaction(() => actions.claimRewards(), {
@@ -97,21 +108,32 @@ export function UseCaseParticipants({
             <TableHeader>
               <TableRow>
                 <TableHead>Address</TableHead>
+                <TableHead>Raw Weight</TableHead>
                 <TableHead>Share</TableHead>
+                <TableHead>Claimed</TableHead>
                 <TableHead>Fixed Reward</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {useCase.participants.map((participant, index) => (
+              {useCase.participants.map((participant, index) => {
+                const participantAddress = participant.participant.toLowerCase();
+                const participantMetadata = metadataByAddress.get(participantAddress);
+                const claimedAmount = claimedByParticipant.get(participantAddress) || 0n;
+
+                return (
                 <TableRow key={`${participant.participant}-${index}`}>
                   <TableCell className="font-medium">
                     {participant.participant.slice(0, 6)}...
                     {participant.participant.slice(-4)}
                   </TableCell>
                   <TableCell>
+                    {participantMetadata ? participantMetadata.numOfShare : "N/A"}
+                  </TableCell>
+                  <TableCell>
                     {Number(participant.rewardShare) / 100}%
                   </TableCell>
+                  <TableCell>{formatEther(claimedAmount)} PTX</TableCell>
                   <TableCell>
                     {formatEther(participant.fixedReward)} PTX
                   </TableCell>
@@ -125,7 +147,7 @@ export function UseCaseParticipants({
                     </Badge>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         </CardContent>

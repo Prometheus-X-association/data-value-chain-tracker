@@ -76,6 +76,61 @@ const getInputData = () => {
   return JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
 };
 
+const MAX_TOTAL_SHARES = 10_000;
+
+const normalizeSharesToBasisPoints = (participants: any[]): number[] => {
+  const weights = participants.map((participant) => {
+    const numericValue = Number(participant?.numOfShare ?? 0);
+
+    if (!Number.isFinite(numericValue) || numericValue < 0) {
+      throw new Error(
+        `Invalid numOfShare for participant "${participant?.participantName || participant?.role || participant?.participantId || "unknown"}"`,
+      );
+    }
+
+    return numericValue;
+  });
+
+  const totalWeight = weights.reduce((sum, value) => sum + value, 0);
+
+  if (totalWeight <= 0) {
+    throw new Error("participantShare numOfShare total must be greater than zero");
+  }
+
+  const normalizedShares = weights.map((weight, index) => {
+    const rawShare = (weight / totalWeight) * MAX_TOTAL_SHARES;
+    const floorShare = Math.floor(rawShare);
+
+    return {
+      index,
+      share: floorShare,
+      remainder: rawShare - floorShare,
+    };
+  });
+
+  let assignedShares = normalizedShares.reduce((sum, entry) => sum + entry.share, 0);
+  let remainingShares = MAX_TOTAL_SHARES - assignedShares;
+
+  normalizedShares
+    .slice()
+    .sort((left, right) => right.remainder - left.remainder)
+    .forEach((entry) => {
+      if (remainingShares <= 0) {
+        return;
+      }
+
+      normalizedShares[entry.index].share += 1;
+      assignedShares += 1;
+      remainingShares -= 1;
+    });
+
+  if (assignedShares !== MAX_TOTAL_SHARES) {
+    throw new Error("Failed to normalize participant shares to 100%");
+  }
+
+  return normalizedShares.map((entry) => entry.share);
+};
+
 async function main(): Promise<FinalResult> {
   const configData = getInputData();
   const rpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
@@ -102,14 +157,15 @@ async function main(): Promise<FinalResult> {
 
   let rewardDepositor = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider);
   var index = 0;
+  const normalizedShares = normalizeSharesToBasisPoints(configData?.participantShare || []);
   
   configData?.participantShare.map((data: any) => {
     if(!agents[data.role]){
         agents[data.role] = new ethers.Wallet(data.participantWallet, provider);
-        agentShares[data.role] = data.numOfShare * 100;
+        agentShares[data.role] = normalizedShares[index];
     }else{
         agents[data.role + index] = new ethers.Wallet(data.participantWallet, provider);
-        agentShares[data.role + index] = data.numOfShare * 100;
+        agentShares[data.role + index] = normalizedShares[index];
     }
 
     if (data.role === "orchestrator") {

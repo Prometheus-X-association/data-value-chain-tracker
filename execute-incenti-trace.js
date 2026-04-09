@@ -52,6 +52,21 @@ function validatePayload(payload) {
       throw createHttpError(400, `Missing or invalid field: ${field}`);
     }
   }
+
+  if (!Array.isArray(payload.participantShare) || payload.participantShare.length === 0) {
+    throw createHttpError(400, "participantShare must contain at least one participant");
+  }
+
+  payload.participantShare.forEach((participant, index) => {
+    const shareValue = Number(participant?.numOfShare);
+
+    if (!Number.isFinite(shareValue) || shareValue < 0) {
+      throw createHttpError(
+        400,
+        `participantShare[${index}].numOfShare must be a non-negative number`,
+      );
+    }
+  });
 }
 
 function getConfiguredOrganizationWallets() {
@@ -243,6 +258,39 @@ function buildTraceabilityPayloads(body, existingNodes) {
   return payloads;
 }
 
+async function persistIncentiveUseCaseMetadata(baseUrl, config) {
+  const useCaseId = String(config.useCaseName || config.useCaseId || "").trim();
+
+  if (!useCaseId) {
+    return;
+  }
+
+  const payload = {
+    useCaseId,
+    useCaseName: String(config.useCaseName || "").trim(),
+    sourceUseCaseId: String(config.useCaseId || "").trim(),
+    rewardPool: String(config.rewardPool || "").trim(),
+    participants: (config.participantShare || []).map((participant) => ({
+      participantId: String(participant.participantId || "").trim(),
+      participantName: String(participant.participantName || "").trim(),
+      role: String(participant.role || "").trim(),
+      walletAddress: String(
+        participant.participantWalletAddress ||
+          participant.walletOrganizationId ||
+          "",
+      ).trim(),
+      numOfShare: Number(participant.numOfShare || 0),
+    })),
+  };
+
+  await axios.post(`${baseUrl}/api/internal/incentive-use-case-metadata`, payload, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-DVCT-Internal-Token": internalApiToken,
+    },
+  });
+}
+
 // Endpoint to trigger the test script
 app.post("/api/run-script", async (req, res) => {
   try {    
@@ -341,16 +389,33 @@ app.post("/api/run-script", async (req, res) => {
         return res.status(500).send({ message: "Error executing script", error: error.message, stdout, stderr });
       }
 
-      console.log("Script stdout:", stdout);
-      if (hardhatNode?.pid) {
-        console.log("Killing Hardhat node...");
-        kill(hardhatNode.pid, 'SIGTERM');
-      }
+      (async () => {
+        console.log("Script stdout:", stdout);
 
-      res.status(200).send({ message: "Script executed successfully", stdout, stderr });
+        try {
+          await persistIncentiveUseCaseMetadata(baseUrl, config);
+        } catch (metadataError) {
+          console.error("Failed to persist incentive use case metadata:", metadataError);
+        }
 
-      //Clean up the temporary file
-      fs.unlinkSync(configPath);
+        if (hardhatNode?.pid) {
+          console.log("Killing Hardhat node...");
+          kill(hardhatNode.pid, 'SIGTERM');
+        }
+
+        res.status(200).send({ message: "Script executed successfully", stdout, stderr });
+
+        //Clean up the temporary file
+        fs.unlinkSync(configPath);
+      })().catch((finalizeError) => {
+        console.error("Error finalizing script execution:", finalizeError);
+        res.status(500).send({
+          message: "Script executed but finalization failed",
+          error: finalizeError.message,
+          stdout,
+          stderr,
+        });
+      });
     });
 
   } catch (err) {

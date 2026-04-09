@@ -3,12 +3,23 @@ import { Badge } from "@/components/ui/badge";
 import { formatEther } from "viem";
 import { formatDuration } from "@/lib/utils";
 import { UseCaseInfo } from "@/types/types";
+import { useUseCaseClaims } from "@/hooks/use-use-case-claims";
 
 interface UseCaseOverviewProps {
   useCase: UseCaseInfo;
 }
 
 export function UseCaseOverview({ useCase }: UseCaseOverviewProps) {
+  const { claimedByParticipant } = useUseCaseClaims(useCase.id);
+  const metadataByAddress = new Map(
+    (useCase.metadata?.participants || [])
+      .filter((participant) => participant.walletAddress)
+      .map((participant) => [
+        participant.walletAddress.toLowerCase(),
+        participant,
+      ]),
+  );
+
   return (
     <div className="grid gap-6">
       <Card>
@@ -83,10 +94,21 @@ export function UseCaseOverview({ useCase }: UseCaseOverviewProps) {
                     {participant.participant.slice(0, 6)}...
                     {participant.participant.slice(-4)}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    Raw weight:{" "}
+                    {metadataByAddress.get(participant.participant.toLowerCase())?.numOfShare ?? "N/A"}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium">
                     {Number(participant.rewardShare) / 100}%
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Claimed:{" "}
+                    {formatEther(
+                      claimedByParticipant.get(participant.participant.toLowerCase()) || 0n,
+                    )}{" "}
+                    PTX
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {formatEther(participant.fixedReward)} PTX Fixed

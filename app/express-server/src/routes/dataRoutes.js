@@ -1,6 +1,7 @@
 const express = require('express');
 const winston = require("winston");
 const Data = require('../models/data'); 
+const IncentiveUseCaseMetadata = require("../models/incentiveUseCaseMetadata");
 const { generateJsonLdData } = require('./generateJsonLdData');
 const { updateChildNode } = require('./updateChildNode');
 const { updateChildPrevNode } = require('./updateChildPrevNode');
@@ -168,16 +169,79 @@ const buildProviderSeedPayload = (inputData) => ({
   dataId: inputData.dataId,
   participantId: inputData.dataProviderId,
   participantSourceId: inputData.participantSourceId || inputData.currentParticipantId || '',
-  participantShare:
-    inputData.participantShare ||
-    inputData.incentiveForDataProvider?.numPoints ||
-    0,
+  // Provider seed nodes must use the provider-side points, not the currently processed
+  // consumer node's participantShare.
+  participantShare: inputData.incentiveForDataProvider?.numPoints || 0,
   dataProviderId: inputData.dataProviderId,
   dataConsumerId: inputData.dataConsumerId,
   dataConsumerIsAIProvider: false,
   prevDataId: [],
   incentiveForDataProvider: inputData.incentiveForDataProvider,
   extraIncentiveForAIProvider: inputData.extraIncentiveForAIProvider,
+});
+
+router.post(
+  "/internal/incentive-use-case-metadata",
+  requireInternalApiToken,
+  async (req, res) => {
+    try {
+      const payload = req.body || {};
+      const normalizedUseCaseId = String(payload.useCaseId || "").trim();
+
+      if (!normalizedUseCaseId) {
+        return res.status(400).json({ error: "useCaseId is required" });
+      }
+
+      const participants = Array.isArray(payload.participants)
+        ? payload.participants.map((participant) => ({
+            participantId: String(participant.participantId || "").trim(),
+            participantName: String(participant.participantName || "").trim(),
+            role: String(participant.role || "").trim(),
+            walletAddress: String(participant.walletAddress || "").trim(),
+            numOfShare: Number(participant.numOfShare || 0),
+          }))
+        : [];
+
+      const metadata = await IncentiveUseCaseMetadata.findOneAndUpdate(
+        { useCaseId: normalizedUseCaseId },
+        {
+          $set: {
+            useCaseId: normalizedUseCaseId,
+            useCaseName: String(payload.useCaseName || "").trim(),
+            sourceUseCaseId: String(payload.sourceUseCaseId || "").trim(),
+            rewardPool: String(payload.rewardPool || "").trim(),
+            participants,
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        },
+      );
+
+      return res.status(200).json(metadata);
+    } catch (error) {
+      console.error("Error saving incentive use case metadata:", error);
+      return res.status(500).json({ error: "Failed to save incentive use case metadata" });
+    }
+  },
+);
+
+router.get("/incentive-use-case-metadata/:useCaseId", async (req, res) => {
+  try {
+    const useCaseId = decodeURIComponent(String(req.params.useCaseId || ""));
+    const metadata = await IncentiveUseCaseMetadata.findOne({ useCaseId }).lean();
+
+    if (!metadata) {
+      return res.status(404).json({ error: "Use case metadata not found" });
+    }
+
+    return res.status(200).json(metadata);
+  } catch (error) {
+    console.error("Error retrieving incentive use case metadata:", error);
+    return res.status(500).json({ error: "Failed to retrieve incentive use case metadata" });
+  }
 });
 
 // API to receive JSON data and save as JSON-LD format to MongoDB
