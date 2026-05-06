@@ -24,7 +24,7 @@
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.6",
-    "axios": "^1.8.2",
+    "axios": "^1.15.2",
     "chai": "^4.3.10",
     "concurrently": "^8.2.2",
     "ethers": "^6.9.0",
