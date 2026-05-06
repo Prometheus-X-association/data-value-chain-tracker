@@ -5,12 +5,8 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "axios"
       - dependency-name: "dotenv"
-      - dependency-name: "ethers"
-      - dependency-name: "express"
       - dependency-name: "joi"
-      - dependency-name: "morgan"
       - dependency-name: "swagger-ui-express"
       - dependency-name: "@types/express"
       - dependency-name: "@types/morgan"
@@ -23,11 +19,8 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "next"
-      - dependency-name: "next-auth"
       - dependency-name: "react"
       - dependency-name: "react-dom"
-      - dependency-name: "eslint-config-next"
   - package-ecosystem: "npm"
     directory: "/incentive/blockchain"
     schedule:
@@ -43,10 +36,6 @@ updates:
       - dependency-name: "@nomicfoundation/hardhat-network-helpers"
       - dependency-name: "@nomicfoundation/hardhat-verify"
       - dependency-name: "@typechain/hardhat"
-      - dependency-name: "hardhat-gas-reporter"
-      - dependency-name: "solidity-coverage"
-      - dependency-name: "lodash"
-      - dependency-name: "lodash-es"
       - dependency-name: "@types/chai"
       - dependency-name: "@types/mocha"
       - dependency-name: "ts-node"
@@ -67,10 +56,6 @@ updates:
       - dependency-name: "@nomicfoundation/hardhat-network-helpers"
       - dependency-name: "@nomicfoundation/hardhat-verify"
       - dependency-name: "@typechain/hardhat"
-      - dependency-name: "hardhat-gas-reporter"
-      - dependency-name: "solidity-coverage"
-      - dependency-name: "lodash"
-      - dependency-name: "lodash-es"
       - dependency-name: "@types/chai"
       - dependency-name: "@types/mocha"
       - dependency-name: "ts-node"
@@ -83,8 +68,6 @@ updates:
     ignore:
       - dependency-name: "lodash"
       - dependency-name: "lodash-es"
-      - dependency-name: "axios"
-      - dependency-name: "express"
       - dependency-name: "ethers"
       - dependency-name: "ts-node"
       - dependency-name: "typescript"
