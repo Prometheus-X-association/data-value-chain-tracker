@@ -5,9 +5,15 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
+      - dependency-name: "axios"
       - dependency-name: "dotenv"
+      - dependency-name: "express"
       - dependency-name: "joi"
+      - dependency-name: "morgan"
       - dependency-name: "swagger-ui-express"
+      - dependency-name: "lodash"
+      - dependency-name: "minimatch"
+      - dependency-name: "path-to-regexp"
       - dependency-name: "@types/express"
       - dependency-name: "@types/morgan"
       - dependency-name: "@types/node"
@@ -19,8 +25,14 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
+      - dependency-name: "next"
+      - dependency-name: "next-auth"
       - dependency-name: "react"
       - dependency-name: "react-dom"
+      - dependency-name: "eslint-config-next"
+      - dependency-name: "axios"
+      - dependency-name: "minimatch"
+      - dependency-name: "postcss"
   - package-ecosystem: "npm"
     directory: "/incentive/blockchain"
     schedule:
@@ -41,6 +53,13 @@ updates:
       - dependency-name: "ts-node"
       - dependency-name: "typechain"
       - dependency-name: "ethers"
+      - dependency-name: "serialize-javascript"
+      - dependency-name: "undici"
+      - dependency-name: "minimatch"
+      - dependency-name: "picomatch"
+      - dependency-name: "glob"
+      - dependency-name: "lodash"
+      - dependency-name: "lodash-es"
   - package-ecosystem: "yarn"
     directory: "/incentive/blockchain"
     schedule:
@@ -61,6 +80,13 @@ updates:
       - dependency-name: "ts-node"
       - dependency-name: "typechain"
       - dependency-name: "ethers"
+      - dependency-name: "serialize-javascript"
+      - dependency-name: "undici"
+      - dependency-name: "minimatch"
+      - dependency-name: "picomatch"
+      - dependency-name: "glob"
+      - dependency-name: "lodash"
+      - dependency-name: "lodash-es"
   - package-ecosystem: "yarn"
     directory: "/incentive/api"
     schedule:
