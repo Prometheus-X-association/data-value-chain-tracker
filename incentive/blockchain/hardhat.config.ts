@@ -2,7 +2,16 @@ import path from "path";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-ethers";
-if (process.env.NODE_ENV !== "docker") {
+import { existsSync } from "fs";
+import { delimiter, join } from "path";
+
+const pathEntries = (process.env.PATH || "").split(delimiter).filter(Boolean);
+const hasForge =
+  existsSync("/usr/local/bin/forge") ||
+  existsSync("/usr/bin/forge") ||
+  pathEntries.some((entry) => existsSync(join(entry, "forge")));
+
+if (process.env.NODE_ENV !== "docker" && hasForge) {
   require("@nomicfoundation/hardhat-foundry");
 }
 import "@nomicfoundation/hardhat-ignition";
