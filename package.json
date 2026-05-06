@@ -40,7 +40,15 @@
     "node": ">=18.0.0"
   },
   "resolutions": {
-    "elliptic": "^6.5.5"
+    "elliptic": "6.6.1",
+    "serialize-javascript": "7.0.5",
+    "path-to-regexp": "8.4.2",
+    "minimatch": "10.2.5",
+    "undici": "6.25.0",
+    "picomatch": "4.0.4",
+    "bn.js": "5.2.3",
+    "cookie": "0.7.2",
+    "tmp": "0.2.5"
   },
   "private": true,
   "dependencies": {
