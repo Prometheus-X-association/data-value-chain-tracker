@@ -32,7 +32,6 @@ updates:
       - dependency-name: "eslint-config-next"
       - dependency-name: "axios"
       - dependency-name: "minimatch"
-      - dependency-name: "postcss"
   - package-ecosystem: "npm"
     directory: "/incentive/blockchain"
     schedule:
