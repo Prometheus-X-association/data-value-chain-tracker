@@ -20,6 +20,7 @@ updates:
       - dependency-name: "@types/swagger-ui-express"
       - dependency-name: "ts-node"
       - dependency-name: "typescript"
+      - dependency-name: "uuid"
   - package-ecosystem: "npm"
     directory: "/incentive/frontend"
     schedule:
@@ -42,6 +43,7 @@ updates:
           - "version-update:semver-major"
       - dependency-name: "axios"
       - dependency-name: "minimatch"
+      - dependency-name: "uuid"
   - package-ecosystem: "yarn"
     directory: "/incentive/frontend"
     schedule:
@@ -64,6 +66,7 @@ updates:
           - "version-update:semver-major"
       - dependency-name: "axios"
       - dependency-name: "minimatch"
+      - dependency-name: "uuid"
   - package-ecosystem: "npm"
     directory: "/incentive/blockchain"
     schedule:
@@ -91,6 +94,7 @@ updates:
       - dependency-name: "glob"
       - dependency-name: "lodash"
       - dependency-name: "lodash-es"
+      - dependency-name: "uuid"
   - package-ecosystem: "yarn"
     directory: "/incentive/blockchain"
     schedule:
@@ -118,6 +122,7 @@ updates:
       - dependency-name: "glob"
       - dependency-name: "lodash"
       - dependency-name: "lodash-es"
+      - dependency-name: "uuid"
   - package-ecosystem: "yarn"
     directory: "/incentive/api"
     schedule:
@@ -128,6 +133,7 @@ updates:
       - dependency-name: "ethers"
       - dependency-name: "ts-node"
       - dependency-name: "typescript"
+      - dependency-name: "uuid"
   - package-ecosystem: "yarn"
     directory: "/"
     schedule:
@@ -150,3 +156,4 @@ updates:
       - dependency-name: "cookie"
       - dependency-name: "tmp"
       - dependency-name: "elliptic"
+      - dependency-name: "uuid"
