@@ -25,11 +25,43 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "next"
       - dependency-name: "next-auth"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "react"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "react-dom"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "next"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "eslint-config-next"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "axios"
+      - dependency-name: "minimatch"
+  - package-ecosystem: "yarn"
+    directory: "/incentive/frontend"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "next-auth"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "react"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "react-dom"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "next"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "eslint-config-next"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "axios"
       - dependency-name: "minimatch"
   - package-ecosystem: "npm"
