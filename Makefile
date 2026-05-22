@@ -16,7 +16,7 @@ up:
 
 down:
 	@echo "Stopping all services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) down
+	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 rebuild:
 	@echo "Rebuilding and starting all services..."
@@ -24,11 +24,11 @@ rebuild:
 
 clean:
 	@echo "Cleaning up containers, networks, and volumes..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) down -v
+	docker compose -f $(DOCKER_COMPOSE_FILE) down -v
 
 logs:
 	@echo "Showing logs for all services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) logs -f
+	docker compose -f $(DOCKER_COMPOSE_FILE) logs -f
 
 build-core-frontend:
 	@echo "Building core frontend image..."
