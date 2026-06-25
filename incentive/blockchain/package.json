@@ -61,7 +61,10 @@
     "serialize-javascript": "^7.0.0",
     "undici": "^6.27.0",
     "tmp": "0.2.7",
-    "form-data": "4.0.6"
+    "form-data": "4.0.6",
+    "js-yaml": "4.2.0",
+    "cookie": "0.7.2",
+    "uuid": "^11.1.1"
   },
   "resolutions": {
     "handlebars": "^4.7.9",
@@ -74,6 +77,9 @@
     "serialize-javascript": "^7.0.0",
     "undici": "^6.27.0",
     "tmp": "0.2.7",
-    "form-data": "4.0.6"
+    "form-data": "4.0.6",
+    "js-yaml": "4.2.0",
+    "cookie": "0.7.2",
+    "uuid": "^11.1.1"
   }
 }
