@@ -35,7 +35,7 @@
     "@types/chai": "^4.2.0",
     "@types/mocha": "^10.0.10",
     "chai": "^4.5.0",
-    "ethers": "^6.14.0",
+    "ethers": "^6.17.0",
     "hardhat-gas-reporter": "2.3.0",
     "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
@@ -55,15 +55,25 @@
     "minimatch": "^9.0.5",
     "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
-    "ws": "8.20.1",
+    "ws": "8.21.0",
     "picomatch": "^4.0.4",
     "glob": "^10.5.0",
     "serialize-javascript": "^7.0.0",
-    "undici": "^6.24.0"
+    "undici": "^6.27.0",
+    "tmp": "0.2.7",
+    "form-data": "4.0.6"
   },
   "resolutions": {
     "handlebars": "^4.7.9",
     "lodash": "^4.18.1",
-    "lodash-es": "^4.18.1"
+    "lodash-es": "^4.18.1",
+    "minimatch": "^9.0.5",
+    "ws": "8.21.0",
+    "picomatch": "^4.0.4",
+    "glob": "^10.5.0",
+    "serialize-javascript": "^7.0.0",
+    "undici": "^6.27.0",
+    "tmp": "0.2.7",
+    "form-data": "4.0.6"
   }
 }
