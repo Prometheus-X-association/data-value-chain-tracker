@@ -61,6 +61,28 @@
     "immutable": "4.3.9",
     "adm-zip": "0.6.0"
   },
+  "overrides": {
+    "elliptic": "6.6.1",
+    "serialize-javascript": "7.0.5",
+    "path-to-regexp": "8.4.2",
+    "minimatch": "10.2.5",
+    "undici": "6.27.0",
+    "picomatch": "4.0.4",
+    "bn.js": "5.2.3",
+    "cookie": "0.7.2",
+    "tmp": "0.2.7",
+    "glob": "^10.5.0",
+    "shell-quote": "1.9.0",
+    "qs": "6.15.2",
+    "diff": "5.2.2",
+    "ws": "8.21.0",
+    "form-data": "4.0.6",
+    "brace-expansion": "5.0.6",
+    "js-yaml": "4.3.0",
+    "uuid": "^11.1.1",
+    "immutable": "4.3.9",
+    "adm-zip": "0.6.0"
+  },
   "private": true,
   "dependencies": {
     "express": "^5.0.0",
