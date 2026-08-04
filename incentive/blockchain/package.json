@@ -62,9 +62,14 @@
     "undici": "^6.27.0",
     "tmp": "0.2.7",
     "form-data": "4.0.6",
-    "js-yaml": "4.2.0",
+    "js-yaml": "4.3.0",
     "cookie": "0.7.2",
-    "uuid": "^11.1.1"
+    "uuid": "^11.1.1",
+    "immutable": "4.3.9",
+    "fast-uri": "3.1.4",
+    "adm-zip": "0.6.0",
+    "axios": "1.18.0",
+    "brace-expansion": "2.1.3"
   },
   "resolutions": {
     "handlebars": "^4.7.9",
@@ -78,8 +83,13 @@
     "undici": "^6.27.0",
     "tmp": "0.2.7",
     "form-data": "4.0.6",
-    "js-yaml": "4.2.0",
+    "js-yaml": "4.3.0",
     "cookie": "0.7.2",
-    "uuid": "^11.1.1"
+    "uuid": "^11.1.1",
+    "immutable": "4.3.9",
+    "fast-uri": "3.1.4",
+    "adm-zip": "0.6.0",
+    "axios": "1.18.0",
+    "brace-expansion": "2.1.3"
   }
 }
