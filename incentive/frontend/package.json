@@ -71,12 +71,14 @@
     "postcss": "8.5.18",
     "form-data": "4.0.6",
     "hono": "4.12.27",
-    "js-yaml": "4.3.0",
+    "js-yaml": "4.3.1",
     "uuid": "^11.1.1",
     "sharp": "0.35.0",
     "brace-expansion": "1.1.18",
     "@auth/core": "0.41.3",
-    "next/postcss": "8.5.18"
+    "next/postcss": "8.5.18",
+    "nanoid": "3.3.18",
+    "socket.io-parser": "4.2.7"
   },
   "overrides": {
     "axios": "1.18.0",
@@ -85,11 +87,13 @@
     "postcss": "8.5.18",
     "form-data": "4.0.6",
     "hono": "4.12.27",
-    "js-yaml": "4.3.0",
+    "js-yaml": "4.3.1",
     "uuid": "^11.1.1",
     "sharp": "0.35.0",
     "brace-expansion": "1.1.18",
     "@auth/core": "0.41.3",
+    "nanoid": "3.3.18",
+    "socket.io-parser": "4.2.7",
     "next": {
       "postcss": "8.5.18"
     }
