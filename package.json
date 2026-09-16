@@ -30,7 +30,7 @@
     "ethers": "^6.9.0",
     "hardhat": "^2.25.0",
     "mocha": "^10.2.0",
-    "rimraf": "^5.0.5",
+    "rimraf": "^6.1.3",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
