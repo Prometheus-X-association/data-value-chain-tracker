@@ -21,14 +21,12 @@
     "build:api": "cd incentive/api && npm run build"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.6",
     "axios": "1.20.0",
     "chai": "^4.3.10",
     "concurrently": "^8.2.2",
     "ethers": "^6.9.0",
-    "hardhat": "^2.25.0",
     "mocha": "^10.2.0",
     "rimraf": "^5.0.5",
     "ts-mocha": "^10.0.0",
@@ -55,12 +53,13 @@
     "diff": "5.2.2",
     "ws": "8.21.0",
     "form-data": "4.0.6",
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "body-parser": "2.3.0",
     "js-yaml": "4.3.2",
     "uuid": "^11.1.1",
     "immutable": "4.3.9",
-    "adm-zip": "0.6.1"
+    "adm-zip": "0.6.1",
+    "proxy-addr": "2.0.8"
   },
   "overrides": {
     "elliptic": "6.6.1",
@@ -78,12 +77,13 @@
     "diff": "5.2.2",
     "ws": "8.21.0",
     "form-data": "4.0.6",
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "body-parser": "2.3.0",
     "js-yaml": "4.3.2",
     "uuid": "^11.1.1",
     "immutable": "4.3.9",
-    "adm-zip": "0.6.1"
+    "adm-zip": "0.6.1",
+    "proxy-addr": "2.0.8"
   },
   "private": true,
   "dependencies": {
