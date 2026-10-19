@@ -1,4 +1,6 @@
 version: 2
+# Major versions are held back where noted (they need manual migration); patch and minor
+# updates, including security fixes, always flow through.
 updates:
   - package-ecosystem: "npm"
     directory: "/incentive/api"
@@ -6,30 +8,61 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "axios"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "dotenv"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "express"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "joi"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "swagger-ui-express"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "lodash"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "lodash-es"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "minimatch"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "path-to-regexp"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/express"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/morgan"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/swagger-ui-express"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ts-node"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ethers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "uuid"
+        update-types:
+          - "version-update:semver-major"
   - package-ecosystem: "npm"
     directory: "/incentive/frontend"
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "next-auth"
-        update-types:
-          - "version-update:semver-major"
       - dependency-name: "react"
         update-types:
           - "version-update:semver-major"
@@ -43,81 +76,248 @@ updates:
         update-types:
           - "version-update:semver-major"
       - dependency-name: "axios"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "minimatch"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "uuid"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "wagmi"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@wagmi/connectors"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@rainbow-me/rainbowkit"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@metamask/sdk"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@metamask/sdk-communication-layer"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@metamask/rpc-errors"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@metamask/utils"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@gemini-wallet/core"
+        update-types:
+          - "version-update:semver-major"
   - package-ecosystem: "npm"
     directory: "/incentive/blockchain"
     schedule:
       interval: "weekly"
     ignore:
       - dependency-name: "hardhat"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-toolbox"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-ethers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-chai-matchers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-foundry"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-ignition"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-ignition-ethers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-network-helpers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-verify"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@typechain/hardhat"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/chai"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/mocha"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ts-node"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "typechain"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ethers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "serialize-javascript"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "minimatch"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "picomatch"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "glob"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "lodash"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "lodash-es"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "uuid"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "solidity-coverage"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "hardhat-gas-reporter"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "bn.js"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "js-yaml"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ethjs-unit"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "sc-istanbul"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "web3-utils"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "number-to-bn"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "secp256k1"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ethereum-cryptography"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ethereumjs-util"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@sentry/node"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "cookie"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@ethersproject/abi"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@ethersproject/abstract-provider"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@ethersproject/abstract-signer"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@ethersproject/hash"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@ethersproject/signing-key"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@ethersproject/transactions"
+        update-types:
+          - "version-update:semver-major"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     ignore:
       - dependency-name: "hardhat"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@nomicfoundation/hardhat-ethers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/chai"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "@types/mocha"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "chai"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ethers"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "ts-node"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "serialize-javascript"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "path-to-regexp"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "minimatch"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "picomatch"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "bn.js"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "cookie"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "tmp"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "elliptic"
+        update-types:
+          - "version-update:semver-major"
       - dependency-name: "uuid"
+        update-types:
+          - "version-update:semver-major"
+  - package-ecosystem: "npm"
+    directory: "/app/express-server"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "react-scripts"
+        update-types:
+          - "version-update:semver-major"
+  - package-ecosystem: "npm"
+    directory: "/trace-api"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directories:
+      - "/app"
+      - "/trace-api"
+      - "/incentive/api"
+      - "/incentive/frontend"
+      - "/incentive/blockchain"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -1,63 +1,68 @@
 DOCKER_COMPOSE_FILE = docker-compose.yml
+DOCKER_COMPOSE_DEV_FILE = docker-compose.dev.yml
 
-.PHONY: up down rebuild clean logs build-core-frontend build-core-api build-incentive-api build-incenti-trace build-engine-test build-incentive-frontend build-hardhat build-all
+.PHONY: init sync-organizations up up-dev down rebuild clean logs build-all test test-core-api test-trace-api test-contracts \
+	build-core-frontend build-core-api build-incentive-api build-trace-api build-incentive-frontend build-hardhat
 
-CORE_FRONTEND_IMAGE = data-value-chain-tracker-core-frontend:latest
-CORE_API_IMAGE = data-value-chain-tracker-core-api:latest
-INCENTIVE_API_IMAGE = data-value-chain-tracker-incentive-api:latest
-INCENTIVE_FRONTEND_IMAGE = data-value-chain-tracker-incentive-frontend:latest
-HARDHAT_IMAGE = data-value-chain-tracker-hardhat:latest
-INCENTI_TRACE_IMAGE = data-value-chain-tracker-incenti-trace:latest
-ENGINE_TEST_IMAGE = data-value-chain-tracker-engine-test:latest
+# Generates .env (service secrets) and config/organizations.json (users with hashed passwords).
+# Login passwords are written to config/dev-credentials.local.txt.
+init:
+	node scripts/init-dev-env.mjs
+
+# Adds organizations from config/organizations.example.json that are missing locally (keeps .env).
+sync-organizations:
+	node scripts/init-dev-env.mjs --sync-organizations
 
 up:
-	@echo "Starting all services..."
+	@test -f .env || (echo "Missing .env - run 'make init' first" && exit 1)
 	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
 
+# Same as up, plus direct service ports on 127.0.0.1, Swagger and dev wallet signing. Local only.
+up-dev:
+	@test -f .env || (echo "Missing .env - run 'make init' first" && exit 1)
+	docker compose -f $(DOCKER_COMPOSE_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) up -d
+
 down:
-	@echo "Stopping all services..."
 	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 rebuild:
-	@echo "Rebuilding and starting all services..."
 	docker compose -f $(DOCKER_COMPOSE_FILE) up --build -d
 
+# Removes containers, networks and volumes (database and chain state).
 clean:
-	@echo "Cleaning up containers, networks, and volumes..."
 	docker compose -f $(DOCKER_COMPOSE_FILE) down -v
 
 logs:
-	@echo "Showing logs for all services..."
 	docker compose -f $(DOCKER_COMPOSE_FILE) logs -f
 
+build-all:
+	docker compose -f $(DOCKER_COMPOSE_FILE) build
+
 build-core-frontend:
-	@echo "Building core frontend image..."
-	docker build -t $(CORE_FRONTEND_IMAGE) -f app/Dockerfile.frontend ./app
+	docker compose -f $(DOCKER_COMPOSE_FILE) build core-frontend
 
 build-core-api:
-	@echo "Building core API image..."
-	docker build -t $(CORE_API_IMAGE) -f app/Dockerfile.server ./app
+	docker compose -f $(DOCKER_COMPOSE_FILE) build core-api
+
+build-trace-api:
+	docker compose -f $(DOCKER_COMPOSE_FILE) build trace-api
 
 build-incentive-api:
-	@echo "Building incentive API image..."
-	docker build -t $(INCENTIVE_API_IMAGE)  -f incentive/api/Dockerfile .
+	docker compose -f $(DOCKER_COMPOSE_FILE) build incentive-api
 
 build-incentive-frontend:
-	@echo "Building incentive frontend image..."
-	docker build -t $(INCENTIVE_FRONTEND_IMAGE) -f incentive/frontend/Dockerfile ./incentive/frontend
+	docker compose -f $(DOCKER_COMPOSE_FILE) build incentive-frontend
 
 build-hardhat:
-	@echo "Building Hardhat node image..."
-	docker build -t $(HARDHAT_IMAGE) -f incentive/blockchain/Dockerfile ./incentive/blockchain
+	docker compose -f $(DOCKER_COMPOSE_FILE) build hardhat
 
-build-incenti-trace:
-	@echo "Building incenti-trace API image..."
-	docker build -t $(INCENTI_TRACE_IMAGE) -f  ./Dockerfile.server .
+test: test-core-api test-trace-api test-contracts
 
-build-engine-test:
-	@echo "Building incenti-trace API image..."
-	docker build -t $(ENGINE_TEST_IMAGE) -f  ./Dockerfile.server .
+test-core-api:
+	cd app/express-server && npm ci && npm test
 
-# Build all images
-build-all: build-core-frontend build-core-api build-incentive-api build-incenti-trace build-incentive-frontend build-hardhat build-engine-test
-	@echo "All images built successfully!"
+test-trace-api:
+	cd trace-api && npm ci && npm test
+
+test-contracts:
+	cd incentive/blockchain && npm ci --legacy-peer-deps && NODE_ENV=docker npx hardhat test

@@ -39,8 +39,19 @@
     "type": "error"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "participant",
+        "type": "address"
+      }
+    ],
+    "name": "DuplicateParticipant",
+    "type": "error"
+  },
+  {
     "inputs": [],
-    "name": "EmergencyWithdrawalFailed",
+    "name": "FixedRewardsExceedPool",
     "type": "error"
   },
   {
@@ -70,7 +81,17 @@
   },
   {
     "inputs": [],
+    "name": "NotAuthorizedDepositor",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "NotUseCaseOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NothingToWithdraw",
     "type": "error"
   },
   {
@@ -152,7 +173,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "owner",
+        "name": "depositor",
         "type": "address"
       },
       {
@@ -463,6 +484,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "RELAYER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "string",
@@ -604,6 +638,43 @@
     "inputs": [
       {
         "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "deposits",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "useCaseId",
+        "type": "string"
+      }
+    ],
+    "name": "distribute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
         "name": "useCaseId",
         "type": "string"
       }
@@ -686,6 +757,11 @@
             "internalType": "struct UseCaseContract.Participant[]",
             "name": "participants",
             "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalFixedRewards",
+            "type": "uint256"
           }
         ],
         "internalType": "struct UseCaseContract.UseCaseInfo[]",
@@ -829,6 +905,11 @@
             "internalType": "struct UseCaseContract.Participant[]",
             "name": "participants",
             "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalFixedRewards",
+            "type": "uint256"
           }
         ],
         "internalType": "struct UseCaseContract.UseCaseInfo",
@@ -996,6 +1077,25 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "totalFixedRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

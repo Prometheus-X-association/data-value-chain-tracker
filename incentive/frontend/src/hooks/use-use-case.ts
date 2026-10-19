@@ -11,14 +11,10 @@ import { Address } from "viem";
 import { useEffect, useState } from "react";
 import { UseCaseMetadata } from "@/types/types";
 
+// Served by the core API through the gateway. It is only visible to signed-in members of the
+// use case (core frontend session); everyone else just sees the on-chain data.
 function getUseCaseMetadataUrl(id: string) {
-  const encodedId = encodeURIComponent(id);
-
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}/incentive/core-api/api/incentive-use-case-metadata/${encodedId}`;
-  }
-
-  return `http://127.0.0.1:3001/api/incentive-use-case-metadata/${encodedId}`;
+  return `${window.location.origin}/api/incentive-use-case-metadata/${encodeURIComponent(id)}`;
 }
 
 export function useUseCase(id: string) {
@@ -46,15 +42,15 @@ export function useUseCase(id: string) {
     let isCancelled = false;
 
     async function loadMetadata() {
-      if (!id) {
+      if (!id || typeof window === "undefined") {
         setMetadata(null);
         return;
       }
 
       try {
-        const response = await fetch(getUseCaseMetadataUrl(id));
+        const response = await fetch(getUseCaseMetadataUrl(id), { credentials: "same-origin" });
 
-        if (response.status === 404) {
+        if (response.status === 401 || response.status === 404) {
           if (!isCancelled) {
             setMetadata(null);
           }
@@ -174,6 +170,7 @@ export function useUseCase(id: string) {
 
   return {
     useCase,
+    metadata,
     isLoading,
     error,
     actions,

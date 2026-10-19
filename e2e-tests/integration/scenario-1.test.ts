@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 import { setupTestEnvironment, TestEnvironment } from "./setup";
 import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner";
 import { waitForTx } from "../helpers/helpers";
-import axios from "axios";
 
 describe("Scenario 1: Educational Data Provider and AI Service Provider", function () {
   this.timeout(60000); // Set timeout to 60 seconds
@@ -97,10 +96,7 @@ describe("Scenario 1: Educational Data Provider and AI Service Provider", functi
     );
 
     // 4. Send request to incentive API and wait for transaction
-    const response = await axios.post(
-      `${env.apiUrl}/api/incentives/distribute`,
-      signedRequest
-    );
+    const response = await env.postToApi("/api/incentives/distribute", signedRequest);
     expect(response.status).to.equal(200);
 
     const txHash = (response.data as { data: { transactionHash: string } }).data.transactionHash;

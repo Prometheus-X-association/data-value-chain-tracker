@@ -8,22 +8,9 @@ import "./src/env.js";
 const config = {
   output: "standalone",
   basePath: "/incentive",
-  async rewrites() {
-    return [
-      {
-        source: "/core-api/:path*",
-        destination: "http://core-api:9081/:path*",
-      },
-      {
-        source: "/rpc",
-        destination: "http://hardhat:8545",
-      },
-      {
-        source: "/rpc/:path*",
-        destination: "http://hardhat:8545/:path*",
-      },
-    ];
-  },
+  poweredByHeader: false,
+  // The chain is reached through the filtered /incentive/rpc route (src/app/rpc/route.ts) and the
+  // core API through the gateway; there are deliberately no transparent proxies here.
 };
 
 export default config;

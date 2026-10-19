@@ -1,109 +1,109 @@
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+const Session = require('../models/session');
+const { findUser, loadRegistry } = require('./organizations');
 
-const parseEnvValue = (value = '') => {
-  const trimmed = value.trim();
+const SESSION_COOKIE_NAME = process.env.DVCT_SESSION_COOKIE_NAME || 'dvct_session';
+const SESSION_TTL_MS = Number(process.env.DVCT_SESSION_TTL_MS || 1000 * 60 * 60 * 8);
+const COOKIE_SAME_SITE = process.env.DVCT_SESSION_SAME_SITE || 'Strict';
+const COOKIE_SECURE = process.env.DVCT_SESSION_SECURE === 'true';
 
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-    (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) {
-    return trimmed.slice(1, -1);
-  }
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const loginFailures = new Map();
 
-  return trimmed;
+const safeEqual = (left = '', right = '') => {
+  const leftDigest = crypto.createHash('sha256').update(String(left)).digest();
+  const rightDigest = crypto.createHash('sha256').update(String(right)).digest();
+  return crypto.timingSafeEqual(leftDigest, rightDigest);
 };
 
-const loadLocalEnv = () => {
-  const envFilePath = path.resolve(__dirname, '../../.env');
+const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
-  if (!fs.existsSync(envFilePath)) {
-    return;
+// Format: scrypt$N$r$p$<salt base64>$<hash base64>
+const verifyPassword = (password, storedHash) => {
+  const parts = String(storedHash).split('$');
+  if (parts.length !== 6 || parts[0] !== 'scrypt') {
+    return false;
   }
 
-  const envContents = fs.readFileSync(envFilePath, 'utf8');
+  const [, N, r, p, saltB64, hashB64] = parts;
+  const expected = Buffer.from(hashB64, 'base64');
+  const actual = crypto.scryptSync(String(password), Buffer.from(saltB64, 'base64'), expected.length, {
+    N: Number(N),
+    r: Number(r),
+    p: Number(p),
+    maxmem: 64 * 1024 * 1024,
+  });
 
-  envContents.split(/\r?\n/).forEach((line) => {
-    const trimmedLine = line.trim();
+  return crypto.timingSafeEqual(actual, expected);
+};
 
-    if (!trimmedLine || trimmedLine.startsWith('#')) {
-      return;
-    }
+const hashPassword = (password) => {
+  const N = 16384;
+  const r = 8;
+  const p = 1;
+  const salt = crypto.randomBytes(16);
+  const hash = crypto.scryptSync(String(password), salt, 32, { N, r, p });
+  return `scrypt$${N}$${r}$${p}$${salt.toString('base64')}$${hash.toString('base64')}`;
+};
 
-    const separatorIndex = trimmedLine.indexOf('=');
+// A fixed hash so that unknown usernames cost the same time as wrong passwords.
+const DUMMY_PASSWORD_HASH = hashPassword(crypto.randomBytes(16).toString('hex'));
 
-    if (separatorIndex === -1) {
-      return;
-    }
+const toProfile = (organization, username) => ({
+  username,
+  organizationId: organization.organizationId,
+  displayName: organization.displayName,
+  identifiers: organization.identifiers,
+});
 
-    const key = trimmedLine.slice(0, separatorIndex).trim();
-    const value = parseEnvValue(trimmedLine.slice(separatorIndex + 1));
+const authenticateCredentials = (username = '', password = '') => {
+  const user = findUser(username);
+  const passwordMatches = verifyPassword(password, user ? user.passwordHash : DUMMY_PASSWORD_HASH);
 
-    if (key && process.env[key] === undefined) {
-      process.env[key] = value;
+  if (!user || !passwordMatches) {
+    return null;
+  }
+
+  return toProfile(user.organization, user.username);
+};
+
+// Failed sign-ins are limited per username and, more loosely, per client IP so that one
+// mistyping user behind a shared proxy does not lock out everybody else.
+const loginThrottleLimits = (req, username) => {
+  const perUser = Number(process.env.DVCT_LOGIN_MAX_FAILURES || 10);
+  return [
+    { key: `user:${String(username).toLowerCase()}`, limit: perUser },
+    { key: `ip:${req.ip}`, limit: perUser * 5 },
+  ];
+};
+
+const pruneLoginFailures = (now) => {
+  loginFailures.forEach((entry, key) => {
+    if (now - entry.windowStart > LOGIN_WINDOW_MS) {
+      loginFailures.delete(key);
     }
   });
 };
 
-loadLocalEnv();
-
-const SESSION_COOKIE_NAME = process.env.DVCT_SESSION_COOKIE_NAME || 'dvct_session';
-const SESSION_TTL_MS = Number(process.env.DVCT_SESSION_TTL_MS || 1000 * 60 * 60 * 8);
-const COOKIE_SAME_SITE = process.env.DVCT_SESSION_SAME_SITE || 'Lax';
-const COOKIE_SECURE = process.env.DVCT_SESSION_SECURE === 'true';
-const INTERNAL_API_TOKEN = process.env.DVCT_INTERNAL_API_TOKEN || '';
-const sessionStore = new Map();
-
-const safeEqual = (left = '', right = '') => {
-  const leftBuffer = Buffer.from(left);
-  const rightBuffer = Buffer.from(right);
-
-  if (leftBuffer.length !== rightBuffer.length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(leftBuffer, rightBuffer);
-};
-
-const getConfiguredUsers = () => {
-  const configuredUsers = process.env.DVCT_AUTH_USERS_JSON;
-
-  if (!configuredUsers) {
-    return [];
-  }
-
-  try {
-    const parsedUsers = JSON.parse(configuredUsers);
-
-    if (!Array.isArray(parsedUsers)) {
-      return [];
-    }
-
-    return parsedUsers.filter(
-      (user) => user?.username && user?.password && user?.organizationId,
-    );
-  } catch (error) {
-    return [];
-  }
-};
-
-const authenticateCredentials = (username = '', password = '') => {
-  const user = getConfiguredUsers().find(
-    (candidate) =>
-      safeEqual(candidate.username, username) &&
-      safeEqual(candidate.password, password),
+const isLoginThrottled = (req, username) => {
+  pruneLoginFailures(Date.now());
+  return loginThrottleLimits(req, username).some(
+    ({ key, limit }) => (loginFailures.get(key)?.count || 0) >= limit,
   );
+};
 
-  if (!user) {
-    return null;
-  }
+const recordLoginFailure = (req, username) => {
+  const now = Date.now();
+  loginThrottleLimits(req, username).forEach(({ key }) => {
+    const entry = loginFailures.get(key) || { count: 0, windowStart: now };
+    entry.count += 1;
+    loginFailures.set(key, entry);
+  });
+};
 
-  return {
-    username: user.username,
-    organizationId: user.organizationId,
-    displayName: user.displayName || user.username,
-  };
+// Only the user's own counter is reset: signing in to one account must not reset the IP budget.
+const clearLoginFailures = (req, username) => {
+  loginFailures.delete(`user:${String(username).toLowerCase()}`);
 };
 
 const parseCookieHeader = (cookieHeader = '') =>
@@ -122,7 +122,11 @@ const parseCookieHeader = (cookieHeader = '') =>
       const value = entry.slice(separatorIndex + 1).trim();
 
       if (name) {
-        cookies[name] = decodeURIComponent(value);
+        try {
+          cookies[name] = decodeURIComponent(value);
+        } catch (error) {
+          cookies[name] = value;
+        }
       }
 
       return cookies;
@@ -134,19 +138,15 @@ const serializeCookie = (name, value, options = {}) => {
   if (options.maxAge !== undefined) {
     attributes.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
   }
-
   if (options.httpOnly) {
     attributes.push('HttpOnly');
   }
-
   if (options.secure) {
     attributes.push('Secure');
   }
-
   if (options.sameSite) {
     attributes.push(`SameSite=${options.sameSite}`);
   }
-
   if (options.path) {
     attributes.push(`Path=${options.path}`);
   }
@@ -154,55 +154,43 @@ const serializeCookie = (name, value, options = {}) => {
   return attributes.join('; ');
 };
 
-const pruneExpiredSessions = () => {
-  const now = Date.now();
-
-  Array.from(sessionStore.entries()).forEach(([sessionId, session]) => {
-    if (!session || session.expiresAt <= now) {
-      sessionStore.delete(sessionId);
-    }
+const createSession = async (profile) => {
+  const token = crypto.randomBytes(32).toString('hex');
+  await Session.create({
+    tokenHash: hashToken(token),
+    organizationId: profile.organizationId,
+    username: profile.username,
+    expiresAt: new Date(Date.now() + SESSION_TTL_MS),
   });
+  return token;
 };
 
-const createSession = (user) => {
-  pruneExpiredSessions();
+const getSessionFromRequest = async (req) => {
+  const token = parseCookieHeader(req.headers.cookie || '')[SESSION_COOKIE_NAME];
 
-  const sessionId = crypto.randomBytes(32).toString('hex');
-  sessionStore.set(sessionId, {
-    user,
-    expiresAt: Date.now() + SESSION_TTL_MS,
-  });
-
-  return sessionId;
-};
-
-const getSessionFromRequest = (req) => {
-  pruneExpiredSessions();
-
-  const cookies = parseCookieHeader(req.headers.cookie || '');
-  const sessionId = cookies[SESSION_COOKIE_NAME];
-
-  if (!sessionId) {
+  if (!token || !/^[0-9a-f]{64}$/.test(token)) {
     return null;
   }
 
-  const session = sessionStore.get(sessionId);
-
-  if (!session || session.expiresAt <= Date.now()) {
-    sessionStore.delete(sessionId);
+  const session = await Session.findOne({ tokenHash: hashToken(token) }).lean();
+  if (!session || session.expiresAt <= new Date()) {
     return null;
   }
 
-  return {
-    sessionId,
-    user: session.user,
-  };
+  // Re-read the registry so that removed users or organizations lose access immediately.
+  const user = findUser(session.username);
+  if (!user || user.organization.organizationId !== session.organizationId) {
+    await Session.deleteOne({ _id: session._id });
+    return null;
+  }
+
+  return { token, user: toProfile(user.organization, user.username) };
 };
 
-const attachSessionCookie = (res, sessionId) => {
+const attachSessionCookie = (res, token) => {
   res.setHeader(
     'Set-Cookie',
-    serializeCookie(SESSION_COOKIE_NAME, sessionId, {
+    serializeCookie(SESSION_COOKIE_NAME, token, {
       httpOnly: true,
       secure: COOKIE_SECURE,
       sameSite: COOKIE_SAME_SITE,
@@ -225,80 +213,109 @@ const clearSessionCookie = (res) => {
   );
 };
 
-const destroySession = (sessionId) => {
-  if (sessionId) {
-    sessionStore.delete(sessionId);
+const destroySession = async (token) => {
+  if (token) {
+    await Session.deleteOne({ tokenHash: hashToken(token) });
   }
 };
 
-const requireAuthenticatedSession = (req, res, next) => {
-  const activeSession = getSessionFromRequest(req);
+const requireAuthenticatedSession = async (req, res, next) => {
+  try {
+    const activeSession = await getSessionFromRequest(req);
 
-  if (!activeSession) {
-    return res.status(401).json({ error: 'Authentication required' });
+    if (!activeSession) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    req.auth = activeSession.user;
+    req.sessionToken = activeSession.token;
+    return next();
+  } catch (error) {
+    return next(error);
   }
-
-  req.auth = activeSession.user;
-  req.sessionId = activeSession.sessionId;
-  return next();
 };
 
 const requireInternalApiToken = (req, res, next) => {
-  if (!INTERNAL_API_TOKEN) {
+  const internalApiToken = process.env.DVCT_INTERNAL_API_TOKEN || '';
+
+  if (internalApiToken.length < 32) {
     return res.status(503).json({ error: 'Internal API token is not configured' });
   }
 
-  const requestToken =
-    req.headers['x-dvct-internal-token'] ||
-    req.headers['x-internal-token'] ||
-    '';
+  const requestToken = req.headers['x-dvct-internal-token'] || '';
 
-  if (!safeEqual(String(requestToken), INTERNAL_API_TOKEN)) {
+  if (!safeEqual(String(requestToken), internalApiToken)) {
     return res.status(401).json({ error: 'Internal authentication required' });
   }
 
   return next();
 };
 
-const buildOrganizationVisibilityFilter = (organizationId) => ({
-  $or: [
-    { participantId: organizationId },
-    { participantSourceId: organizationId },
-    { 'nodeMetadata.dataProviderId': organizationId },
-    { 'nodeMetadata.dataConsumerId': organizationId },
-    { 'nodeMetadata.incentiveReceivedFrom.organizationId': organizationId },
-  ],
-});
+const allowedOrigins = () =>
+  String(process.env.DVCT_CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
-const nodeBelongsToOrganization = (node, organizationId) => {
-  if (!node || !organizationId) {
+// CSRF defence in depth (cookies are already SameSite=Strict): state-changing requests coming
+// from a browser must originate from this site or from an explicitly allowed origin.
+const requireTrustedOrigin = (req, res, next) => {
+  const origin = req.headers.origin || (req.headers.referer ? safeOrigin(req.headers.referer) : '');
+
+  if (!origin) {
+    return next(); // Not a browser request (curl, service-to-service).
+  }
+
+  const host = req.headers['x-forwarded-host'] || req.headers.host || '';
+  if (safeHost(origin) === host || allowedOrigins().includes(origin)) {
+    return next();
+  }
+
+  return res.status(403).json({ error: 'Cross-site request rejected' });
+};
+
+const safeOrigin = (url) => {
+  try {
+    return new URL(url).origin;
+  } catch (error) {
+    return 'invalid';
+  }
+};
+
+const safeHost = (url) => {
+  try {
+    return new URL(url).host;
+  } catch (error) {
+    return 'invalid';
+  }
+};
+
+// --- Organization-scoped visibility -------------------------------------------------------
+
+const nodeBelongsToOrganization = (node, identifiers = []) => {
+  if (!node || identifiers.length === 0) {
     return false;
   }
 
+  const ids = new Set(identifiers);
   return (
-    node.participantId === organizationId ||
-    node.participantSourceId === organizationId ||
-    node.nodeMetadata?.dataProviderId === organizationId ||
-    node.nodeMetadata?.dataConsumerId === organizationId ||
-    (node.nodeMetadata?.incentiveReceivedFrom || []).some(
-      (incentive) => incentive.organizationId === organizationId,
-    )
+    ids.has(node.participantId) ||
+    ids.has(node.participantSourceId) ||
+    ids.has(node.nodeMetadata?.dataProviderId) ||
+    ids.has(node.nodeMetadata?.dataConsumerId) ||
+    (node.nodeMetadata?.incentiveReceivedFrom || []).some((incentive) => ids.has(incentive.organizationId))
   );
 };
 
-const collectNodeIdentifiers = (node) =>
-  [
-    node?.nodeId,
-    node?.canonicalKey,
-    node?.dataId,
-    node?.participantId,
-  ].filter(Boolean);
+const nodeOwnedByOrganization = (node, identifiers = []) =>
+  Boolean(node?.participantId) && identifiers.includes(node.participantId);
 
 const buildNodeLookup = (nodes = []) => {
   const lookup = new Map();
 
+  // Links reference nodes by nodeId or canonicalKey only.
   nodes.forEach((node) => {
-    collectNodeIdentifiers(node).forEach((identifier) => {
+    [node?.nodeId, node?.canonicalKey].filter(Boolean).forEach((identifier) => {
       if (!lookup.has(identifier)) {
         lookup.set(identifier, node);
       }
@@ -308,9 +325,10 @@ const buildNodeLookup = (nodes = []) => {
   return lookup;
 };
 
-const expandToAuthorizedHierarchy = (nodes = [], organizationId) => {
+// An organization sees the nodes it takes part in plus the value chains they are linked to.
+const expandToAuthorizedHierarchy = (nodes = [], identifiers = []) => {
   const lookup = buildNodeLookup(nodes);
-  const queue = nodes.filter((node) => nodeBelongsToOrganization(node, organizationId));
+  const queue = nodes.filter((node) => nodeBelongsToOrganization(node, identifiers));
   const visited = new Set();
   const authorizedNodes = [];
 
@@ -324,34 +342,45 @@ const expandToAuthorizedHierarchy = (nodes = [], organizationId) => {
     visited.add(currentNode.nodeId);
     authorizedNodes.push(currentNode);
 
-    const linkedIds = [
-      ...(currentNode.prevNode || []).map((link) => link.nodeId),
-      ...(currentNode.childNode || []).map((link) => link.nodeId),
-    ].filter(Boolean);
-
-    linkedIds.forEach((linkedId) => {
-      const linkedNode = lookup.get(linkedId);
-
-      if (linkedNode && !visited.has(linkedNode.nodeId)) {
-        queue.push(linkedNode);
-      }
-    });
+    [...(currentNode.prevNode || []), ...(currentNode.childNode || [])]
+      .map((link) => link.nodeId)
+      .filter(Boolean)
+      .forEach((linkedId) => {
+        const linkedNode = lookup.get(linkedId);
+        if (linkedNode && !visited.has(linkedNode.nodeId)) {
+          queue.push(linkedNode);
+        }
+      });
   }
 
   return authorizedNodes;
 };
 
+// Validates the registry at startup so configuration errors fail fast.
+const assertAuthConfiguration = () => {
+  loadRegistry();
+  if ((process.env.DVCT_INTERNAL_API_TOKEN || '').length < 32) {
+    throw new Error('DVCT_INTERNAL_API_TOKEN must be set to at least 32 characters. Run "make init".');
+  }
+};
+
 module.exports = {
+  assertAuthConfiguration,
   attachSessionCookie,
   authenticateCredentials,
-  buildOrganizationVisibilityFilter,
+  clearLoginFailures,
   clearSessionCookie,
   createSession,
   destroySession,
   expandToAuthorizedHierarchy,
-  getConfiguredUsers,
   getSessionFromRequest,
+  hashPassword,
+  isLoginThrottled,
   nodeBelongsToOrganization,
+  nodeOwnedByOrganization,
+  recordLoginFailure,
   requireAuthenticatedSession,
   requireInternalApiToken,
+  requireTrustedOrigin,
+  verifyPassword,
 };

@@ -1,0 +1,7 @@
+node_modules
+build
+.env*
+express-server/node_modules
+express-server/.env
+express-server/logs
+express-server/src/tests

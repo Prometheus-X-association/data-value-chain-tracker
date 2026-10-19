@@ -11,8 +11,8 @@ const fetchNodeTree = async (nodeId, options = {}, visited = new Set()) => {
   visited.add(nodeId);
 
   const node = await Data.findOne({
-    $or: [{ nodeId }, { canonicalKey: nodeId }, { dataId: nodeId }],
-  });
+    $or: [{ nodeId }, { canonicalKey: nodeId }],
+  }).lean();
 
   if (!node) {
     return null;
@@ -29,13 +29,13 @@ const fetchNodeTree = async (nodeId, options = {}, visited = new Set()) => {
 
   // Calculate incentives for the current node
   incentives.forEach((incentive) => {
-    totalIncentive += incentive.numPoints;
+    totalIncentive += Number(incentive.numPoints) || 0;
   });
 
   const childNodes = [];
 
   // Recursively fetch all child nodes and their incentives
-  for (const child of node.childNode) {
+  for (const child of node.childNode || []) {
     const childData = await fetchNodeTree(child.nodeId, options, visited);
     if (childData) {
       childNodes.push(childData);

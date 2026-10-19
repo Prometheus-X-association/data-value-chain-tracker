@@ -1,26 +1,19 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const logger = require('../lib/logger');
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/jsonldDB";
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jsonldDB';
 
-const connectWithRetry = () => {
-  console.log("MongoDB connection with retry");
-  mongoose
-    .connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-      //useFindAndModify: false,
-    })
-    .then(() => {
-      console.log("MongoDB is connected");
-    })
-    .catch((err) => {
-      console.log(
-        "MongoDB connection unsuccessful, retry after 5 seconds. ",
-        err,
-      );
-      setTimeout(connectWithRetry, 5000);
-    });
+const connectWithRetry = async () => {
+  for (;;) {
+    try {
+      await mongoose.connect(MONGODB_URI);
+      logger.info('MongoDB is connected');
+      return;
+    } catch (error) {
+      logger.warn(`MongoDB connection unsuccessful, retrying in 5 seconds: ${error.message}`);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
 };
 
 module.exports = connectWithRetry;

@@ -1,0 +1,24 @@
+# Local debugging only: publishes the internal services on 127.0.0.1 and enables Swagger and
+# the RPC dev signing used by the incentive UI wallet switcher. Never use on a shared host.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d   (make up-dev)
+services:
+  core-api:
+    environment:
+      DVCT_ENABLE_SWAGGER: "true"
+    ports:
+      - "127.0.0.1:3001:9081"
+  trace-api:
+    ports:
+      - "127.0.0.1:3005:9091"
+  incentive-api:
+    ports:
+      - "127.0.0.1:3002:3000"
+  incentive-frontend:
+    environment:
+      RPC_ALLOW_DEV_SIGNING: "true"
+  mongodb:
+    ports:
+      - "127.0.0.1:27017:27017"
+  hardhat:
+    ports:
+      - "127.0.0.1:8545:8545"

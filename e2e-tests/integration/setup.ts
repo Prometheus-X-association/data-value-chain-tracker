@@ -1,3 +1,5 @@
+import crypto from "crypto";
+import axios from "axios";
 import { ethers } from "ethers";
 import {
   UseCaseContract,
@@ -7,6 +9,7 @@ import { Server } from "http";
 import fs from "fs";
 import path from "path";
 import { startServer } from "../../incentive/api/src/server";
+import { signIncentiveApiRequest } from "../../incentive/api/client/lib/IncentiveSigner";
 import PTXTokenArtifact from "../../incentive/blockchain/artifacts/src/PTXToken.sol/PTXToken.json";
 import UseCaseContractArtifact from "../../incentive/blockchain/artifacts/src/UseCaseContract.sol/UseCaseContract.json";
 
@@ -15,6 +18,8 @@ export interface TestEnvironment {
   useCase: UseCaseContract;
   token: PTXToken;
   apiUrl: string;
+  /** POSTs a body to the incentive API with the HMAC headers it requires. */
+  postToApi: (path: string, body: unknown) => Promise<{ status: number; data: any }>;
   contracts: {
     useCaseAddress: string;
     tokenAddress: string;
@@ -25,6 +30,15 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
   const rpcUrl = process.env.INCENTIVE_RPC_URL || "http://127.0.0.1:8545";
   const apiPort = parseInt(process.env.INCENTIVE_API_PORT || "3001", 10);
   const externalApiUrl = process.env.INCENTIVE_API_URL;
+  // Must match the incentive API's INCENTIVE_API_HMAC_SECRET when testing an external API.
+  const hmacSecret = process.env.INCENTIVE_API_HMAC_SECRET || crypto.randomBytes(32).toString("hex");
+  const postTo = (baseUrl: string) => async (apiPath: string, body: unknown) => {
+    const rawBody = JSON.stringify(body);
+    const response = await axios.post(`${baseUrl}${apiPath}`, rawBody, {
+      headers: signIncentiveApiRequest(rawBody, hmacSecret),
+    });
+    return { status: response.status, data: response.data };
+  };
 
   // Setup provider and wallet
   const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -63,6 +77,7 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
       useCase,
       token,
       apiUrl: externalApiUrl,
+      postToApi: postTo(externalApiUrl),
       contracts: {
         useCaseAddress: deploymentInfo.USECASE_CONTRACT_ADDRESS,
         tokenAddress: deploymentInfo.PTX_TOKEN_ADDRESS,
@@ -104,12 +119,16 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
   )) as UseCaseContract;
   await useCase.waitForDeployment();
 
+  // The incentive API relays permit deposits and therefore needs RELAYER_ROLE.
+  await (await useCase.grantRole(await useCase.RELAYER_ROLE(), apiSigner.address)).wait();
+
   const apiConfig = {
     port: apiPort,
     privateKey: apiSigner.privateKey,
     useCaseAddress: await useCase.getAddress(),
     tokenAddress: await token.getAddress(),
     rpcUrl,
+    hmacSecret,
   };
 
   const apiServer = await startServer(apiConfig);
@@ -119,6 +138,7 @@ export async function setupTestEnvironment(): Promise<TestEnvironment> {
     useCase,
     token,
     apiUrl: `http://127.0.0.1:${apiConfig.port}`,
+    postToApi: postTo(`http://127.0.0.1:${apiConfig.port}`),
     contracts: {
       useCaseAddress: await useCase.getAddress(),
       tokenAddress: await token.getAddress(),

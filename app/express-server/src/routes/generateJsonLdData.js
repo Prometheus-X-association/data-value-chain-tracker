@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const jsonld = require('jsonld');
-const { buildCanonicalKey, buildNodeType } = require('../lib/traceability');
+const { buildCanonicalKey, buildNodeType, buildNodeUrl } = require('../lib/traceability');
 
 const generateJsonLdData = async (inputData) => {
   const nodeId = new mongoose.Types.ObjectId().toString(); // Generate a unique node ID
@@ -59,7 +59,7 @@ const generateJsonLdData = async (inputData) => {
   if (validPrevDataIds.length > 0) {
     jsonLdData.prevNode = validPrevDataIds.map(prevId => ({
       "nodeId": prevId,
-      "@nodeUrl": `https://url-to-prevNode/${prevId}`
+      "@nodeUrl": buildNodeUrl(prevId)
     }));
   }
 

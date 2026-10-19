@@ -1,21 +1,3 @@
-export type KeyPair = {
-  clientId: string;
-  publicKey: string;
-  permissions: string[];
-  createdAt: Date;
-};
-
-export interface IncentivePayload {
-  useCaseId: string;
-  recipient: string;
-  eventName: string;
-  amount: string;
-  factor: string;
-  nonce: number;
-  timestamp: number;
-  clientId: string;
-}
-
 export type Permit = {
   owner: string;
   spender: string;
@@ -26,20 +8,10 @@ export type Permit = {
   s: string;
 };
 
-export type TransferRequest = {
+export type UseCaseDepositRequest = {
+  useCaseId: string;
   from: string;
   to: string;
   amount: string;
+  permit: Permit;
 };
-
-export type UseCaseDepositRequest = TransferRequest & {
-  useCaseId: string;
-  permit?: Permit;
-};
-
-export type TokenRewardRequest = TransferRequest & {
-  incentiveType: string;
-  permit?: Permit;
-};
-
-export type IncentiveRequest = UseCaseDepositRequest | TokenRewardRequest;

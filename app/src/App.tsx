@@ -34,6 +34,23 @@ function App() {
     void restoreSession();
   }, []);
 
+  // When the session expires, any protected call answers 401: return to the sign-in screen.
+  useEffect(() => {
+    const interceptorId = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const url = String(error?.config?.url || '');
+        if (error?.response?.status === 401 && !url.includes('/api/auth/')) {
+          setProfile(null);
+          setAuthError('Your session has expired. Please sign in again.');
+        }
+        return Promise.reject(error);
+      },
+    );
+
+    return () => axios.interceptors.response.eject(interceptorId);
+  }, []);
+
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError(null);
@@ -142,7 +159,7 @@ function App() {
                   <input
                     autoComplete="username"
                     onChange={(event) => setUsername(event.target.value)}
-                    placeholder="org3335"
+                    placeholder="Organization username"
                     required
                     value={username}
                   />
@@ -193,7 +210,7 @@ function App() {
       </header>
 
       <main className="app-shell__content">
-        <DataNodes organizationId={profile.organizationId} />
+        <DataNodes organizationId={profile.organizationId} organizationName={profile.displayName} />
       </main>
     </div>
   );

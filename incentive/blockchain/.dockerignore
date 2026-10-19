@@ -4,3 +4,6 @@ dist
 build
 cache
 artifacts
+out
+typechain-types
+deployment.local.json

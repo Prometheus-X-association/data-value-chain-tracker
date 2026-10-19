@@ -1,43 +1,23 @@
-FROM node:20.18.0-slim
+FROM ghcr.io/foundry-rs/foundry:v1.0.0 AS foundry
+
+FROM node:20.19.0-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pinned Foundry release (Anvil is the local demonstrator chain)
+COPY --from=foundry /usr/local/bin/anvil /usr/local/bin/anvil
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps --no-audit --no-fund
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    bash \
-    git \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install typescript and ts-node globally
-RUN npm install -g typescript ts-node
-
-# Install dependencies with legacy-peer-deps flag
-RUN npm install --legacy-peer-deps
-
-# Copy the entire project directory
 COPY . .
 
-ENV SHELL=/bin/bash
 ENV NODE_ENV=docker
+RUN npx hardhat compile && chmod +x /app/startup.sh
 
-RUN curl -L https://foundry.paradigm.xyz | bash
-
-RUN /root/.foundry/bin/foundryup
-
-ENV PATH="/root/.foundry/bin:${PATH}"
-
-RUN cd /app && npx hardhat compile
-
-# Expose hardhat node port
 EXPOSE 8545
 
-COPY startup.sh /app/startup.sh
-
-RUN chmod +x /app/startup.sh
-
-# Run the startup script
 CMD ["/bin/sh", "/app/startup.sh"]

@@ -1,0 +1,26 @@
+{
+  "_id": "f26201fffe660c97d448c25b",
+  "name": "Example ecosystem",
+  "serviceChains": [
+    {
+      "_id": "46ed3e17e97f2390ab648ad1",
+      "name": "Other chain 1",
+      "status": "Active"
+    },
+    {
+      "_id": "c87abddbae88f3a2503673e9",
+      "name": "Other chain 2",
+      "status": "Active"
+    },
+    {
+      "_id": "1c0433ee2e5296087dae561f",
+      "name": "Other chain 3",
+      "status": "Draft"
+    },
+    {
+      "_id": "32c09a520bca7915f542db7e",
+      "name": "Example chain",
+      "status": "Active"
+    }
+  ]
+}

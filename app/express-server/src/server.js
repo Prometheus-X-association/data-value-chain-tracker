@@ -1,43 +1,38 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocs = require('./config/swagger');
+const fs = require('fs');
+const path = require('path');
+
+// Local development outside Docker: read app/express-server/.env if present.
+const localEnvFile = path.resolve(__dirname, '../.env');
+if (fs.existsSync(localEnvFile)) {
+  process.loadEnvFile(localEnvFile);
+}
+
+const app = require('./app');
 const connectWithRetry = require('./config/database');
-const dataRoutes = require('./routes/dataRoutes');
+const Data = require('./models/data');
+const logger = require('./lib/logger');
+const { assertAuthConfiguration } = require('./lib/auth');
 
-const app = express();
-const port = 9081;
+const port = Number(process.env.PORT || 9081);
 
-const cors = require('cors');
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  }),
-);
+const start = async () => {
+  assertAuthConfiguration();
+  await connectWithRetry();
 
-// Connect to MongoDB
-connectWithRetry();
+  try {
+    await Data.init();
+  } catch (error) {
+    logger.error(
+      `Could not build the unique canonicalKey index (duplicate nodes in the database?): ${error.message}`,
+    );
+  }
 
-// Middleware to parse JSON
-app.use(bodyParser.json());
+  app.listen(port, () => {
+    logger.info(`Server is running on port ${port}`);
+  });
+};
 
-// Swagger setup
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// Use API routes
-app.use('/api', dataRoutes);
-
-app.use(express.static("./../build"));
-
-// Home route
-app.get('/', (req, res) => {
-  res.send('Welcome to the PTX - Data Value Chain Tracker');
+start().catch((error) => {
+  logger.error(`Startup failed: ${error.message}`);
+  process.exit(1);
 });
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-module.exports = app;

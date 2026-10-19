@@ -10,32 +10,28 @@ export const DataNodeCard = memo(({ data }: NodeProps<Node<FlowNodeData>>) => {
 
       <div className="data-node-card__header">
         <span className="data-node-card__eyebrow">{data.nodeType}</span>
-        <span className="data-node-card__badge">{data.participantShare || data.incentiveTotal} pts</span>
+        {data.participantShare || data.incentiveTotal ? (
+          <span className="data-node-card__badge">{data.participantShare || data.incentiveTotal} pts</span>
+        ) : null}
       </div>
 
       <strong className="data-node-card__title">{data.label}</strong>
       <p className="data-node-card__subtitle">{data.subtitle}</p>
 
-      {!data.isRoot ? (
-        <dl className="data-node-card__meta">
+      <dl className="data-node-card__meta">
+        {!data.isRoot ? (
           <div>
-            <dt>Provider</dt>
+            <dt>From</dt>
             <dd>{data.providerId}</dd>
           </div>
-          {data.consumerIds.length > 0 ? (
-            <div>
-              <dt>Consumers</dt>
-              <dd>
-                <ul className="data-node-card__consumer-list">
-                  {data.consumerIds.map((consumerId) => (
-                    <li key={consumerId}>{consumerId}</li>
-                  ))}
-                </ul>
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-      ) : null}
+        ) : null}
+        {data.consumerIds.length > 0 ? (
+          <div>
+            <dt>Sends to</dt>
+            <dd>{data.consumerIds.join(', ')}</dd>
+          </div>
+        ) : null}
+      </dl>
 
       <Handle className="data-node-card__handle" position={Position.Bottom} type="source" />
     </div>

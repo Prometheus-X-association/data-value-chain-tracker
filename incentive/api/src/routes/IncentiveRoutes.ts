@@ -1,24 +1,19 @@
 import { Router } from "express";
+import { ethers } from "ethers";
 import { IncentiveController } from "../controllers/IncentiveController";
 import { IncentiveService } from "../services/IncentiveService";
-import { ethers } from "ethers";
+import { createHmacAuth } from "../middleware/hmacAuth";
 
 export function createIncentiveRouter(
   wallet: ethers.Wallet,
   useCaseAddress: string,
-  tokenAddress: string
+  hmacSecret: string
 ): Router {
-  const incentiveService = new IncentiveService(
-    wallet,
-    useCaseAddress,
-    tokenAddress
-  );
-
-  const controller = new IncentiveController(incentiveService);
+  const controller = new IncentiveController(new IncentiveService(wallet, useCaseAddress));
   const router = Router();
 
-  // Single endpoint for all incentive distributions
-  router.post("/distribute", controller.distributeIncentive);
+  // Relays a permit-based reward deposit into a use case. Callers must sign the request.
+  router.post("/distribute", createHmacAuth(hmacSecret), controller.distributeIncentive);
 
   return router;
 }

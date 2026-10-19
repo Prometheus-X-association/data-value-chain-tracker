@@ -1,3 +1,4 @@
+const path = require('path');
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const swaggerOptions = {
@@ -10,7 +11,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
+        url: '/',
       },
     ],
     components: {
@@ -104,7 +105,7 @@ const swaggerOptions = {
       }
     }
   },
-  apis: ['./src/routes/dataRoutes.js'],
+  apis: [path.join(__dirname, '../routes/dataRoutes.js')],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);

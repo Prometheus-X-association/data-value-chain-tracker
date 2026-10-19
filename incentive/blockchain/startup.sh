@@ -1,19 +1,23 @@
 #!/bin/sh
+# Local demonstrator chain. Anvil listens on the internal Docker network only (no published port);
+# browsers reach it through the incentive frontend's filtered /incentive/rpc proxy.
+# The chain state and its deployment record live in /data/anvil (a Docker volume), so recreating
+# the container keeps every use case; "make clean" removes the volume together with the database.
 set -eu
 
 STATE_DIR="/data/anvil"
 STATE_FILE="${STATE_DIR}/state.json"
+DEPLOYMENT_RECORD="${STATE_DIR}/deployment.json"
 RPC_URL="http://127.0.0.1:8545"
-API_SIGNER_ADDRESS="0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-TARGET_BALANCE_HEX="0x3635c9adc5dea00000"
 
 mkdir -p "${STATE_DIR}"
+rm -f /tmp/dvct-chain-ready
 
 echo "Starting persistent Anvil node..."
-/root/.foundry/bin/anvil \
+anvil \
   --host 0.0.0.0 \
   --port 8545 \
-  --state "${STATE_DIR}" \
+  --state "${STATE_FILE}" \
   --state-interval 5 &
 ANVIL_PID=$!
 
@@ -26,19 +30,23 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
-sleep 5
+until curl -s -X POST "${RPC_URL}" -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' >/dev/null; do
+  sleep 1
+done
 
-echo "Ensuring incentive API signer has native gas balance..."
-curl -s -X POST "${RPC_URL}" \
-  -H "Content-Type: application/json" \
-  --data "{\"jsonrpc\":\"2.0\",\"method\":\"anvil_setBalance\",\"params\":[\"${API_SIGNER_ADDRESS}\",\"${TARGET_BALANCE_HEX}\"],\"id\":1}" \
-  >/dev/null
-
-if [ ! -f "${STATE_FILE}" ]; then
-  echo "No persisted blockchain state found, deploying test environment..."
-  cd /app && npx hardhat run script/deployTestEnv.ts --network localhost --no-compile
+cd /app
+if [ -f "${STATE_FILE}" ] && [ -f "${DEPLOYMENT_RECORD}" ]; then
+  echo "Persisted chain state found, skipping contract deployment."
+  cp "${DEPLOYMENT_RECORD}" /app/deployment.local.json
 else
-  echo "Persisted blockchain state found, skipping deployment bootstrap."
+  echo "No persisted chain state, deploying contracts and demo use cases..."
+  npx hardhat run script/deployTestEnv.ts --network localhost --no-compile
+  cp /app/deployment.local.json "${DEPLOYMENT_RECORD}"
 fi
+
+echo "Bootstrapping service wallets..."
+npx hardhat run script/bootstrapServices.ts --network localhost --no-compile
+touch /tmp/dvct-chain-ready
 
 wait "${ANVIL_PID}"

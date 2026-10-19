@@ -1,0 +1,23 @@
+{
+  "4f0d35da82bf80117c855e8b": {
+    "_id": "4f0d35da82bf80117c855e8b",
+    "legalName": "Participant A",
+    "dataspaceEndpoint": "https://connector-a.example.org",
+    "dataspaceConnectorAppKey": "FIXTURE-SECRET-APP-KEY",
+    "exchangeTriggerAPIKey": "FIXTURE-SECRET-TRIGGER-KEY"
+  },
+  "ec0a6e8d9fb4c9e585310224": {
+    "_id": "ec0a6e8d9fb4c9e585310224",
+    "legalName": "Participant B",
+    "dataspaceEndpoint": "https://connector-b.example.org/",
+    "dataspaceConnectorAppKey": "FIXTURE-SECRET-APP-KEY",
+    "exchangeTriggerAPIKey": "FIXTURE-SECRET-TRIGGER-KEY"
+  },
+  "8c0bc413f9be90e93fe691c0": {
+    "_id": "8c0bc413f9be90e93fe691c0",
+    "legalName": "Participant C",
+    "dataspaceEndpoint": "https://connector-c.example.org/",
+    "dataspaceConnectorAppKey": "FIXTURE-SECRET-APP-KEY",
+    "exchangeTriggerAPIKey": "FIXTURE-SECRET-TRIGGER-KEY"
+  }
+}

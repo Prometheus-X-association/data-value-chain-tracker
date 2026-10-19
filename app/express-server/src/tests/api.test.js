@@ -1,228 +1,318 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../server'); // Your Express app
-const Data = require('../models/data'); // Data model
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const { hashPassword } = require('../lib/auth');
 
-// Helper function to clear the database before each test
-const clearDatabase = async () => {
-  await Data.deleteMany({});
-};
+const INTERNAL_TOKEN = 'test-internal-token-0123456789abcdef0123456789';
+const ORG_A = 'http://localhost:3335/';
+const ORG_A_CATALOG = 'http://catalog/participants/a';
+const ORG_B = 'http://localhost:3339/';
+const PASSWORD_A = 'password-of-org-a';
+const PASSWORD_B = 'password-of-org-b';
+
+process.env.DVCT_INTERNAL_API_TOKEN = INTERNAL_TOKEN;
+process.env.DVCT_LOGIN_MAX_FAILURES = '3';
+process.env.DVCT_CORS_ORIGINS = 'http://allowed.example';
+process.env.DVCT_ORGANIZATIONS_JSON = JSON.stringify([
+  {
+    organizationId: ORG_A,
+    displayName: 'Organization A',
+    aliases: [ORG_A_CATALOG],
+    users: [{ username: 'orga', passwordHash: hashPassword(PASSWORD_A) }],
+  },
+  {
+    organizationId: ORG_B,
+    displayName: 'Organization B',
+    users: [
+      { username: 'orgb', passwordHash: hashPassword(PASSWORD_B) },
+      // Dedicated to the throttling test, which leaves this user locked out.
+      { username: 'orgb-throttled', passwordHash: hashPassword(PASSWORD_B) },
+    ],
+  },
+]);
+
+const app = require('../app');
+const Data = require('../models/data');
+const IncentiveUseCaseMetadata = require('../models/incentiveUseCaseMetadata');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  await Data.init();
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
 
 beforeEach(async () => {
-  await clearDatabase();
+  await mongoose.connection.db.dropDatabase();
+  await Data.createIndexes();
 });
 
-// POST /api/node - Test the creation of a new node
-describe('POST /api/node', () => {
-  it('should create a new node', async () => {
-    const inputData = {
-      dvctId: "dvct123",
-      usecaseContractId: "contract123",
-      usecaseContractTitle: "Test Contract",
-      contractId: "contract123",
-      dataId: "data123",
-      dataProviderId: "provider123",
-      dataConsumerId: "consumer123",
-      dataConsumerIsAIProvider: false,
-      prevDataId: [],
-      extraIncentiveForAIProvider: {
-        numPoints: 10,
-        factor: 1,
-        factorCheck: false
-      },
-      incentiveForDataProvider: {
-        numPoints: 10,
-        factor: 1.5,
-        factorCheck: true
-      }
-    };
+const nodePayload = (overrides = {}) => ({
+  dvctId: 'dvct123',
+  usecaseContractId: 'usecase-1',
+  usecaseContractTitle: 'Test Contract',
+  contractId: 'contract123',
+  dataId: 'data123',
+  participantId: ORG_B,
+  participantSourceId: ORG_B,
+  participantShare: 10,
+  dataProviderId: ORG_A,
+  dataConsumerId: ORG_B,
+  dataConsumerIsAIProvider: true,
+  prevDataId: [`trace-node:usecase-1:data123:${ORG_A}`],
+  incentiveForDataProvider: { numPoints: 20, factor: 1, factorCheck: true },
+  extraIncentiveForAIProvider: { numPoints: 10, factor: 1, factorCheck: true },
+  ...overrides,
+});
 
-    const response = await request(app)
-      .post('/api/node')
-      .send(inputData);
+const postNode = (payload) =>
+  request(app).post('/api/node').set('X-DVCT-Internal-Token', INTERNAL_TOKEN).send(payload);
+
+const login = async (username, password) => {
+  const agent = request.agent(app);
+  const response = await agent.post('/api/auth/login').send({ username, password });
+  expect(response.status).toBe(200);
+  return agent;
+};
+
+describe('POST /api/node', () => {
+  it('rejects writes without the internal token', async () => {
+    const response = await request(app).post('/api/node').send(nodePayload());
+    expect(response.status).toBe(401);
+    expect(await Data.countDocuments()).toBe(0);
+  });
+
+  it('creates the consumer node and the referenced provider node', async () => {
+    const response = await postNode(nodePayload());
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('message', 'Data saved successfully');
-    expect(response.body.data).toHaveProperty('nodeId');
-    expect(response.body.data).toHaveProperty('canonicalKey', 'data:data123');
-    expect(response.body.data).toHaveProperty('dataId', inputData.dataId);
+    expect(response.body.data.canonicalKey).toBe(`trace-node:usecase-1:data123:${ORG_B}`);
+    expect(response.body.data.prevNode[0]['@nodeUrl']).toContain('/api/data/');
+
+    const provider = await Data.findOne({ canonicalKey: `trace-node:usecase-1:data123:${ORG_A}` });
+    expect(provider.childNode.map((link) => link.nodeId)).toContain(response.body.data.canonicalKey);
   });
 
-  it('should reuse the canonical node for repeated traceability events', async () => {
-    const inputData = {
-      dvctId: "dvct123",
-      usecaseContractId: "contract123",
-      usecaseContractTitle: "Test Contract",
-      contractId: "contract123",
-      dataId: "data123",
-      dataProviderId: "provider123",
-      dataConsumerId: "consumer123",
-      dataConsumerIsAIProvider: false,
-      prevDataId: [],
-      extraIncentiveForAIProvider: {
-        numPoints: 10,
-        factor: 1,
-        factorCheck: false
-      },
-      incentiveForDataProvider: {
-        numPoints: 10,
-        factor: 1.5,
-        factorCheck: true
-      }
-    };
-
-    await request(app).post('/api/node').send(inputData);
-    await request(app).post('/api/node').send({
-      ...inputData,
-      contractId: 'contract456'
-    });
-
-    const savedNodes = await Data.find({ canonicalKey: 'data:data123' });
-    expect(savedNodes).toHaveLength(1);
+  it('reuses the canonical node for repeated and concurrent events', async () => {
+    await Promise.all([postNode(nodePayload()), postNode(nodePayload()), postNode(nodePayload())]);
+    expect(await Data.countDocuments({ canonicalKey: `trace-node:usecase-1:data123:${ORG_B}` })).toBe(1);
+    expect(await Data.countDocuments({ canonicalKey: `trace-node:usecase-1:data123:${ORG_A}` })).toBe(1);
   });
 
-  it('should return 400 if there is no canonical identity in the payload', async () => {
-    const response = await request(app)
-      .post('/api/node')
-      .send({});
-    
+  it('rejects invalid payloads', async () => {
+    const response = await postNode(nodePayload({ prevDataId: [{ $ne: null }], participantShare: -1 }));
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error');
+    expect(response.body.details).toEqual(
+      expect.arrayContaining(['participantShare must be a non-negative number', 'prevDataId must be an array of strings']),
+    );
+  });
+
+  it('returns 400 if there is no canonical identity in the payload', async () => {
+    const response = await postNode({});
+    expect(response.status).toBe(400);
   });
 });
 
-// GET /api/data/:nodeId - Test retrieving node data by nodeId
-describe('GET /api/data/:nodeId', () => {
-  it('should retrieve JSON-LD data for an existing node', async () => {
-    const data = new Data({
-      nodeId: "node123",
-      canonicalKey: "data:data123",
-      nodeType: "raw_data",
-      dataId: "data123",
-      nodeMetadata: {
-        dvctId: "dvct123",
-        usecaseContractId: "contract123",
-        dataProviderId: "provider123",
-        dataConsumerId: "consumer123",
-        incentiveReceivedFrom: []
-      },
-      prevNode: [],
-      childNode: []
-    });
-
-    await data.save();
-
-    const response = await request(app).get(`/api/data/${data.nodeId}`);
+describe('authentication', () => {
+  it('signs in with valid credentials and exposes the profile', async () => {
+    const agent = await login('orga', PASSWORD_A);
+    const response = await agent.get('/api/auth/me');
     expect(response.status).toBe(200);
-    expect(response.body.nodeId).toBe(data.nodeId);
+    expect(response.body).toEqual({ username: 'orga', organizationId: ORG_A, displayName: 'Organization A' });
   });
 
-  it('should return 404 for a non-existent node', async () => {
-    const response = await request(app).get('/api/data/nonexistentNodeId');
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Node not found');
+  it('sets a hardened session cookie', async () => {
+    const response = await request(app).post('/api/auth/login').send({ username: 'orga', password: PASSWORD_A });
+    expect(response.headers['set-cookie'][0]).toMatch(/HttpOnly; SameSite=Strict; Path=\//);
+  });
+
+  it('rejects wrong passwords and throttles repeated failures', async () => {
+    for (let i = 0; i < 3; i++) {
+      const response = await request(app).post('/api/auth/login').send({ username: 'orgb-throttled', password: 'wrong' });
+      expect(response.status).toBe(401);
+    }
+    const throttled = await request(app).post('/api/auth/login').send({ username: 'orgb-throttled', password: PASSWORD_B });
+    expect(throttled.status).toBe(429);
+  });
+
+  it('rejects cross-site sign-in requests', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .set('Origin', 'http://evil.example')
+      .send({ username: 'orga', password: PASSWORD_A });
+    expect(response.status).toBe(403);
+  });
+
+  it('invalidates the session on logout', async () => {
+    const agent = await login('orga', PASSWORD_A);
+    await agent.post('/api/auth/logout').expect(204);
+    await agent.get('/api/auth/me').expect(401);
+  });
+
+  it('requires a session for graph endpoints', async () => {
+    await request(app).get('/api/data').expect(401);
+    await request(app).get('/api/data/anything').expect(401);
+    await request(app).get('/api/node-tree/anything').expect(401);
   });
 });
 
-// DELETE /api/data/:nodeId - Test deleting a node
-describe('DELETE /api/data/:nodeId', () => {
-  it('should delete the node and return success', async () => {
-    const data = new Data({
-      nodeId: "node123",
-      canonicalKey: "data:data123",
-      nodeType: "raw_data",
-      dataId: "data123",
-      nodeMetadata: {
-        dvctId: "dvct123",
-        usecaseContractId: "contract123",
-        dataProviderId: "provider123",
-        dataConsumerId: "consumer123",
-        incentiveReceivedFrom: []
-      },
-      prevNode: [],
-      childNode: []
-    });
-
-    await data.save();
-
-    const response = await request(app).delete(`/api/data/${data.nodeId}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Node deleted successfully');
+describe('organization-scoped graph access', () => {
+  beforeEach(async () => {
+    await postNode(nodePayload());
+    // An unrelated chain between two other organizations.
+    await postNode(
+      nodePayload({
+        usecaseContractId: 'usecase-2',
+        dataId: 'other-data',
+        participantId: 'http://localhost:4000/',
+        participantSourceId: 'http://localhost:4000/',
+        dataProviderId: 'http://localhost:4001/',
+        dataConsumerId: 'http://localhost:4000/',
+        prevDataId: ['trace-node:usecase-2:other-data:http://localhost:4001/'],
+      }),
+    );
   });
 
-  it('should return 404 for a non-existent node', async () => {
-    const response = await request(app).delete('/api/data/nonexistentNodeId');
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Node not found');
+  it('returns only the value chains the organization takes part in', async () => {
+    const agent = await login('orga', PASSWORD_A);
+    const response = await agent.get('/api/data').expect(200);
+    expect(response.body.map((node) => node.dataId).sort()).toEqual(['data123', 'data123']);
+  });
+
+  it('matches organizations by any of their registered identifiers', async () => {
+    await postNode(
+      nodePayload({
+        usecaseContractId: 'usecase-3',
+        dataId: 'catalog-data',
+        participantId: 'http://localhost:4002/',
+        participantSourceId: ORG_A_CATALOG,
+        dataProviderId: 'http://localhost:4003/',
+        dataConsumerId: 'http://localhost:4002/',
+        prevDataId: [],
+      }),
+    );
+    const agent = await login('orga', PASSWORD_A);
+    const response = await agent.get('/api/data/catalog-data').expect(200);
+    expect(response.body.participantSourceId).toBe(ORG_A_CATALOG);
+  });
+
+  it('hides nodes of other organizations', async () => {
+    const agent = await login('orga', PASSWORD_A);
+    await agent.get('/api/data/other-data').expect(404);
+    await agent.get('/api/node-tree/other-data').expect(404);
+  });
+
+  it('returns the node tree with total incentive', async () => {
+    const agent = await login('orga', PASSWORD_A);
+    const response = await agent.get(`/api/node-tree/${encodeURIComponent(`trace-node:usecase-1:data123:${ORG_A}`)}`);
+    expect(response.status).toBe(200);
+    expect(response.body.childNode).toHaveLength(1);
+    expect(Number.isFinite(response.body.totalIncentive)).toBe(true);
+  });
+
+  it('lets only the owning organization delete a node and unlinks it', async () => {
+    const consumerKey = `trace-node:usecase-1:data123:${ORG_B}`;
+    const orgA = await login('orga', PASSWORD_A);
+    await orgA.delete(`/api/data/${encodeURIComponent(consumerKey)}`).expect(404);
+
+    const orgB = await login('orgb', PASSWORD_B);
+    await orgB.delete(`/api/data/${encodeURIComponent(consumerKey)}`).expect(200);
+
+    expect(await Data.countDocuments({ canonicalKey: consumerKey })).toBe(0);
+    const provider = await Data.findOne({ canonicalKey: `trace-node:usecase-1:data123:${ORG_A}` });
+    expect(provider.childNode).toHaveLength(0);
   });
 });
 
-// GET /api/data - Test retrieving all data
-describe('GET /api/data', () => {
-  it('should retrieve all JSON-LD data', async () => {
-    const data = new Data({
-      nodeId: "node123",
-      canonicalKey: "data:data123",
-      nodeType: "raw_data",
-      dataId: "data123",
-      nodeMetadata: {
-        dvctId: "dvct123",
-        usecaseContractId: "contract123",
-        dataProviderId: "provider123",
-        dataConsumerId: "consumer123",
-        incentiveReceivedFrom: []
-      },
-      prevNode: [],
-      childNode: []
-    });
+describe('participant names', () => {
+  it('names the organizations of the visible graph only', async () => {
+    await postNode(nodePayload());
+    await postNode(
+      nodePayload({
+        usecaseContractId: 'usecase-2',
+        dataId: 'other-data',
+        participantId: 'http://localhost:4000/',
+        participantSourceId: 'http://localhost:4000/',
+        dataProviderId: ORG_B,
+        dataConsumerId: 'http://localhost:4000/',
+        prevDataId: [],
+      }),
+    );
 
-    await data.save();
+    await request(app).get('/api/participant-names').expect(401);
 
-    const response = await request(app).get('/api/data');
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBeGreaterThan(0);
-  });
-
-  it('should return 500 if there is an error', async () => {
-    // Simulate a server error by forcing an invalid operation
-    jest.spyOn(Data, 'find').mockImplementationOnce(() => { throw new Error('Server error'); });
-
-    const response = await request(app).get('/api/data');
-    expect(response.status).toBe(500);
-    expect(response.body).toHaveProperty('error');
+    const agent = await login('orga', PASSWORD_A);
+    const response = await agent.get('/api/participant-names').expect(200);
+    expect(response.body).toEqual({ [ORG_A]: 'Organization A', [ORG_B]: 'Organization B' });
   });
 });
 
-// GET /api/node-tree/:nodeId - Test retrieving node tree
-describe('GET /api/node-tree/:nodeId', () => {
-  it('should retrieve the node tree with total incentive', async () => {
-    const data = new Data({
-      nodeId: "node123",
-      canonicalKey: "data:data123",
-      nodeType: "raw_data",
-      dataId: "data123",
-      nodeMetadata: {
-        dvctId: "dvct123",
-        usecaseContractId: "contract123",
-        dataProviderId: "provider123",
-        dataConsumerId: "consumer123",
-        incentiveReceivedFrom: [{ organizationId: "org123", numPoints: 10, contractId: "contract123" }]
-      },
-      prevNode: [],
-      childNode: [{ nodeId: "childNode123", "@nodeUrl": "https://url-to-childNode/childNode123" }]
-    });
+describe('reported organization names', () => {
+  it('uses names reported with the trace for unregistered organizations; the registry wins', async () => {
+    await postNode(
+      nodePayload({
+        participantId: 'http://catalog/participants/unregistered',
+        participantSourceId: 'http://catalog/participants/unregistered',
+        dataConsumerId: 'http://catalog/participants/unregistered',
+        organizationNames: [
+          { organizationId: 'http://catalog/participants/unregistered', name: 'Catalog Name' },
+          { organizationId: ORG_A, name: 'Catalog name of A' },
+        ],
+      }),
+    );
 
-    await data.save();
-
-    const response = await request(app).get(`/api/node-tree/${data.nodeId}`);
-    expect(response.status).toBe(200);
-    expect(response.body.nodeId).toBe(data.nodeId);
-    expect(response.body.totalIncentive).toBeGreaterThan(0);
+    const agent = await login('orga', PASSWORD_A);
+    const response = await agent.get('/api/participant-names').expect(200);
+    expect(response.body['http://catalog/participants/unregistered']).toBe('Catalog Name');
+    expect(response.body[ORG_A]).toBe('Organization A');
   });
 
-  it('should return 404 for a non-existent node', async () => {
-    const response = await request(app).get('/api/node-tree/nonexistentNodeId');
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Node not found');
+  it('rejects malformed organization names', async () => {
+    const response = await postNode(nodePayload({ organizationNames: [{ organizationId: 1, name: {} }] }));
+    expect(response.status).toBe(400);
+  });
+});
+
+describe('internal endpoints', () => {
+  it('requires a filter on the internal data lookup', async () => {
+    await request(app).get('/api/internal/data').set('X-DVCT-Internal-Token', INTERNAL_TOKEN).expect(400);
+    await request(app).get('/api/internal/data?dataId=data123').expect(401);
+  });
+});
+
+describe('incentive use case metadata', () => {
+  beforeEach(async () => {
+    await request(app)
+      .post('/api/internal/incentive-use-case-metadata')
+      .set('X-DVCT-Internal-Token', INTERNAL_TOKEN)
+      .send({ useCaseId: 'uc-1', participants: [{ participantId: ORG_A_CATALOG, walletAddress: '0x1' }] })
+      .expect(200);
+  });
+
+  it('is visible to members only', async () => {
+    await request(app).get('/api/incentive-use-case-metadata/uc-1').expect(401);
+
+    const member = await login('orga', PASSWORD_A);
+    await member.get('/api/incentive-use-case-metadata/uc-1').expect(200);
+
+    const outsider = await login('orgb', PASSWORD_B);
+    await outsider.get('/api/incentive-use-case-metadata/uc-1').expect(404);
+    expect(await IncentiveUseCaseMetadata.countDocuments()).toBe(1);
+  });
+});
+
+describe('CORS', () => {
+  it('only reflects allow-listed origins', async () => {
+    const allowed = await request(app).get('/').set('Origin', 'http://allowed.example');
+    expect(allowed.headers['access-control-allow-origin']).toBe('http://allowed.example');
+
+    const denied = await request(app).get('/').set('Origin', 'http://evil.example');
+    expect(denied.headers['access-control-allow-origin']).toBeUndefined();
   });
 });

@@ -113,8 +113,16 @@ const dedupeLinks = (links = []) => {
   });
 };
 
+// Resolvable URL of a node in the core API (JSON-LD @id of a link). Must be absolute:
+// JSON-LD compaction drops relative IRIs.
+const buildNodeUrl = (nodeReference) => {
+  const baseUrl = (process.env.DVCT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  return `${baseUrl}/api/data/${encodeURIComponent(nodeReference)}`;
+};
+
 module.exports = {
   buildCanonicalKey,
+  buildNodeUrl,
   buildNodeType,
   dedupeIncentives,
   dedupeLinks,
