@@ -119,6 +119,73 @@ describe('POST /api/node', () => {
   });
 });
 
+describe('shared data sources', () => {
+  const RESOURCE = 'https://catalog/dataresources/r1';
+  const sourceNode = (dvctId, points) =>
+    nodePayload({
+      nodeScope: 'data-source',
+      dvctId,
+      usecaseContractId: `chain-${dvctId}`,
+      dataId: RESOURCE,
+      participantId: ORG_A,
+      participantSourceId: ORG_A,
+      dataProviderId: ORG_A,
+      dataConsumerId: ORG_B,
+      dataConsumerIsAIProvider: false,
+      participantShare: points,
+      prevDataId: [],
+    });
+  const branch = (dvctId) =>
+    nodePayload({
+      dvctId,
+      usecaseContractId: `chain-${dvctId}`,
+      dataId: `${dvctId}/step-1`,
+      prevDataId: [`trace-source:${RESOURCE}:${ORG_A}`],
+    });
+
+  it('keeps one node per data resource with parallel branches and points per exchange', async () => {
+    await postNode(sourceNode('dx1', 30)).expect(201);
+    await postNode(branch('dx1')).expect(201);
+    await postNode(sourceNode('dx2', 20)).expect(201);
+    await postNode(branch('dx2')).expect(201);
+    // Repeating an exchange does not add its points twice.
+    await postNode(sourceNode('dx1', 30)).expect(201);
+
+    const sources = await Data.find({ canonicalKey: `trace-source:${RESOURCE}:${ORG_A}` }).lean();
+    expect(sources).toHaveLength(1);
+    expect(sources[0].childNode).toHaveLength(2);
+    const points = sources[0].nodeMetadata.incentiveReceivedFrom.reduce((sum, entry) => sum + entry.numPoints, 0);
+    expect(points).toBe(50);
+
+    const agent = await login('orga', PASSWORD_A);
+    const tree = await agent.get(`/api/node-tree/${encodeURIComponent(`trace-source:${RESOURCE}:${ORG_A}`)}`).expect(200);
+    expect(tree.body.childNode).toHaveLength(2);
+  });
+
+  it('updates the same nodes when the same service chain runs again', async () => {
+    const run = (dvctId, points) =>
+      nodePayload({
+        dvctId,
+        usecaseContractId: 'chain-1',
+        dataId: 'step-1',
+        participantShare: points,
+        prevDataId: [],
+      });
+    await postNode(run('dx1', 30)).expect(201);
+    await postNode(run('dx2', 20)).expect(201);
+    await postNode(run('dx2', 20)).expect(201); // the same exchange again: no change
+
+    const nodes = await Data.find({ 'nodeMetadata.usecaseContractId': 'chain-1' }).lean();
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0].executions.map((execution) => execution.dvctId)).toEqual(['dx1', 'dx2']);
+    expect(nodes[0].nodeMetadata.incentiveReceivedFrom.reduce((sum, entry) => sum + entry.numPoints, 0)).toBe(50);
+  });
+
+  it('rejects an unknown nodeScope', async () => {
+    await postNode(nodePayload({ nodeScope: 'everything' })).expect(400);
+  });
+});
+
 describe('authentication', () => {
   it('signs in with valid credentials and exposes the profile', async () => {
     const agent = await login('orga', PASSWORD_A);

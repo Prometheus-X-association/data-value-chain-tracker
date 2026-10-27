@@ -22,7 +22,7 @@ import '@xyflow/react/dist/style.css';
 import './DataNodes.css';
 import CustomEdge from './CustomEdge';
 import { DataNodeCard } from './DataNodeCard';
-import { ApiNode, FlowEdgeData, FlowNodeData, Incentive, TreeApiNode } from './types';
+import { ApiNode, Execution, FlowEdgeData, FlowNodeData, Incentive, TreeApiNode } from './types';
 
 type DataNodesProps = {
   organizationId: string;
@@ -135,6 +135,7 @@ const flattenTree = (root: TreeApiNode): ApiNode[] => {
       participantSourceId: node.participantSourceId,
       usecaseContractTitle: node.usecaseContractTitle,
       nodeMetadata: node.nodeMetadata,
+      executions: node.executions,
       prevNode: parentId ? [{ nodeId: parentId }] : [],
       childNode: node.childNode.map((child) => ({ nodeId: child.nodeId })),
     });
@@ -161,6 +162,7 @@ const dedupeIncentives = (incentives: Incentive[] = []) => {
     const key = [
       incentive.organizationId,
       incentive.contractId,
+      incentive.dvctId,
       incentive.numPoints,
     ].join('::');
 
@@ -172,6 +174,26 @@ const dedupeIncentives = (incentives: Incentive[] = []) => {
     return true;
   });
 };
+
+// Unique executions (one per data exchange), oldest first.
+const mergeExecutions = (executions: Execution[] = []) =>
+  Array.from(new Map(executions.filter((run) => run?.dvctId).map((run) => [run.dvctId, run])).values()).sort(
+    (left, right) => String(left.executedAt || '').localeCompare(String(right.executedAt || '')),
+  );
+
+// Points per organization on a node, summed over all executions.
+const pointsByOrganization = (incentives: Incentive[] = []) => {
+  const totals = new Map<string, { points: number; runs: number }>();
+  incentives.forEach((incentive) => {
+    const entry = totals.get(incentive.organizationId) || { points: 0, runs: 0 };
+    entry.points += incentive.numPoints || 0;
+    entry.runs += 1;
+    totals.set(incentive.organizationId, entry);
+  });
+  return Array.from(totals.entries());
+};
+
+const formatDate = (value?: string) => (value ? new Date(value).toLocaleString() : 'Unknown');
 
 const mergeLinks = (links: { nodeId: string; '@nodeUrl'?: string }[]) => {
   const seen = new Set<string>();
@@ -225,6 +247,7 @@ const normalizeApiNodes = (data: ApiNode[]) => {
           ...node.nodeMetadata,
           incentiveReceivedFrom: dedupeIncentives(node.nodeMetadata?.incentiveReceivedFrom),
         },
+        executions: mergeExecutions(node.executions),
       });
 
       return;
@@ -255,6 +278,7 @@ const normalizeApiNodes = (data: ApiNode[]) => {
       },
       prevNode: mergeLinks([...(existingNode.prevNode || []), ...prevNode]),
       childNode: mergeLinks([...(existingNode.childNode || []), ...childNode]),
+      executions: mergeExecutions([...(existingNode.executions || []), ...(node.executions || [])]),
     });
   });
 
@@ -394,7 +418,9 @@ const buildGraph = (data: ApiNode[], names: NameMap) => {
             subtitle: chainName(node?.usecaseContractTitle) || `Data ${shortId(node?.dataId)}`,
             nodeType: stepLabel(node?.nodeType),
             incentiveTotal,
-            participantShare: node?.participantShare || incentiveTotal,
+            // Sum of the node's points (a shared data source collects them from several exchanges).
+            participantShare: incentiveTotal,
+            executionCount: node?.executions?.length || 0,
             isRoot: !node?.prevNode || node.prevNode.length === 0,
             providerId: getProviderName(node),
             consumerIds: getConsumerNames(node),
@@ -747,15 +773,28 @@ export const DataNodes = ({ organizationId, organizationName }: DataNodesProps) 
                 </dd>
               </div>
               <div>
-                <dt>Incentive points</dt>
+                <dt>Executions</dt>
+                <dd className="graph-detail-list__value">
+                  {(selectedNode.executions?.length || 0) > 0
+                    ? `${selectedNode.executions!.length} run${selectedNode.executions!.length > 1 ? 's' : ''} · last ${formatDate(
+                        selectedNode.executions![selectedNode.executions!.length - 1].executedAt,
+                      )}`
+                    : 'Not recorded'}
+                </dd>
+              </div>
+              <div>
+                <dt>Incentive points (all runs)</dt>
                 <dd>
                   {selectedNode.nodeMetadata.incentiveReceivedFrom?.length ? (
                     <ul className="graph-chip-list">
-                      {selectedNode.nodeMetadata.incentiveReceivedFrom.map((incentive) => (
-                        <li key={`${incentive.organizationId}-${incentive.contractId}`} title={incentive.organizationId}>
-                          {nameOf(names, incentive.organizationId)}: {incentive.numPoints} pts
-                        </li>
-                      ))}
+                      {pointsByOrganization(selectedNode.nodeMetadata.incentiveReceivedFrom)
+                        .filter(([, total]) => total.points > 0)
+                        .map(([organizationId, total]) => (
+                          <li key={organizationId} title={organizationId}>
+                            {nameOf(names, organizationId)}: {total.points} pts
+                            {total.runs > 1 ? ` (${total.runs} runs)` : ''}
+                          </li>
+                        ))}
                     </ul>
                   ) : (
                     'None'
@@ -773,6 +812,10 @@ export const DataNodes = ({ organizationId, organizationName }: DataNodesProps) 
                   ['Data exchange (DVCT ID)', selectedNode.nodeMetadata.dvctId],
                   ['Service chain ID', selectedNode.nodeMetadata.usecaseContractId],
                   ['Use case title', selectedNode.usecaseContractTitle],
+                  [
+                    'Data exchanges',
+                    (selectedNode.executions || []).map((run) => `${run.dvctId} (${formatDate(run.executedAt)})`).join(', '),
+                  ],
                   ['Provider ID', selectedNode.nodeMetadata.dataProviderId],
                   ['Consumer ID', selectedNode.nodeMetadata.dataConsumerId],
                   ['Node ID', selectedNode.rawNodeId || selectedNode.nodeId],

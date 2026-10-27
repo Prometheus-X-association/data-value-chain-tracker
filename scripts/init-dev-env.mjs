@@ -173,6 +173,8 @@ CATALOG_API_DOMAINS=
 CONTRACT_API_DOMAINS=
 # How long a payout waits for the exchange to reach IMPORT_SUCCESS
 DATAEXCHANGE_COMPLETION_TIMEOUT_SECONDS=1800
+# Optional: catalog id(s) of the DVCT service offering (hidden from the traceability graph)
+DVCT_SERVICE_OFFERINGS=
 # Upper bound for dvctRewardPool / rewardPool (PTX)
 INCENTIVE_MAX_REWARD_POOL=1000000
 `;

@@ -232,6 +232,11 @@
   flex-wrap: wrap;
 }
 
+.data-node-card__badges {
+  display: inline-flex;
+  gap: 6px;
+}
+
 .data-node-card__eyebrow {
   color: var(--color-accent-strong);
   font-size: 0.72rem;

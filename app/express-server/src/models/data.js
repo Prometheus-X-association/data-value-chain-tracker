@@ -20,7 +20,8 @@ const dataSchema = new mongoose.Schema({
     incentiveReceivedFrom: [{
       organizationId: String,
       numPoints: Number,
-      contractId: String
+      contractId: String,
+      dvctId: String
     }]
   },
   prevNode: [{
@@ -37,6 +38,12 @@ const dataSchema = new mongoose.Schema({
     _id: false,
     organizationId: String,
     name: String
+  }],
+  // Data exchanges that ran through this node (one entry per exchange): its execution count.
+  executions: [{
+    _id: false,
+    dvctId: String,
+    executedAt: Date
   }]
 }, { timestamps: true, optimisticConcurrency: true });
 

@@ -48,6 +48,39 @@ export const createDataspaceClient = ({ safeFetch, config }) => {
         const participant = await safeFetch(url, config.catalogDomains, "participant");
         return { legalName: String(participant?.legalName || "").slice(0, 256) };
       }),
+
+    // Display name of a data resource (only the name is kept).
+    getResourceName: (url) =>
+      cached(`resource:${url}`, async () => {
+        try {
+          const resource = await safeFetch(url, config.catalogDomains, "data resource");
+          return String(resource?.name || "").slice(0, 256);
+        } catch {
+          return "";
+        }
+      }),
+
+    // A service offering is the DVCT service itself when one of its software resources declares the
+    // DVCT incentive parameters, or when it is listed in DVCT_SERVICE_OFFERINGS.
+    isDvctService: (offeringUrl) =>
+      cached(`dvct:${offeringUrl}`, async () => {
+        if ((config.dvctServiceOfferings || []).some((id) => id && (offeringUrl === id || lastSegment(offeringUrl) === id))) {
+          return true;
+        }
+        try {
+          const offering = await safeFetch(offeringUrl, config.catalogDomains, "service offering");
+          for (const resourceUrl of (offering?.aggregationOf || []).slice(0, 10)) {
+            const resource = await safeFetch(String(resourceUrl), config.catalogDomains, "software resource");
+            const declared = resource?.representation?.queryParams || [];
+            if (declared.includes(REWARD_POOL_PARAM) || declared.includes(WEIGHTS_PARAM)) {
+              return true;
+            }
+          }
+        } catch {
+          // Unknown offering: treat it as a regular service.
+        }
+        return false;
+      }),
   };
 };
 
@@ -237,6 +270,29 @@ export const resolveDataExchange = async (client, { dataExchangeId, connector })
     });
   }
 
+  // Data sources of the exchange: each input data resource and the chain step that provides it.
+  const inputResources = [];
+  for (const entry of Array.isArray(exchange.resources) ? exchange.resources : []) {
+    const resourceUrl = String(entry?.resource || "");
+    if (!resourceUrl || inputResources.some((resource) => resource.url === resourceUrl)) continue;
+    const providerIndex = services.findIndex((service) => service.service && service.service === entry.serviceOffering);
+    inputResources.push({
+      url: resourceUrl,
+      stepIndex: providerIndex >= 0 ? providerIndex : 0,
+      name: await client.getResourceName(resourceUrl),
+    });
+  }
+
+  const steps = buildChainSteps(services);
+  for (const step of steps) {
+    step.resources = inputResources.filter((resource) => resource.stepIndex === step.index);
+    step.isDvct = false;
+  }
+  // Only the last step of the chain can be the DVCT service (the step that calls this API).
+  const lastStep = steps[steps.length - 1];
+  const lastService = String(services[lastStep.index].service || "");
+  lastStep.isDvct = Boolean(lastService) && lastStep.index > 0 && (await client.isDvctService(lastService));
+
   return {
     dataExchangeId: String(exchange._id),
     providerDataExchangeId,
@@ -248,7 +304,7 @@ export const resolveDataExchange = async (client, { dataExchangeId, connector })
     chainName,
     ecosystemName: String(ecosystem.name || ""),
     participants,
-    steps: buildChainSteps(services),
+    steps,
     params: extractQueryParams(exchange),
   };
 };
@@ -299,32 +355,7 @@ export const buildExchangeJob = (resolved, { registry, config, reachEndFlow = tr
     .filter((participant) => participant.catalogName)
     .map((participant) => ({ organizationId: participant.url, name: participant.catalogName }));
 
-  // One traceability node per chain step; the first step keeps the exchange id as data id.
-  const stepDataId = (index) =>
-    index === 0 ? resolved.providerDataExchangeId : `${resolved.providerDataExchangeId}/step-${index}`;
-  const stepKey = (step) => `trace-node:${resolved.chainId}:${stepDataId(step.index)}:${step.participant}`;
-  const nodes = resolved.steps.map((step) => {
-    const provider = step.sources.length > 0 ? resolved.steps[step.sources[0]].participant : step.participant;
-    const consumer =
-      step.sources.length > 0 ? step.participant : resolved.steps[1]?.participant || step.participant;
-    return {
-      dvctId: resolved.providerDataExchangeId,
-      usecaseContractId: resolved.chainId,
-      usecaseContractTitle: title,
-      contractId: resolved.contractId,
-      dataId: stepDataId(step.index),
-      participantId: step.participant,
-      participantSourceId: step.participant,
-      participantShare: weightOf(step.participant),
-      dataProviderId: provider,
-      dataConsumerId: consumer,
-      dataConsumerIsAIProvider: step.sources.length > 0,
-      prevDataId: step.sources.map((source) => stepKey(resolved.steps[source])),
-      incentiveForDataProvider: { numPoints: weightOf(provider), factor: 1, factorCheck: true },
-      extraIncentiveForAIProvider: { numPoints: weightOf(step.participant), factor: 1, factorCheck: true },
-      organizationNames,
-    };
-  });
+  const nodes = buildTraceNodes(resolved, { title, weightOf, organizationNames });
 
   const common = {
     dvctId: resolved.providerDataExchangeId,
@@ -351,14 +382,106 @@ export const buildExchangeJob = (resolved, { registry, config, reachEndFlow = tr
       },
       // Traceability nodes, in chain order (parents before children).
       nodes,
-      hops: resolved.steps.flatMap((step) =>
-        step.sources.map((source) => ({
-          from: resolved.steps[source].participant,
-          to: step.participant,
-          fromStep: source,
-          toStep: step.index,
+      hops: nodes.flatMap((node) =>
+        node.prevDataId.map((parentKey) => ({
+          from: nodes.find((candidate) => nodeKeyOf(candidate) === parentKey)?.participantId || parentKey,
+          to: node.participantId,
         })),
       ),
     },
   };
+};
+
+// Canonical key the core API derives for a node (kept in sync with app/express-server traceability.js).
+export const nodeKeyOf = (node) =>
+  node.nodeScope === "data-source"
+    ? `trace-source:${node.dataId}:${node.participantId}`
+    : `trace-node:${node.usecaseContractId}:${node.dataId}:${node.participantId}`;
+
+/**
+ * Traceability nodes of one data exchange, parents before children:
+ * - the step that provides the input data becomes one data-source node per input data resource.
+ *   Data-source nodes do not depend on the chain, use case or exchange, so every exchange using
+ *   the same data resource branches off the same node (parallel ramifications);
+ * - every other step becomes one node per service chain and step, linked to the steps it receives
+ *   data from; repeated runs of the same chain reuse these nodes;
+ * - the DVCT service (the chain's last step, see resolveDataExchange) is not recorded;
+ * - an organization's points are carried by its first node in chain order only.
+ */
+export const buildTraceNodes = (resolved, { title, weightOf, organizationNames }) => {
+  const { steps } = resolved;
+  const pointsGiven = new Set();
+  const pointsFor = (participant) => {
+    if (pointsGiven.has(participant)) return 0;
+    pointsGiven.add(participant);
+    return weightOf(participant);
+  };
+
+  // Skips DVCT steps when following a step's inputs.
+  const inputsOf = (step) =>
+    step.sources.flatMap((index) => (steps[index].isDvct ? inputsOf(steps[index]) : [index]));
+
+  const keysByStep = new Map();
+  const nodes = [];
+  const base = {
+    dvctId: resolved.providerDataExchangeId,
+    usecaseContractId: resolved.chainId,
+    contractId: resolved.contractId,
+    organizationNames,
+  };
+  const nextParticipant = (index) => steps.find((step) => step.index > index && !step.isDvct)?.participant;
+
+  for (const step of steps) {
+    if (step.isDvct) continue;
+
+    if (step.resources.length > 0 && inputsOf(step).length === 0) {
+      const keys = [];
+      for (const resource of step.resources) {
+        const points = pointsFor(step.participant);
+        const node = {
+          ...base,
+          nodeScope: "data-source",
+          usecaseContractTitle: resource.name || title,
+          dataId: resource.url,
+          participantId: step.participant,
+          participantSourceId: step.participant,
+          participantShare: points,
+          dataProviderId: step.participant,
+          dataConsumerId: nextParticipant(step.index) || step.participant,
+          dataConsumerIsAIProvider: false,
+          prevDataId: [],
+          incentiveForDataProvider: { numPoints: points, factor: 1, factorCheck: true },
+          extraIncentiveForAIProvider: { numPoints: points, factor: 1, factorCheck: true },
+        };
+        nodes.push(node);
+        keys.push(nodeKeyOf(node));
+      }
+      keysByStep.set(step.index, keys);
+      continue;
+    }
+
+    const inputs = inputsOf(step);
+    const points = pointsFor(step.participant);
+    const provider = inputs.length > 0 ? steps[inputs[0]].participant : step.participant;
+    const node = {
+      ...base,
+      usecaseContractTitle: title,
+      // Identified by chain and step, not by exchange: re-running the same service chain updates
+      // the same nodes (execution count, points) instead of adding a parallel sequence.
+      dataId: `step-${step.index}`,
+      participantId: step.participant,
+      participantSourceId: step.participant,
+      participantShare: points,
+      dataProviderId: provider,
+      dataConsumerId: inputs.length > 0 ? step.participant : nextParticipant(step.index) || step.participant,
+      dataConsumerIsAIProvider: inputs.length > 0,
+      prevDataId: inputs.flatMap((index) => keysByStep.get(index) || []),
+      incentiveForDataProvider: { numPoints: 0, factor: 1, factorCheck: true },
+      extraIncentiveForAIProvider: { numPoints: points, factor: 1, factorCheck: true },
+    };
+    nodes.push(node);
+    keysByStep.set(step.index, [nodeKeyOf(node)]);
+  }
+
+  return nodes;
 };

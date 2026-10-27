@@ -328,6 +328,7 @@ const upsertTraceNode = async (inputData, canonicalKey) => {
         numPoints:
           inputData.participantShare || inputData.extraIncentiveForAIProvider?.numPoints || 0,
         contractId: inputData.contractId,
+        dvctId: inputData.dvctId,
       },
     ]);
 
@@ -361,6 +362,17 @@ const upsertTraceNode = async (inputData, canonicalKey) => {
     nodeId: link.nodeId,
     '@nodeUrl': link['@nodeUrl'] || buildNodeUrl(link.nodeId),
   }));
+  // Count each exchange once: re-running a service chain updates its nodes instead of adding new ones.
+  const dvctId = normalizeString(inputData.dvctId);
+  if (dvctId && !(traceNode.executions || []).some((execution) => execution.dvctId === dvctId)) {
+    traceNode.executions = [
+      ...(traceNode.executions || []).map((execution) => ({
+        dvctId: execution.dvctId,
+        executedAt: execution.executedAt,
+      })),
+      { dvctId, executedAt: new Date() },
+    ];
+  }
   await traceNode.save();
 };
 

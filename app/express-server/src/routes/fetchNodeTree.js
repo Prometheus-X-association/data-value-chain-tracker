@@ -54,6 +54,7 @@ const fetchNodeTree = async (nodeId, options = {}, visited = new Set()) => {
     participantSourceId: node.participantSourceId,
     usecaseContractTitle: node.usecaseContractTitle,
     nodeMetadata: node.nodeMetadata,
+    executions: node.executions || [],
     totalIncentive, // Include the total incentive in the response
     childNode: childNodes, // Nested child nodes
   };

@@ -2,6 +2,7 @@ const normalizeString = (value) =>
   typeof value === 'string' ? value.trim() : '';
 
 const buildCanonicalKey = ({
+  nodeScope,
   dataId,
   usecaseContractId,
   dvctId,
@@ -17,6 +18,12 @@ const buildCanonicalKey = ({
   const normalizedProvider = normalizeString(dataProviderId);
   const normalizedConsumer = normalizeString(dataConsumerId);
   const normalizedNodeId = normalizeString(nodeId);
+
+  // A data source is one node per data resource and provider, shared by every use case, service
+  // chain and exchange that uses it, so its branches show up side by side.
+  if (nodeScope === 'data-source' && normalizedDataId && normalizedParticipantId) {
+    return `trace-source:${normalizedDataId}:${normalizedParticipantId}`;
+  }
 
   if (normalizedDataId && normalizedUseCase && normalizedParticipantId) {
     return `trace-node:${normalizedUseCase}:${normalizedDataId}:${normalizedParticipantId}`;
@@ -83,9 +90,12 @@ const dedupeIncentives = (incentives = []) => {
   const seen = new Set();
 
   return incentives.filter((incentive) => {
+    // Points are counted per exchange (dvctId): a shared data source sums the points of every
+    // exchange that used it, while repeating the same exchange does not add them twice.
     const key = [
       normalizeString(incentive.organizationId),
       normalizeString(incentive.contractId),
+      normalizeString(incentive.dvctId),
       Number(incentive.numPoints || 0),
     ].join('::');
 

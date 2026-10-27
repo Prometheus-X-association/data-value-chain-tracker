@@ -10,9 +10,14 @@ export const DataNodeCard = memo(({ data }: NodeProps<Node<FlowNodeData>>) => {
 
       <div className="data-node-card__header">
         <span className="data-node-card__eyebrow">{data.nodeType}</span>
-        {data.participantShare || data.incentiveTotal ? (
-          <span className="data-node-card__badge">{data.participantShare || data.incentiveTotal} pts</span>
-        ) : null}
+        <span className="data-node-card__badges">
+          {data.participantShare || data.incentiveTotal ? (
+            <span className="data-node-card__badge">{data.participantShare || data.incentiveTotal} pts</span>
+          ) : null}
+          {data.executionCount > 1 ? (
+            <span className="data-node-card__badge" title="Times this step was executed">×{data.executionCount}</span>
+          ) : null}
+        </span>
       </div>
 
       <strong className="data-node-card__title">{data.label}</strong>

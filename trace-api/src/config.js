@@ -81,6 +81,12 @@ export const loadDataspaceConfig = () => {
     catalogDomains,
     contractDomains,
     completionTimeoutSeconds,
+    // Service offerings (catalog id or URL) that are the DVCT service itself; detected automatically
+    // from the catalog when their software resource declares dvctRewardPool / dvctWeights.
+    dvctServiceOfferings: String(process.env.DVCT_SERVICE_OFFERINGS || "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean),
     httpTimeoutMs: Number(process.env.DATASPACE_HTTP_TIMEOUT_MS || 10_000),
     // Only for local testing against a connector on a private network.
     allowPrivateNetworks: process.env.DATASPACE_ALLOW_PRIVATE_NETWORKS === "true",

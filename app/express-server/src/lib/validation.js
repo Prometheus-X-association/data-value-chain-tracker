@@ -54,6 +54,10 @@ const validateNodeInput = (input) => {
     }
   });
 
+  if (input.nodeScope !== undefined && input.nodeScope !== 'data-source') {
+    errors.push('nodeScope must be "data-source" when set');
+  }
+
   if (input.participantShare !== undefined && !isNonNegativeNumber(input.participantShare)) {
     errors.push('participantShare must be a non-negative number');
   }

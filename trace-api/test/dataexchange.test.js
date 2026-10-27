@@ -11,6 +11,7 @@ import { SourceError, createSafeFetcher, hostMatches, isPrivateAddress } from ".
 import {
   buildExchangeJob,
   createDataspaceClient,
+  nodeKeyOf,
   extractQueryParams,
   parseWeights,
   resolveDataExchange,
@@ -62,7 +63,7 @@ const withRewardParams = (exchange, extra) => {
 };
 
 // Fake network: URL -> JSON document (or a function returning a Response-like object).
-const createNetwork = (overrides = {}) => {
+const createNetwork = (overrides = {}, configOverride = {}) => {
   const documents = {
     [`https://connector-c.example.org/dataexchanges/${CONSUMER_DX}`]: load("dataexchange-consumer.json"),
     [`https://connector-a.example.org/dataexchanges/${PROVIDER_DX}`]: load("dataexchange-provider.json"),
@@ -81,7 +82,10 @@ const createNetwork = (overrides = {}) => {
     return { status: 200, ok: true, headers: new Map(), text: async () => body };
   };
   const lookup = async (host) => [{ address: host.startsWith("internal.") ? "10.0.0.5" : "93.184.216.34" }];
-  return { client: createDataspaceClient({ safeFetch: createSafeFetcher({ fetchImpl, lookup }), config: dataspaceConfig }), requested };
+  return { client: createDataspaceClient({
+      safeFetch: createSafeFetcher({ fetchImpl, lookup }),
+      config: { ...dataspaceConfig, ...configOverride },
+    }), requested };
 };
 
 const resolveConsumer = (client, connector = "https://connector-c.example.org") =>
@@ -100,11 +104,17 @@ test("resolves the last service's data exchange into the service chain", async (
     resolved.participants.map((participant) => participant.legalName),
     ["Participant A", "Participant B", "Participant C"],
   );
-  assert.deepEqual(resolved.steps, [
-    { index: 0, participant: PARTICIPANT_A, sources: [] },
-    { index: 1, participant: PARTICIPANT_B, sources: [0] },
-    { index: 2, participant: PARTICIPANT_C, sources: [1] },
-  ]);
+  assert.deepEqual(
+    resolved.steps.map(({ index, participant, sources, isDvct }) => ({ index, participant, sources, isDvct })),
+    [
+      { index: 0, participant: PARTICIPANT_A, sources: [], isDvct: false },
+      { index: 1, participant: PARTICIPANT_B, sources: [0], isDvct: false },
+      { index: 2, participant: PARTICIPANT_C, sources: [1], isDvct: false },
+    ],
+  );
+  // The first step provides the exchange's input data resource.
+  assert.equal(resolved.steps[0].resources.length, 1);
+  assert.equal(resolved.steps[1].resources.length, 0);
   assert.ok(!JSON.stringify(resolved).includes("FIXTURE-SECRET"), "catalog keys must never be kept");
 });
 
@@ -252,13 +262,136 @@ test("a chain that visits a participant twice stays a path in the graph", async 
   const { payload, plan } = buildExchangeJob(resolved, { registry, config: { maxRewardPool: 5000 } });
 
   assert.deepEqual(resolved.participants.map((participant) => participant.url), [PARTICIPANT_A, PARTICIPANT_B]);
-  const keys = payload.nodes.map((node) => `trace-node:${node.usecaseContractId}:${node.dataId}:${node.participantId}`);
+  const keys = payload.nodes.map(nodeKeyOf);
   assert.equal(new Set(keys).size, 3, "every step gets its own node");
   assert.deepEqual(payload.nodes.map((node) => node.prevDataId), [[], [keys[0]], [keys[1]]]);
+  // An organization's points appear once, on its first node in chain order.
+  assert.deepEqual(payload.nodes.map((node) => node.participantShare), [60, 40, 0]);
+  assert.deepEqual(payload.nodes.map((node) => node.extraIncentiveForAIProvider.numPoints), [60, 40, 0]);
   assert.deepEqual(plan.participants.map((entry) => [entry.walletAddress, entry.basisPoints]), [
     [WALLETS[PARTICIPANT_A], 6000],
     [WALLETS[PARTICIPANT_B], 4000],
   ]);
+});
+
+const DVCT_OFFERING = "https://catalog.example.org/v1/catalog/serviceofferings/dddddddddddddddddddddddd";
+const DVCT_RESOURCE = "https://catalog.example.org/v1/catalog/softwareresources/eeeeeeeeeeeeeeeeeeeeeeee";
+const exchangeUrl = `https://connector-c.example.org/dataexchanges/${CONSUMER_DX}`;
+
+const withDvctStep = (exchange) => {
+  exchange.content.serviceChain.services.push({
+    participant: PARTICIPANT_A,
+    service: DVCT_OFFERING,
+    params: "",
+    pre: [],
+    completed: true,
+  });
+  return exchange;
+};
+
+const exchangeCopy = (id, chainId) => {
+  const copy = load("dataexchange-consumer.json");
+  copy.content._id = id;
+  copy.content.providerDataExchange = id;
+  if (chainId) copy.content.serviceChain.catalogId = chainId;
+  return copy;
+};
+const CONTRACT_URL = "https://contracts.example.org/contracts/1ede4e4c2b10f3273181b36f";
+
+test("running the same service chain again reuses its nodes instead of adding a parallel sequence", async () => {
+  const otherDx = "abcdefabcdefabcdefabcdef";
+  const { client } = createNetwork({ [`https://connector-c.example.org/dataexchanges/${otherDx}`]: exchangeCopy(otherDx) });
+
+  const first = buildExchangeJob(await resolveConsumer(client), { registry, config: { maxRewardPool: 5000 } });
+  const second = buildExchangeJob(
+    await resolveDataExchange(client, { dataExchangeId: otherDx, connector: "https://connector-c.example.org" }),
+    { registry, config: { maxRewardPool: 5000 } },
+  );
+
+  // Same nodes; the exchange id (dvctId) is what tells the two executions apart.
+  assert.deepEqual(first.payload.nodes.map(nodeKeyOf), second.payload.nodes.map(nodeKeyOf));
+  assert.notEqual(first.payload.nodes[1].dvctId, second.payload.nodes[1].dvctId);
+});
+
+test("another service chain using the same data source branches off in parallel", async () => {
+  const otherDx = "abcdefabcdefabcdefabcdef";
+  const otherChain = "cccccccccccccccccccccccc";
+  const contract = load("contract.json");
+  const chainCopy = structuredClone(contract.serviceChains.find((chain) => chain.catalogId === CHAIN));
+  chainCopy.catalogId = otherChain;
+  chainCopy.serviceChainId = otherChain;
+  contract.serviceChains.push(chainCopy);
+  const { client } = createNetwork({
+    [`https://connector-c.example.org/dataexchanges/${otherDx}`]: exchangeCopy(otherDx, otherChain),
+    [CONTRACT_URL]: contract,
+  });
+
+  const first = buildExchangeJob(await resolveConsumer(client), { registry, config: { maxRewardPool: 5000 } });
+  const second = buildExchangeJob(
+    await resolveDataExchange(client, { dataExchangeId: otherDx, connector: "https://connector-c.example.org" }),
+    { registry, config: { maxRewardPool: 5000 } },
+  );
+
+  // Same root (data source), a separate branch per service chain.
+  assert.equal(first.payload.nodes[0].nodeScope, "data-source");
+  assert.equal(nodeKeyOf(first.payload.nodes[0]), nodeKeyOf(second.payload.nodes[0]));
+  assert.notEqual(nodeKeyOf(first.payload.nodes[1]), nodeKeyOf(second.payload.nodes[1]));
+  assert.deepEqual(second.payload.nodes[1].prevDataId, [nodeKeyOf(first.payload.nodes[0])]);
+});
+
+test("several input data resources become parallel data source nodes", async () => {
+  const exchange = withRewardParams(load("dataexchange-consumer.json"), [
+    { dvctRewardPool: "100" },
+    { dvctWeights: "50,30,20" },
+  ]);
+  const second = structuredClone(exchange.content.resources[0]);
+  second.resource = "https://catalog.example.org/v1/catalog/dataresources/ffffffffffffffffffffffff";
+  exchange.content.resources.push(second);
+  const { client } = createNetwork({ [exchangeUrl]: exchange });
+  const { payload } = buildExchangeJob(await resolveConsumer(client), { registry, config: { maxRewardPool: 5000 } });
+
+  const sources = payload.nodes.filter((node) => node.nodeScope === "data-source");
+  assert.equal(sources.length, 2);
+  assert.deepEqual(payload.nodes[2].prevDataId.sort(), sources.map(nodeKeyOf).sort());
+  // The provider's points appear on its first node only.
+  assert.deepEqual(sources.map((node) => node.participantShare), [50, 0]);
+});
+
+test("the DVCT service step is detected from the catalog and not recorded", async () => {
+  const exchange = withDvctStep(load("dataexchange-consumer.json"));
+  const { client } = createNetwork({
+    [exchangeUrl]: exchange,
+    [DVCT_OFFERING]: { aggregationOf: [DVCT_RESOURCE] },
+    [DVCT_RESOURCE]: { representation: { queryParams: ["x-ptx-dataexchangeid", "dvctRewardPool", "dvctWeights"] } },
+  });
+  const resolved = await resolveConsumer(client);
+  const { payload } = buildExchangeJob(resolved, { registry, config: { maxRewardPool: 5000 } });
+
+  assert.equal(resolved.steps[3].isDvct, true);
+  assert.equal(payload.nodes.length, 3, "no node for the DVCT step");
+  assert.deepEqual(payload.nodes.map((node) => node.participantId), [PARTICIPANT_A, PARTICIPANT_B, PARTICIPANT_C]);
+  assert.equal(payload.hops.length, 2);
+});
+
+test("a middle step is never treated as the DVCT service, even if it declares the parameters", async () => {
+  const exchange = withDvctStep(load("dataexchange-consumer.json"));
+  // Move the DVCT-declaring offering to the middle of the chain.
+  const [dvctStep] = exchange.content.serviceChain.services.splice(3, 1);
+  exchange.content.serviceChain.services.splice(1, 0, dvctStep);
+  const { client } = createNetwork({
+    [exchangeUrl]: exchange,
+    [DVCT_OFFERING]: { aggregationOf: [DVCT_RESOURCE] },
+    [DVCT_RESOURCE]: { representation: { queryParams: ["dvctRewardPool", "dvctWeights"] } },
+  });
+  const resolved = await resolveConsumer(client);
+  assert.deepEqual(resolved.steps.map((step) => step.isDvct), [false, false, false, false]);
+});
+
+test("the DVCT service step can also be configured explicitly", async () => {
+  const exchange = withDvctStep(load("dataexchange-consumer.json"));
+  const { client } = createNetwork({ [exchangeUrl]: exchange }, { dvctServiceOfferings: ["dddddddddddddddddddddddd"] });
+  const { payload } = buildExchangeJob(await resolveConsumer(client), { registry, config: { maxRewardPool: 5000 } });
+  assert.equal(payload.nodes.length, 3);
 });
 
 test("never fetches from hosts outside the allowlists", async () => {
@@ -441,7 +574,7 @@ test("the job records every hop, waits for completion, then settles the payout",
   // One node per chain step, each linked to the previous step.
   assert.deepEqual(posted.map((node) => node.participantId), [PARTICIPANT_A, PARTICIPANT_B, PARTICIPANT_C]);
   assert.deepEqual(posted[0].prevDataId, []);
-  assert.deepEqual(posted[2].prevDataId, [`trace-node:${CHAIN}:${PROVIDER_DX}/step-1:${PARTICIPANT_B}`]);
+  assert.deepEqual(posted[2].prevDataId, [`trace-node:${CHAIN}:step-1:${PARTICIPANT_B}`]);
   assert.equal(calls.length, 0, "no payout before the exchange is complete");
 
   running.content.status = "IMPORT_SUCCESS";
