@@ -30,7 +30,7 @@
   "license": "MIT",
   "devDependencies": {
     "jest": "29.7.0",
-    "mongodb-memory-server": "10.1.4",
+    "mongodb-memory-server": "11.3.0",
     "supertest": "7.0.0"
   }
 }
