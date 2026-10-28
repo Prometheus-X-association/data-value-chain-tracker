@@ -9,7 +9,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.106",
+    "@types/node": "^26.6.5",
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
     "@visx/visx": "^3.11.0",
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/cytoscape": "^3.21.7",
-    "@types/node": "^24.0.7",
+    "@types/node": "^26.6.5",
     "@types/react-cytoscapejs": "^1.2.5"
   }
 }
