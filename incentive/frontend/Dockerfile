@@ -1,4 +1,4 @@
-FROM node:22.20.0-alpine AS build
+FROM node:26.12.1-alpine AS build
 
 # Build tools for native modules
 RUN apk add --no-cache python3 make g++ gcc libc-dev
@@ -13,7 +13,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN SKIP_ENV_VALIDATION=1 yarn build
 
-FROM node:22.20.0-alpine AS runner
+FROM node:26.12.1-alpine AS runner
 
 WORKDIR /app
 
