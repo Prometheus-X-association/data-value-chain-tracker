@@ -1,6 +1,6 @@
 FROM ghcr.io/foundry-rs/foundry:v1.0.0 AS foundry
 
-FROM node:20.19.0-slim
+FROM node:26.12.0-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
