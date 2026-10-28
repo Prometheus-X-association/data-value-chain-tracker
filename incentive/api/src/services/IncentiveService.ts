@@ -1,125 +1,48 @@
 import { ethers } from "ethers";
-import { UseCaseContract } from "../typechain-types";
-import { PTXToken } from "../typechain-types";
-import { TokenRewardRequest, UseCaseDepositRequest } from "../types/types";
-import { TOKEN_ABI, USECASE_ABI } from "../config/abis";
+import { UseCaseDepositRequest } from "../types/types";
+import { USECASE_ABI } from "../config/abis";
 
+export class RequestError extends Error {}
+
+/**
+ * Relays permit-based reward deposits to the use case contract. The API wallet pays the gas and
+ * holds RELAYER_ROLE on the contract; it can only move tokens that their owner signed a permit for.
+ */
 export class IncentiveService {
-  private token: PTXToken;
-  private useCase: UseCaseContract;
+  private useCase: ethers.Contract;
 
   constructor(
-    private wallet: ethers.Wallet,
-    private useCaseAddress: string,
-    private tokenAddress: string
+    wallet: ethers.Wallet,
+    private useCaseAddress: string
   ) {
-    this.useCase = new ethers.Contract(
-      useCaseAddress,
-      USECASE_ABI,
-      wallet
-    ) as unknown as UseCaseContract;
-
-    this.token = new ethers.Contract(
-      tokenAddress,
-      TOKEN_ABI,
-      wallet
-    ) as unknown as PTXToken;
+    this.useCase = new ethers.Contract(useCaseAddress, USECASE_ABI, wallet);
   }
 
-  async transferReward(request: TokenRewardRequest): Promise<string> {
-    if (!this.validateTransferRequest(request)) {
-      throw new Error("Invalid transfer request");
+  async depositRewardsWithPermit(request: UseCaseDepositRequest): Promise<string> {
+    const amount = ethers.parseEther(request.amount);
+    const { permit } = request;
+
+    if (ethers.getAddress(request.to) !== ethers.getAddress(this.useCaseAddress)) {
+      throw new RequestError("Deposits must target the use case contract");
     }
-
-    const tx = await this.token.transferReward(
-      request.from,
-      request.to,
-      ethers.parseEther(request.amount),
-      ethers.id(request.incentiveType)
-    );
-
-    return tx.hash;
-  }
-
-  async transferRewardWithPermit(request: TokenRewardRequest): Promise<string> {
-    if (!request.permit) {
-      throw new Error("Permit required for this operation");
-    }
-    if (!this.validateTransferRequest(request)) {
-      throw new Error("Invalid transfer request");
-    }
-
-    const tx = await this.token.transferRewardWithPermit(
-      request.permit.owner,
-      request.permit.spender,
-      request.to,
-      ethers.parseEther(request.amount),
-      request.permit.deadline,
-      request.permit.v,
-      request.permit.r,
-      request.permit.s,
-      ethers.id(request.incentiveType)
-    );
-
-    return tx.hash;
-  }
-
-  async depositRewards(request: UseCaseDepositRequest): Promise<string> {
-    if (!this.validateDepositRequest(request)) {
-      throw new Error("Invalid deposit request");
-    }
-
-    const tx = await this.useCase.depositRewards(
-      request.useCaseId,
-      ethers.parseEther(request.amount)
-    );
-
-    return tx.hash;
-  }
-
-  async depositRewardsWithPermit(
-    request: UseCaseDepositRequest
-  ): Promise<string> {
-    if (!request.permit) {
-      throw new Error("Permit required for this operation");
-    }
-    if (!this.validateDepositRequest(request)) {
-      throw new Error("Invalid deposit request");
+    if (
+      ethers.getAddress(permit.owner) !== ethers.getAddress(request.from) ||
+      ethers.getAddress(permit.spender) !== ethers.getAddress(this.useCaseAddress) ||
+      BigInt(permit.amount) !== amount
+    ) {
+      throw new RequestError("Permit does not match the deposit request");
     }
 
     const tx = await this.useCase.depositRewardsWithPermit(
       request.useCaseId,
-      request.permit.owner,
-      ethers.parseEther(request.amount),
-      request.permit.deadline,
-      request.permit.v,
-      request.permit.r,
-      request.permit.s
+      permit.owner,
+      amount,
+      permit.deadline,
+      permit.v,
+      permit.r,
+      permit.s
     );
 
     return tx.hash;
-  }
-
-  private validateTransferRequest(request: TokenRewardRequest): boolean {
-    return (
-      ethers.isAddress(request.from) &&
-      ethers.isAddress(request.to) &&
-      request.to !== ethers.ZeroAddress &&
-      request.from !== ethers.ZeroAddress &&
-      parseFloat(request.amount) > 0 &&
-      !!request.incentiveType
-    );
-  }
-
-  private validateDepositRequest(request: UseCaseDepositRequest): boolean {
-    return (
-      !!request.useCaseId &&
-      request.useCaseId.length > 0 &&
-      ethers.isAddress(request.from) &&
-      ethers.isAddress(request.to) &&
-      request.to !== ethers.ZeroAddress &&
-      request.from !== ethers.ZeroAddress &&
-      parseFloat(request.amount) > 0
-    );
   }
 }

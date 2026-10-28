@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { ethers } from "ethers";
 import { Permit } from "../../src/types/types";
 
@@ -98,24 +99,18 @@ export class IncentiveSigner {
       permit,
     };
   }
+}
 
-  /**
-   * Creates a direct token reward request
-   */
-  async createTokenRewardRequest(
-    to: string,
-    amount: string,
-    incentiveType: string,
-    deadline?: number
-  ) {
-    const permit = await this.createPermit(to, amount, deadline);
-
-    return {
-      from: this.wallet.address,
-      to,
-      amount,
-      incentiveType,
-      permit,
-    };
-  }
+/**
+ * Returns the headers that authenticate a request body for the incentive API.
+ * The body must be sent exactly as the string that was signed.
+ */
+export function signIncentiveApiRequest(rawBody: string, hmacSecret: string) {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signature = crypto.createHmac("sha256", hmacSecret).update(`${timestamp}.${rawBody}`).digest("hex");
+  return {
+    "Content-Type": "application/json",
+    "X-DVCT-Timestamp": timestamp,
+    "X-DVCT-Signature": signature,
+  };
 }

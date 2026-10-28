@@ -333,7 +333,8 @@ contract UseCaseContractTest is Test {
             )
         );
 
-        // Call depositRewardsWithPermit
+        // The token owner submits its own permit (only the owner or a relayer may do so)
+        vm.prank(user1Address);
         useCase.depositRewardsWithPermit(
             useCaseId,
             user1Address,
@@ -344,6 +345,7 @@ contract UseCaseContractTest is Test {
 
         UseCaseContract.UseCaseInfo memory info = useCase.getUseCaseInfo(useCaseId);
         assertEq(info.totalRewardPool, amount, "Reward pool should have received the tokens");
+        assertEq(useCase.deposits(useCaseId, user1Address), amount, "Deposit should be attributed to the owner");
         assertEq(token.balanceOf(user1Address), 0, "User wallet should have zero balance");
         assertEq(token.balanceOf(address(useCase)), amount, "UseCase contract should have the tokens");
     }
@@ -390,5 +392,30 @@ contract UseCaseContractTest is Test {
         
         assertEq(token.balanceOf(address(1)), 600 ether);
         assertEq(token.balanceOf(address(2)), 400 ether);
+    }
+}
+contract UseCaseContractPermitAuthTest is Test {
+    function test_RevertWhen_ThirdPartySubmitsPermit() public {
+        PTXToken token = new PTXToken(1_000 ether);
+        UseCaseContract useCase = new UseCaseContract(address(token));
+        uint256 victimKey = 0xA11CE;
+        address victim = vm.addr(victimKey);
+        token.transfer(victim, 100 ether);
+
+        address attacker = makeAddr("attacker");
+        vm.prank(attacker);
+        useCase.createUseCase("attack");
+
+        uint256 deadline = block.timestamp + 1 days;
+        bytes32 digest = keccak256(abi.encodePacked(
+            "\x19\x01",
+            token.DOMAIN_SEPARATOR(),
+            keccak256(abi.encode(token.PERMIT_TYPEHASH(), victim, address(useCase), 100 ether, token.nonces(victim), deadline))
+        ));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(victimKey, digest);
+
+        vm.prank(attacker);
+        vm.expectRevert(UseCaseContract.NotAuthorizedDepositor.selector);
+        useCase.depositRewardsWithPermit("attack", victim, 100 ether, deadline, v, r, s);
     }
 }

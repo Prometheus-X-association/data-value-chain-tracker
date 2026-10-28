@@ -1,0 +1,115 @@
+{
+  "_id": "1ede4e4c2b10f3273181b36f",
+  "ecosystem": "https://catalog.example.org/v1/catalog/ecosystems/f26201fffe660c97d448c25b",
+  "orchestrator": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+  "status": "signed",
+  "serviceChains": [
+    {
+      "catalogId": "c87abddbae88f3a2503673e9",
+      "serviceChainId": "c87abddbae88f3a2503673e9",
+      "services": [
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/e73140d0cfc89e6e6e8fed8b",
+          "params": "",
+          "pre": []
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/ec0a6e8d9fb4c9e585310224",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/9b6aace105b3eae22a4b94bd",
+          "params": "",
+          "pre": []
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/8c0bc413f9be90e93fe691c0",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/3ee02fa1ba69965088666d1c",
+          "params": "",
+          "pre": []
+        }
+      ]
+    },
+    {
+      "catalogId": "46ed3e17e97f2390ab648ad1",
+      "serviceChainId": "46ed3e17e97f2390ab648ad1",
+      "services": [
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/77bdc0a776414547a0ca2948",
+          "params": "",
+          "pre": []
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/ec0a6e8d9fb4c9e585310224",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/dfdb9715d42bfe4ab0d28683",
+          "params": "",
+          "pre": []
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/8c0bc413f9be90e93fe691c0",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/3ee02fa1ba69965088666d1c",
+          "params": "",
+          "pre": []
+        }
+      ]
+    },
+    {
+      "catalogId": "32c09a520bca7915f542db7e",
+      "serviceChainId": "32c09a520bca7915f542db7e",
+      "services": [
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/77bdc0a776414547a0ca2948",
+          "params": "",
+          "pre": []
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/ec0a6e8d9fb4c9e585310224",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/b3004fef722475d65c0ae618",
+          "params": "",
+          "pre": [
+            [
+              {
+                "participant": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+                "service": "https://catalog.example.org/v1/catalog/serviceofferings/e73140d0cfc89e6e6e8fed8b",
+                "params": ""
+              }
+            ]
+          ]
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/8c0bc413f9be90e93fe691c0",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/3ee02fa1ba69965088666d1c",
+          "params": "",
+          "pre": []
+        }
+      ]
+    }
+  ],
+  "members": [
+    {
+      "participant": "https://catalog.example.org/v1/catalog/participants/8c0bc413f9be90e93fe691c0",
+      "role": "participant",
+      "signature": "signed",
+      "date": "2025-08-27T14:57:26.751Z"
+    },
+    {
+      "participant": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+      "role": "orchestrator",
+      "signature": "signed",
+      "date": "2025-12-12T12:49:22.921Z"
+    },
+    {
+      "participant": "https://catalog.example.org/v1/catalog/participants/ec0a6e8d9fb4c9e585310224",
+      "role": "participant",
+      "signature": "signed",
+      "date": "2025-12-18T14:03:37.790Z"
+    },
+    {
+      "participant": "https://catalog.example.org/v1/catalog/participants/3e35c483c9423ad1da47b1dc",
+      "role": "participant",
+      "signature": "signed",
+      "date": "2026-01-29T10:02:32.443Z"
+    }
+  ],
+  "useDVCT": false
+}

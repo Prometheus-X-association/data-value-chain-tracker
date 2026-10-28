@@ -10,7 +10,26 @@ import { UseCaseOverview } from "@/components/use-case/use-case-overview";
 import { UseCaseParticipants } from "@/components/use-case/use-case-participants";
 import { UseCaseActions } from "@/components/use-case/use-case-actions";
 import { UseCaseDeposit } from "@/components/use-case/use-case-deposit";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
+
+function UseCaseUnavailable({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Container className="flex min-h-[60vh] items-center justify-center">
+      <div className="w-full max-w-xl space-y-4">
+        <Alert>
+          <AlertTitle>{title}</AlertTitle>
+          <AlertDescription>{children}</AlertDescription>
+        </Alert>
+        <Button asChild variant="outline">
+          <Link href="/">Back to dashboard</Link>
+        </Button>
+      </div>
+    </Container>
+  );
+}
 
 function getDisplayUseCaseName(id: string) {
   if (!id) return id;
@@ -25,7 +44,7 @@ export default function UseCasePage() {
   const { id } = useParams();
   const { address } = useAccount();
   const decodedUseCaseId = decodeURIComponent(String(id));
-  const { useCase, isLoading, error } = useUseCase(decodedUseCaseId);
+  const { useCase, metadata, isLoading, error } = useUseCase(decodedUseCaseId);
 
   if (isLoading) {
     return (
@@ -38,11 +57,25 @@ export default function UseCasePage() {
     );
   }
 
-  if (error) return <div>Error: {error.message}</div>;
-  if (!useCase) return <div>Use case not found</div>;
+  const notFound = error ? String(error.message).includes("UseCaseDoesNotExist") : !useCase;
+  if (notFound) {
+    return (
+      <UseCaseUnavailable title="Use case not found">
+        No use case <strong>{getDisplayUseCaseName(decodedUseCaseId)}</strong> exists on the current
+        chain. It may never have been created, or the local demo chain was reset since then.
+      </UseCaseUnavailable>
+    );
+  }
+  if (error || !useCase) {
+    return (
+      <UseCaseUnavailable title="The use case could not be loaded">
+        The blockchain node did not answer as expected. Try again in a moment.
+      </UseCaseUnavailable>
+    );
+  }
 
   const isOwner = address?.toLowerCase() === useCase.owner.toLowerCase();
-  const displayName = getDisplayUseCaseName(decodedUseCaseId);
+  const displayName = metadata?.useCaseName || getDisplayUseCaseName(decodedUseCaseId);
 
   return (
     <Container>

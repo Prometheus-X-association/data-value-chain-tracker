@@ -232,6 +232,11 @@
   flex-wrap: wrap;
 }
 
+.data-node-card__badges {
+  display: inline-flex;
+  gap: 6px;
+}
+
 .data-node-card__eyebrow {
   color: var(--color-accent-strong);
   font-size: 0.72rem;
@@ -531,4 +536,23 @@
   .graph-detail-list__value--technical {
     font-size: 0.82rem;
   }
+}
+
+/* Collapsible technical identifiers in the inspector */
+.graph-technical {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+}
+
+.graph-technical summary {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.graph-technical[open] summary {
+  margin-bottom: 10px;
 }

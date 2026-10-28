@@ -1,120 +1,158 @@
-version: "3"
+# DVCT demonstrator. Run "make init" once to generate .env and config/organizations.json.
+# Only the gateway publishes a port; every other service is reachable on the internal network only.
+# For local debugging with direct service ports, add -f docker-compose.dev.yml (see Makefile: make up-dev).
+
+x-required:
+  internal-token: &internal-token ${DVCT_INTERNAL_API_TOKEN:?run "make init" to generate .env}
+  mongo-uri: &mongo-uri mongodb://${MONGO_ROOT_USERNAME:?run make init}:${MONGO_ROOT_PASSWORD:?run make init}@mongodb:27017/jsonldDB?authSource=admin
 
 services:
+  # Public gateway: core frontend (/core), core API (/api), incentive UI (/incentive), trace-api (/trace-api)
   core-frontend:
     build:
       context: ./app
       dockerfile: Dockerfile.frontend
-    environment:
-      - REACT_APP_ENVIRONMENT=production
-      - REACT_APP_BASE_URL_PROD=http://localhost:3001/
-      - REACT_APP_BASE_URL_DEV=http://localhost:9081/
     ports:
-      - "3000:80" # http://localhost:3000
+      - "${PUBLIC_PORT:-3000}:8080"
     depends_on:
       - core-api
+      - trace-api
+      - incentive-frontend
     networks:
       - core-network
+    restart: unless-stopped
 
   core-api:
     build:
       context: ./app
       dockerfile: Dockerfile.server
-    ports:
-      - "3001:9081" # http:localhost:3001
     environment:
-      MONGODB_URI: "mongodb://mongodb:27017/jsonldDB"
-      DVCT_INTERNAL_API_TOKEN: "dvct-internal-dev-token"
+      MONGODB_URI: *mongo-uri
+      DVCT_INTERNAL_API_TOKEN: *internal-token
+      DVCT_ORGANIZATIONS_FILE: /config/organizations.json
+      DVCT_SESSION_SECURE: ${DVCT_SESSION_SECURE:-false}
+      DVCT_CORS_ORIGINS: ${DVCT_CORS_ORIGINS:-}
+      DVCT_PUBLIC_BASE_URL: http://localhost:${PUBLIC_PORT:-3000}
+    volumes:
+      - ./config/organizations.json:/config/organizations.json:ro
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - core-network
+    restart: unless-stopped
 
+  # Receives data-exchange events from the PDC (POST /trace-api/api/run-script on the gateway)
+  trace-api:
+    build:
+      context: ./trace-api
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/dvctTrace?authSource=admin
+      TRACE_API_TOKEN: ${TRACE_API_TOKEN:?run make init}
+      CORE_API_URL: http://core-api:9081
+      DVCT_INTERNAL_API_TOKEN: *internal-token
+      DVCT_ORGANIZATIONS_FILE: /config/organizations.json
+      INCENTIVE_DEPLOYMENT_FILE: /config/deployment.json
+      INCENTIVE_RPC_URL: http://hardhat:8545
+      INCENTIVE_API_URL: http://incentive-api:3000
+      INCENTIVE_API_HMAC_SECRET: ${INCENTIVE_API_HMAC_SECRET:?run make init}
+      TRACE_OPERATOR_PRIVATE_KEY: ${TRACE_OPERATOR_PRIVATE_KEY:?run make init}
+      INCENTIVE_LOCK_SECONDS: ${INCENTIVE_LOCK_SECONDS:-60}
+      INCENTIVE_MAX_REWARD_POOL: ${INCENTIVE_MAX_REWARD_POOL:-1000000}
+      # Data-exchange endpoint: dataspace hosts the trace-api may query (set in .env; empty = disabled)
+      PDC_CONNECTOR_DOMAINS: ${PDC_CONNECTOR_DOMAINS:-}
+      PDC_DEFAULT_CONNECTOR: ${PDC_DEFAULT_CONNECTOR:-}
+      CATALOG_API_DOMAINS: ${CATALOG_API_DOMAINS:-}
+      CONTRACT_API_DOMAINS: ${CONTRACT_API_DOMAINS:-}
+      DATAEXCHANGE_COMPLETION_TIMEOUT_SECONDS: ${DATAEXCHANGE_COMPLETION_TIMEOUT_SECONDS:-1800}
+    volumes:
+      - ./config/organizations.json:/config/organizations.json:ro
+      - ./incentive/api/src/config/deployment.json:/config/deployment.json:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      hardhat:
+        condition: service_healthy
+      core-api:
+        condition: service_started
+      incentive-api:
+        condition: service_started
+    networks:
+      - core-network
+    restart: unless-stopped
+
+  # Relays permit-based reward deposits; only accepts HMAC-signed requests from the trace-api
   incentive-api:
     build:
-      context: .
-      dockerfile: incentive/api/Dockerfile
-    ports:
-      - "3002:3000" # http://localhost:3002
+      context: ./incentive/api
     environment:
       PORT: 3000
-      PRIVATE_KEY: "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
+      PRIVATE_KEY: ${INCENTIVE_API_PRIVATE_KEY:?run make init}
       RPC_URL: http://hardhat:8545
+      INCENTIVE_API_HMAC_SECRET: ${INCENTIVE_API_HMAC_SECRET:?run make init}
     depends_on:
-      - hardhat
+      hardhat:
+        condition: service_healthy
     networks:
       - core-network
+    restart: unless-stopped
 
   incentive-frontend:
     build:
       context: ./incentive/frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3003:3000" # http://localhost:3003
-    depends_on:
-      - hardhat
-    networks:
-      - core-network
-
-  incenti-trace:
-    build:
-      dockerfile: Dockerfile.server
-      context: ./
     environment:
-      - ENVIRONMENT=production
-      - INCENTIVE_RPC_URL=http://hardhat:8545
-      - INCENTIVE_API_URL=http://incentive-api:3000
-      - USE_EXTERNAL_HARDHAT=true
-      - DVCT_INTERNAL_API_TOKEN=dvct-internal-dev-token
-      - DVCT_ORGANIZATION_WALLETS_FILE=config/organization-wallets.dev.json
-    command: ["node", "./execute-incenti-trace.js"]
-    ports:
-      - "3005:9091" # http:localhost:3004
+      RPC_UPSTREAM_URL: http://hardhat:8545
+      RPC_ALLOW_DEV_SIGNING: ${RPC_ALLOW_DEV_SIGNING:-false}
     depends_on:
-      - core-api
-      - incentive-api
-      - hardhat
+      hardhat:
+        condition: service_healthy
     networks:
       - core-network
-    
-  engine-test:
-    build:
-      dockerfile: Dockerfile.server
-      context: ./
-    environment:
-      - ENVIRONMENT=production
-      - DVCT_ORGANIZATION_WALLETS_FILE=config/organization-wallets.dev.json
-    command: ["node", "./core-engine.js"]
-    ports:
-      - "3004:9091" # http:localhost:3004
-    depends_on:
-      - core-api
-    networks:
-      - core-network
-    
+    restart: unless-stopped
 
   mongodb:
-    image: mongo
-    container_name: mongodb
-    ports:
-      - "27017:27017"
+    image: mongo:8.0.13
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?run make init}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?run make init}
     volumes:
-      - mongo_data:/data/db
+      - mongo_data_secure:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     networks:
       - core-network
+    restart: unless-stopped
 
+  # Local demonstrator chain (Anvil). Not published: browsers use the filtered /incentive/rpc route.
   hardhat:
     build:
       context: ./incentive/blockchain
       dockerfile: Dockerfile
-    ports:
-      - "8545:8545"
+    volumes:
+      # Chain state survives container recreation (use cases stay in sync with the database)
+      - chain_data:/data/anvil
+    environment:
+      INCENTIVE_RELAYER_ADDRESS: ${INCENTIVE_RELAYER_ADDRESS:?run make init}
+      TRACE_OPERATOR_ADDRESS: ${TRACE_OPERATOR_ADDRESS:?run make init}
+    healthcheck:
+      # Healthy once contracts are deployed and the service wallets are bootstrapped
+      test: ["CMD", "test", "-f", "/tmp/dvct-chain-ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
     networks:
       - core-network
+    restart: unless-stopped
 
 networks:
   core-network:
     driver: bridge
 
 volumes:
-  mongo_data:
+  # Authenticated database volume (the previous unauthenticated "mongo_data" volume is not reused)
+  mongo_data_secure:
+  # Local chain state; removed together with the database by "make clean"
+  chain_data:

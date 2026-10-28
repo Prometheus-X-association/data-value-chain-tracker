@@ -12,7 +12,7 @@ async function main() {
   }
 
   // Write to API
-  const abiPath = path.join(__dirname, "../../api/src/contracts/abis.ts");
+  const abiPath = path.join(__dirname, "../../api/src/config/abis.ts");
 
   // Ensure directory exists
   const dir = path.dirname(abiPath);

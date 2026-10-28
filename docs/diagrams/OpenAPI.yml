@@ -1,200 +1,437 @@
-openapi: 3.0.0
+openapi: 3.0.3
 
 info:
-  title: 'Data Value Chain Tracker'
-  version: '0.0.1'
-  description: 'API for managing Value Chain Tracker'
+  title: Data Value Chain Tracker
+  version: '0.1.0'
+  description: |
+    Public API of the DVCT demonstrator, as exposed by the gateway.
+    - Core API (`/api/...`): organization sign-in and the traceability graph.
+    - trace-api (`/trace-api/api/...`): entry point for the PDC and workflow engines.
+    The incentive API is internal (not routed by the gateway) and documented at the end.
 
 servers:
   - url: http://localhost:3000
 
-paths:
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: dvct_session
+      description: HttpOnly session cookie set by POST /api/auth/login
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-DVCT-Internal-Token
+      description: Service-to-service token (trace-api -> core API). Not available to browsers.
+    traceApiToken:
+      type: http
+      scheme: bearer
+      description: TRACE_API_TOKEN from .env, configured in the PDC / workflow engine
+    incentiveHmac:
+      type: apiKey
+      in: header
+      name: X-DVCT-Signature
+      description: hex(HMAC_SHA256(INCENTIVE_API_HMAC_SECRET, "<X-DVCT-Timestamp>.<raw body>")), plus X-DVCT-Timestamp
 
-  /api/node:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+
+    Profile:
+      type: object
+      properties:
+        username: { type: string }
+        organizationId: { type: string }
+        displayName: { type: string }
+
+    Incentive:
+      type: object
+      properties:
+        organizationId: { type: string }
+        numPoints: { type: number }
+        contractId: { type: string }
+
+    NodeLink:
+      type: object
+      properties:
+        nodeId: { type: string }
+        '@nodeUrl': { type: string, format: uri }
+
+    InputData:
+      type: object
+      properties:
+        dvctId: { type: string }
+        usecaseContractId: { type: string }
+        usecaseContractTitle: { type: string }
+        contractId: { type: string }
+        dataId: { type: string }
+        participantId: { type: string }
+        participantSourceId: { type: string }
+        participantShare: { type: number, minimum: 0 }
+        dataProviderId: { type: string }
+        dataConsumerId: { type: string }
+        dataConsumerIsAIProvider: { type: boolean }
+        prevDataId:
+          type: array
+          maxItems: 50
+          items: { type: string }
+        incentiveForDataProvider:
+          $ref: '#/components/schemas/IncentiveFactor'
+        extraIncentiveForAIProvider:
+          $ref: '#/components/schemas/IncentiveFactor'
+
+    IncentiveFactor:
+      type: object
+      properties:
+        numPoints: { type: number, minimum: 0 }
+        factor: { type: number }
+        factorCheck: { type: boolean }
+
+    JsonLdData:
+      type: object
+      properties:
+        '@context': { type: object }
+        '@type': { type: string }
+        nodeId: { type: string }
+        canonicalKey: { type: string }
+        nodeType: { type: string, enum: [raw_data, ai_processing, use_case_step, linked_data] }
+        dataId: { type: string }
+        participantId: { type: string }
+        participantShare: { type: number }
+        participantSourceId: { type: string }
+        usecaseContractTitle: { type: string }
+        nodeMetadata:
+          type: object
+          properties:
+            dvctId: { type: string }
+            usecaseContractId: { type: string }
+            dataProviderId: { type: string }
+            dataConsumerId: { type: string }
+            incentiveReceivedFrom:
+              type: array
+              items: { $ref: '#/components/schemas/Incentive' }
+        prevNode:
+          type: array
+          items: { $ref: '#/components/schemas/NodeLink' }
+        childNode:
+          type: array
+          items: { $ref: '#/components/schemas/NodeLink' }
+
+    RunScriptPayload:
+      type: object
+      required: [dvctId, contractId, useCaseContractTitle, dataId, dataProviderId, dataConsumerId, factorCheck,
+                 reachEndFlow, providerUrl, currentParticipantId, nextParticipantId, useCaseId, useCaseName,
+                 dataQualityCheck, participantShare]
+      properties:
+        dvctId: { type: string }
+        contractId: { type: string }
+        useCaseContractTitle: { type: string }
+        dataId: { type: string }
+        dataProviderId: { type: string }
+        dataConsumerId: { type: string }
+        factorCheck: { type: boolean }
+        reachEndFlow:
+          type: boolean
+          description: true settles the incentive payout of the use case after recording traceability
+        providerUrl: { type: string }
+        currentParticipantId: { type: string }
+        nextParticipantId: { type: string }
+        useCaseId: { type: string }
+        useCaseName:
+          type: string
+          description: On-chain use case identifier; each use case is paid out once
+        dataQualityCheck: { type: string }
+        rewardPool:
+          type: string
+          description: PTX amount deposited and distributed when reachEndFlow is true (default 1000)
+        participantShare:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            required: [participantId, numOfShare]
+            properties:
+              participantId:
+                type: string
+                description: Must be registered with a walletAddress in config/organizations.json
+              participantName: { type: string }
+              role: { type: string }
+              numOfShare: { type: number, minimum: 0, description: Raw weight, normalized to basis points }
+
+    Job:
+      type: object
+      properties:
+        jobId: { type: string }
+        statusUrl: { type: string }
+        status: { type: string, enum: [queued, running, waiting, succeeded, failed] }
+        step: { type: string, enum: [trace, awaitExchange, useCase, shares, metadata, deposit, lock, distribute, done] }
+        nextRunAt: { type: string, format: date-time }
+        result:
+          type: object
+          properties:
+            traceNodes: { type: array, items: { type: string } }
+            useCaseId: { type: string }
+            rewardPool: { type: string }
+            depositTransaction: { type: string }
+            unlockAt: { type: string, format: date-time }
+            distributeTransaction: { type: string }
+            payouts:
+              type: array
+              items:
+                type: object
+                properties:
+                  walletAddress: { type: string }
+                  amount: { type: string }
+        error:
+          type: object
+          properties:
+            step: { type: string }
+            message: { type: string }
+            retrying: { type: boolean }
+
+paths:
+  /api/auth/login:
     post:
-      summary: Post node data and save as JSON-LD format to MongoDB
+      summary: Sign in as an organization user (sets the HttpOnly session cookie)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InputData'
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
       responses:
-        201:
-          description: Data saved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  data:
-                    $ref: '#/components/schemas/JsonLdData'
-        500:
-          description: Internal server error
+        '200': { description: Signed in, content: { application/json: { schema: { $ref: '#/components/schemas/Profile' } } } }
+        '401': { description: Invalid credentials }
+        '403': { description: Cross-site request rejected }
+        '429': { description: Too many failed attempts }
 
-  /api/data/{nodeId}:
+  /api/auth/logout:
+    post:
+      summary: Sign out and invalidate the session
+      responses:
+        '204': { description: Signed out }
+
+  /api/auth/me:
     get:
-      summary: Retrieve JSON-LD data based on nodeId
-      parameters:
-        - in: path
-          name: nodeId
-          required: true
-          schema:
-            type: string
-          description: The nodeId of the data to retrieve
+      summary: Profile of the signed-in user
+      security: [{ sessionCookie: [] }]
       responses:
-        200:
-          description: JSON-LD data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JsonLdData'
-        404:
-          description: Node not found
-        500:
-          description: Internal server error
+        '200': { description: Profile, content: { application/json: { schema: { $ref: '#/components/schemas/Profile' } } } }
+        '401': { description: Authentication required }
 
-    delete:
-      summary: Deletes JSON-LD data based on nodeId
-      parameters:
-        - in: path
-          name: nodeId
-          required: true
-          schema:
-            type: string
-          description: The nodeId of the data to delete
-      responses:
-        200:
-          description: JSON-LD data deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JsonLdData'
-        404:
-          description: Node not found
-        500:
-          description: Internal server error
-  
   /api/data:
     get:
-      summary: Retrieve all JSON-LD data
+      summary: Every node visible to the signed-in organization
+      description: Nodes the organization takes part in, plus the value chains linked to them.
+      security: [{ sessionCookie: [] }]
       responses:
-        200:
-          description: All JSON-LD data retrieved successfully
+        '200':
+          description: Visible nodes
           content:
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JsonLdData'
-        500:
-          description: Internal server error
+              schema: { type: array, items: { $ref: '#/components/schemas/JsonLdData' } }
+        '401': { description: Authentication required }
 
-  /api/incentives/balance/{walletId}:
+  /api/data/{nodeId}:
+    parameters:
+      - in: path
+        name: nodeId
+        required: true
+        schema: { type: string }
+        description: nodeId, canonicalKey or dataId
     get:
-      summary: Get the current balance of a wallet
+      summary: One node visible to the signed-in organization
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Node, content: { application/json: { schema: { $ref: '#/components/schemas/JsonLdData' } } } }
+        '401': { description: Authentication required }
+        '404': { description: Not found or not visible }
+    delete:
+      summary: Delete a node owned by the signed-in organization and unlink it
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Deleted }
+        '401': { description: Authentication required }
+        '404': { description: Not found or not owned }
+
+  /api/node-tree/{nodeId}:
+    get:
+      summary: A node and its visible descendants, with total incentive
+      security: [{ sessionCookie: [] }]
       parameters:
         - in: path
-          name: walletId
+          name: nodeId
           required: true
-          schema:
-            type: string
-          description: The ID of the wallet to check
+          schema: { type: string }
       responses:
-        200:
-          description: Wallet balance retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  walletId:
-                    type: string
-                  balance:
-                    type: number
-        404:
-          description: Wallet not found
-        500:
-          description: Internal server error
+        '200': { description: Node tree }
+        '401': { description: Authentication required }
+        '404': { description: Not found or not visible }
 
-  /api/incentives/history/{walletId}:
+  /api/incentive-use-case-metadata/{useCaseId}:
     get:
-      summary: Get the transaction history for a wallet
+      summary: Participants of an incentive use case (members of the use case only)
+      security: [{ sessionCookie: [] }]
       parameters:
         - in: path
-          name: walletId
+          name: useCaseId
           required: true
-          schema:
-            type: string
-          description: The ID of the wallet to check
-        - in: query
-          name: startDate
-          schema:
-            type: string
-            format: date
-          description: Start date for filtering transactions
-        - in: query
-          name: endDate
-          schema:
-            type: string
-            format: date
-          description: End date for filtering transactions
+          schema: { type: string }
       responses:
-        200:
-          description: Transaction history retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    transactionId:
-                      type: string
-                    fromWalletId:
-                      type: string
-                    toWalletId:
-                      type: string
-                    points:
-                      type: number
-                    timestamp:
-                      type: string
-                      format: date-time
-                    contractId:
-                      type: string
-                    dataUsageId:
-                      type: string
-        404:
-          description: Wallet not found
-        500:
-          description: Internal server error
+        '200': { description: Use case metadata }
+        '401': { description: Authentication required }
+        '404': { description: Not found or not a member }
 
-  /api/incentives/audit-log:
+  /api/node:
+    post:
+      summary: Record a traceability event (internal - used by the trace-api)
+      security: [{ internalToken: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InputData' }
+      responses:
+        '201': { description: Saved (events with the same canonical identity are merged) }
+        '400': { description: Invalid payload }
+        '401': { description: Internal authentication required }
+
+  /trace-api/api/run-script:
+    post:
+      summary: Report a data exchange (PDC / workflow entry point)
+      description: |
+        Validates the event synchronously, then records traceability and - when reachEndFlow is true -
+        settles the payout (create use case, set shares, deposit, lock, distribute) as an asynchronous job.
+        Repeating the same event returns the existing job. Add `?wait=<seconds>` (max 60) to wait for the
+        job to finish or reach the lock period.
+      security: [{ traceApiToken: [] }]
+      parameters:
+        - in: query
+          name: wait
+          schema: { type: integer, minimum: 0, maximum: 60 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunScriptPayload' }
+      responses:
+        '202': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/Job' } } } }
+        '200': { description: Already received, or finished within the wait time, content: { application/json: { schema: { $ref: '#/components/schemas/Job' } } } }
+        '400': { description: Invalid payload or participant without registered wallet }
+        '401': { description: Authentication required }
+
+  /trace-api/api/jobs/{jobId}:
     get:
-      summary: Retrieve a log of all incentive events
+      summary: Status of a run-script job
+      security: [{ traceApiToken: [] }]
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
       responses:
-        200:
-          description: Audit log retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
+        '200': { description: Job, content: { application/json: { schema: { $ref: '#/components/schemas/Job' } } } }
+        '401': { description: Authentication required }
+        '404': { description: Job not found }
+
+  /trace-api/api/dataexchanges/{dataExchangeId}/run:
+    post:
+      summary: Trace and settle a dataspace connector data exchange (called by the last service of a chain)
+      description: |
+        Everything is read from the dataspace: the data exchange from the connector, the contract from the
+        contract manager, the ecosystem and participants from the catalog. Every participant of the executed
+        service chain must be a signed member of the signed contract.
+        Reward pool and weights are read from the exchange's own query params (params.query), declared on a
+        service of the chain:
+          - dvctRewardPool: PTX amount, e.g. "1000"
+          - dvctWeights: "<participantId>:<weight>,..." (catalog participant id or URL) or positional
+            "<weight>,<weight>,..." in chain order. Unlisted participants get nothing.
+        Without these params only traceability is recorded. The payout waits until the exchange reports
+        IMPORT_SUCCESS with every service completed. One payout per exchange: on-chain use case
+        "<serviceChainId>:<providerDataExchangeId>". The provider-side and consumer-side ids of an exchange
+        map to the same job.
+      security: [{ traceApiToken: [] }]
+      parameters:
+        - in: path
+          name: dataExchangeId
+          required: true
+          schema: { type: string, pattern: '^[0-9a-fA-F]{24}$' }
+          description: The x-ptx-dataexchangeid the service received from its connector
+        - in: query
+          name: connector
+          schema: { type: string, format: uri }
+          description: Connector holding the exchange (https, host must match PDC_CONNECTOR_DOMAINS). Default PDC_DEFAULT_CONNECTOR.
+        - in: query
+          name: reachEndFlow
+          schema: { type: boolean, default: true }
+          description: false records traceability only
+        - in: query
+          name: wait
+          schema: { type: integer, minimum: 0, maximum: 60 }
+      responses:
+        '202': { description: Accepted (job), content: { application/json: { schema: { $ref: '#/components/schemas/Job' } } } }
+        '200': { description: Already received, or finished within the wait time }
+        '400': { description: Invalid id, exchange failed, not in a signed contract, invalid dvct params, or missing wallet }
+        '401': { description: Authentication required }
+        '502': { description: Connector, catalog or contract manager unreachable, not allow-listed or not found }
+        '503': { description: Data-exchange processing not configured }
+
+  /trace-api/api/dataexchanges/{dataExchangeId}/preview:
+    get:
+      summary: Show what /run would record and pay, without writing anything
+      security: [{ traceApiToken: [] }]
+      parameters:
+        - in: path
+          name: dataExchangeId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: connector
+          schema: { type: string, format: uri }
+      responses:
+        '200': { description: Resolved exchange, service chain, participants, hops and payout plan }
+        '400': { description: Invalid exchange or parameters }
+        '502': { description: Upstream error }
+
+  # Internal service (http://incentive-api:3000), not routed by the gateway
+  /api/incentives/distribute:
+    servers:
+      - url: http://incentive-api:3000
+    post:
+      summary: Relay a permit-based reward deposit into a use case (internal)
+      security: [{ incentiveHmac: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [useCaseId, from, to, amount, permit]
+              properties:
+                useCaseId: { type: string }
+                from: { type: string, description: Token owner (permit signer) }
+                to: { type: string, description: Use case contract address }
+                amount: { type: string, description: PTX amount, decimal }
+                permit:
                   type: object
                   properties:
-                    eventId:
-                      type: string
-                    eventType:
-                      type: string
-                    timestamp:
-                      type: string
-                      format: date-time
-                    details:
-                      type: object
-                      description: Additional details about the event.
-        500:
-          description: Internal server error
-
-apis: ['./src/routes/dataRoutes.js']
+                    owner: { type: string }
+                    spender: { type: string }
+                    amount: { type: string, description: wei }
+                    deadline: { type: integer }
+                    v: { type: integer }
+                    r: { type: string }
+                    s: { type: string }
+      responses:
+        '200': { description: Transaction submitted (returns transactionHash) }
+        '400': { description: Invalid request or permit does not match }
+        '401': { description: Missing, invalid or expired signature }
+        '409': { description: Signature already used }
+        '422': { description: Rejected by the contract }

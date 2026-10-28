@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
@@ -78,7 +78,10 @@ contract PTXToken is ERC20, ERC20Permit, AccessControl {
         if(owner == address(0) || to == address(0)) revert ZeroAddress();
         if(amount == 0) revert ZeroAmount();
 
-        permit(owner, spender, amount, deadline, v, r, s);
+        // A permit can be front-run (its signature is public once broadcast). If someone
+        // already consumed it, the allowance is in place and transferFrom still succeeds;
+        // if it is genuinely invalid, transferFrom reverts on the missing allowance.
+        try this.permit(owner, spender, amount, deadline, v, r, s) {} catch {}
         transferFrom(owner, to, amount);
         emit RewardTransfer(owner, to, amount, incentiveType);
     }

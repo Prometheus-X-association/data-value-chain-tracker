@@ -1,0 +1,92 @@
+{
+  "timestamp": 1792141324183,
+  "code": 200,
+  "content": {
+    "providerParams": {
+      "query": []
+    },
+    "consumerParams": {
+      "query": []
+    },
+    "serviceChain": {
+      "catalogId": "32c09a520bca7915f542db7e",
+      "services": [
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/4f0d35da82bf80117c855e8b",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/77bdc0a776414547a0ca2948",
+          "params": "",
+          "pre": [],
+          "completed": true,
+          "_id": "3593d7342f7f80cfe52be1fe"
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/ec0a6e8d9fb4c9e585310224",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/b3004fef722475d65c0ae618",
+          "params": "",
+          "pre": [],
+          "completed": true,
+          "_id": "8b3f747edd51059d21b3e314"
+        },
+        {
+          "participant": "https://catalog.example.org/v1/catalog/participants/8c0bc413f9be90e93fe691c0",
+          "service": "https://catalog.example.org/v1/catalog/serviceofferings/3ee02fa1ba69965088666d1c",
+          "params": "",
+          "pre": [],
+          "completed": true,
+          "_id": "da0930c853b086a8960c43c7"
+        }
+      ]
+    },
+    "_id": "4e39d0a95bd10781b97e6644",
+    "resources": [
+      {
+        "serviceOffering": "https://catalog.example.org/v1/catalog/serviceofferings/77bdc0a776414547a0ca2948",
+        "resource": "https://catalog.example.org/v1/catalog/dataresources/3c06b0f8576f5ad9bba5c8d2",
+        "params": {
+          "query": [
+            {
+              "sessionID": "session_fixture"
+            }
+          ]
+        }
+      }
+    ],
+    "purposes": [
+      {
+        "serviceOffering": "https://catalog.example.org/v1/catalog/serviceofferings/3ee02fa1ba69965088666d1c",
+        "resource": "https://catalog.example.org/v1/catalog/softwareresources/b8b1eb77e58972e1cb26b0ca",
+        "params": {
+          "query": [
+            {
+              "sessionID": "session_fixture"
+            }
+          ]
+        }
+      }
+    ],
+    "purposeId": "https://catalog.example.org/v1/catalog/serviceofferings/3ee02fa1ba69965088666d1c",
+    "contract": "https://contracts.example.org/contracts/1ede4e4c2b10f3273181b36f",
+    "providerEndpoint": "https://connector-a.example.org",
+    "providerDataExchange": "1fe8e3f84dc443e1b472ea28",
+    "status": "IMPORT_SUCCESS",
+    "serviceChainParams": [
+      {
+        "resource": "https://catalog.example.org/v1/catalog/softwareresources/c43c7ac7354e2d3b03678e68",
+        "params": {
+          "query": [
+            {
+              "target": "example-target"
+            },
+            {
+              "ontology": "example-ontology"
+            },
+            {
+              "language": "en"
+            }
+          ]
+        }
+      }
+    ],
+    "__v": 0
+  }
+}

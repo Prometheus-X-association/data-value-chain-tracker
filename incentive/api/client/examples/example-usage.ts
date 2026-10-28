@@ -1,43 +1,26 @@
 import { ethers } from "ethers";
-import { IncentiveSigner } from "../lib/IncentiveSigner";
+import { IncentiveSigner, signIncentiveApiRequest } from "../lib/IncentiveSigner";
 
-// Setup provider (example using local hardhat node)
+// Local Anvil node and the shared HMAC secret from the root .env (INCENTIVE_API_HMAC_SECRET)
 const provider = new ethers.JsonRpcProvider("http://localhost:8545");
+const signer = new IncentiveSigner("YOUR_PRIVATE_KEY", "PTX_TOKEN_ADDRESS", provider);
 
-// Initialize signer with required parameters
-const signer = new IncentiveSigner(
-  "YOUR_PRIVATE_KEY",
-  "PTX_TOKEN_ADDRESS",
-  provider
-);
-
-async function examples() {
-  // Example 1: Create a use case deposit request
-  const useCaseRequest = await signer.createUseCaseDepositRequest(
+async function example() {
+  // The depositor signs an EIP-2612 permit for the use case contract...
+  const depositRequest = await signer.createUseCaseDepositRequest(
     "use-case-123", // use case ID
-    "USE_CASE_CONTRACT_ADDRESS", // use case contract address
-    "100.0" // amount in tokens
+    "USE_CASE_CONTRACT_ADDRESS",
+    "100.0" // amount in PTX
   );
 
-  // Example 2: Create a direct token reward request
-  const tokenRequest = await signer.createTokenRewardRequest(
-    "RECIPIENT_ADDRESS", // recipient address
-    "50.0", // amount in tokens
-    "data_provider" // incentive type
-  );
-
-  // Example API calls
-  const response1 = await fetch("API_URL/distribute", {
+  // ...and the request is authenticated for the incentive API, which relays it on-chain.
+  const body = JSON.stringify(depositRequest);
+  const response = await fetch("http://incentive-api:3000/api/incentives/distribute", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(useCaseRequest),
+    headers: signIncentiveApiRequest(body, process.env.INCENTIVE_API_HMAC_SECRET || ""),
+    body,
   });
-
-  const response2 = await fetch("API_URL/distribute", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(tokenRequest),
-  });
+  console.log(response.status, await response.json());
 }
 
-examples().catch(console.error);
+example().catch(console.error);

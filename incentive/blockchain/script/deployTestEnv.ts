@@ -11,15 +11,7 @@ async function main() {
     participant2,
     participant3,
   ] = await ethers.getSigners();
-  const apiSignerAddress = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199";
   console.log("Deploying contracts with account:", deployer.address);
-
-  console.log(
-    "Public key for incentive api: 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-  );
-  console.log(
-    "Private key for incentive api: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-  );
 
   // Deploy PTX Token
   const PTXToken = await ethers.getContractFactory("PTXToken");
@@ -36,12 +28,6 @@ async function main() {
   // Transfer tokens to use case owners for testing
   await token.transfer(useCaseOwner1.address, ethers.parseEther("10000"));
   await token.transfer(useCaseOwner2.address, ethers.parseEther("10000"));
-
-  // Fund the incentive API signer with native ETH on the local dev chain.
-  await deployer.sendTransaction({
-    to: apiSignerAddress,
-    value: ethers.parseEther("1000"),
-  });
 
   // Setup test use cases
   const useCaseContract = useCase.connect(useCaseOwner1);
@@ -107,6 +93,12 @@ async function main() {
     PTX_TOKEN_ADDRESS: await token.getAddress(),
     USECASE_CONTRACT_ADDRESS: await useCase.getAddress(),
   };
+
+  // Read by script/bootstrapServices.ts on every node start.
+  fs.writeFileSync(
+    path.join(__dirname, "../deployment.local.json"),
+    JSON.stringify(deploymentInfo, null, 2)
+  );
 
   const configDir = path.join(__dirname, "../../frontend/src/config");
   if (!fs.existsSync(configDir)) {

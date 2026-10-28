@@ -1,41 +1,33 @@
-FROM node:20.19.0-alpine AS build
+FROM node:22.20.0-alpine AS build
 
-# Install dependencies needed for node-gyp and other build tools
+# Build tools for native modules
 RUN apk add --no-cache python3 make g++ gcc libc-dev
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY yarn.lock ./
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
-# Install dependencies
-RUN yarn install --frozen-lockfile
-
-# Copy source code
 COPY . .
 
-# Build the application
-RUN yarn build
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN SKIP_ENV_VALIDATION=1 yarn build
 
-# Production image
-FROM node:20.18.0-alpine AS runner
+FROM node:22.20.0-alpine AS runner
 
 WORKDIR /app
 
-# Copy necessary files from build stage
-COPY --from=build /app/next.config.js ./
-COPY --from=build /app/package.json ./
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    HOSTNAME=0.0.0.0 \
+    PORT=3000
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV HOSTNAME=0.0.0.0
-ENV PORT=3000
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
+
+USER node
 
 EXPOSE 3000
 
-# Start the application
 CMD ["node", "server.js"]

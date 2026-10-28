@@ -1,39 +1,25 @@
-FROM node:20.18.0-slim
+FROM node:20.19.0-slim AS build
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    bash \
-    git \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-COPY package*.json ./
+COPY tsconfig.json ./
+COPY src ./src
+RUN yarn build
 
-RUN npm install
+FROM node:20.19.0-slim
 
-COPY . .
+WORKDIR /app
+ENV NODE_ENV=production
 
-WORKDIR /app/incentive/blockchain
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --production && yarn cache clean
 
-RUN npm install --legacy-peer-deps
+COPY --from=build /app/dist ./dist
 
-ENV SHELL=/bin/bash
-
-RUN curl -L https://foundry.paradigm.xyz | bash
-
-RUN /root/.foundry/bin/foundryup
-
-ENV PATH="/root/.foundry/bin:${PATH}"
-
-RUN npm run copy-types
-
-WORKDIR /app/incentive/api
-
-RUN yarn
-
-RUN npm run build
+USER node
 
 EXPOSE 3000
 

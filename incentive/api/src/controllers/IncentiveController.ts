@@ -1,92 +1,67 @@
-import { IncentiveService } from "@/services/IncentiveService";
-import { IncentiveRequest } from "@/types/types";
+import Joi from "joi";
 import { Request, Response } from "express";
+import { ethers } from "ethers";
+import { IncentiveService, RequestError } from "../services/IncentiveService";
+import { UseCaseDepositRequest } from "../types/types";
+
+const address = Joi.string().custom((value, helpers) =>
+  ethers.isAddress(value) && value !== ethers.ZeroAddress ? value : helpers.error("any.invalid")
+);
+const bytes32 = Joi.string().pattern(/^0x[0-9a-fA-F]{64}$/);
+
+const depositSchema = Joi.object<UseCaseDepositRequest>({
+  useCaseId: Joi.string().trim().min(1).max(256).required(),
+  from: address.required(),
+  to: address.required(),
+  amount: Joi.string()
+    .pattern(/^\d+(\.\d{1,18})?$/)
+    .required(),
+  permit: Joi.object({
+    owner: address.required(),
+    spender: address.required(),
+    amount: Joi.string().pattern(/^\d+$/).required(),
+    deadline: Joi.number().integer().positive().required(),
+    v: Joi.number().integer().valid(27, 28).required(),
+    r: bytes32.required(),
+    s: bytes32.required(),
+  }).required(),
+});
 
 export class IncentiveController {
   constructor(private incentiveService: IncentiveService) {}
 
-  public distributeIncentive = async (
-    req: Request,
-    res: Response
-  ): Promise<void> => {
-    try {
-      const request = req.body as IncentiveRequest;
+  public distributeIncentive = async (req: Request, res: Response): Promise<void> => {
+    const { value, error } = depositSchema.validate(req.body, { abortEarly: true });
 
-      // Basic request validation
-      if (!this.validateRequestBody(request)) {
-        res.status(400).json({
-          success: false,
-          error: "Invalid request body",
-          details: "Missing or invalid required fields",
-        });
+    if (error) {
+      res.status(400).json({ success: false, error: `Invalid request body: ${error.message}` });
+      return;
+    }
+    if (Number(value.amount) <= 0) {
+      res.status(400).json({ success: false, error: "Invalid request body: amount must be positive" });
+      return;
+    }
+
+    try {
+      const transactionHash = await this.incentiveService.depositRewardsWithPermit(value);
+      res.status(200).json({ success: true, data: { transactionHash, useCaseId: value.useCaseId } });
+    } catch (err) {
+      if (err instanceof RequestError) {
+        res.status(400).json({ success: false, error: err.message });
         return;
       }
 
-      let txHash: string;
+      const failure = err as { code?: string; reason?: string | null; data?: string };
+      console.error("Incentive deposit failed:", (err as Error)?.message);
 
-      // Determine which type of request it is and call appropriate service method
-      if ("useCaseId" in request) {
-        // This is a UseCase deposit request
-        if (request.permit) {
-          txHash =
-            await this.incentiveService.depositRewardsWithPermit(request);
-        } else {
-          txHash = await this.incentiveService.depositRewards(request);
-        }
-      } else if ("incentiveType" in request) {
-        // This is a token reward request
-        if (request.permit) {
-          txHash =
-            await this.incentiveService.transferRewardWithPermit(request);
-        } else {
-          txHash = await this.incentiveService.transferReward(request);
-        }
-      } else {
-        throw new Error("Invalid request type");
+      // A revert is a definitive answer from the contract: report it as such (not retryable).
+      if (failure?.code === "CALL_EXCEPTION") {
+        const detail = failure.reason || (failure.data ? `error ${String(failure.data).slice(0, 10)}` : "reverted");
+        res.status(422).json({ success: false, error: `Transaction rejected by the contract: ${detail}` });
+        return;
       }
 
-      res.status(200).json({
-        success: true,
-        data: {
-          transactionHash: txHash,
-          ...request,
-        },
-      });
-    } catch (error) {
-      console.error("Incentive distribution error:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      const statusCode = this.getErrorStatusCode(errorMessage);
-
-      res.status(statusCode).json({
-        success: false,
-        error: errorMessage,
-      });
+      res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-
-  private validateRequestBody(request: IncentiveRequest): boolean {
-    // Common validations
-    if (!request.from || !request.to || !request.amount) {
-      return false;
-    }
-
-    // Specific validations based on request type
-    if ("useCaseId" in request) {
-      return !!request.useCaseId;
-    }
-
-    if ("incentiveType" in request) {
-      return !!request.incentiveType;
-    }
-
-    return false;
-  }
-
-  private getErrorStatusCode(error: string): number {
-    if (error.includes("Invalid request")) return 400;
-    if (error.includes("Not authorized")) return 403;
-    if (error.includes("Not found")) return 404;
-    return 500;
-  }
 }

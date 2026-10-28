@@ -22,11 +22,15 @@ import '@xyflow/react/dist/style.css';
 import './DataNodes.css';
 import CustomEdge from './CustomEdge';
 import { DataNodeCard } from './DataNodeCard';
-import { ApiNode, FlowEdgeData, FlowNodeData, Incentive, TreeApiNode } from './types';
+import { ApiNode, Execution, FlowEdgeData, FlowNodeData, Incentive, TreeApiNode } from './types';
 
 type DataNodesProps = {
   organizationId: string;
+  organizationName?: string;
 };
+
+// Organization identifier (catalog or connector URL) -> display name from the registry.
+type NameMap = Record<string, string>;
 
 const apiUrl = (path: string) => path;
 
@@ -45,6 +49,18 @@ const getNodes = async () => {
   return response.data;
 };
 
+const getParticipantNames = async (): Promise<NameMap> => {
+  try {
+    const response = await axios.get<NameMap>(apiUrl('/api/participant-names'), {
+      withCredentials: true,
+    });
+    return response.data || {};
+  } catch (error) {
+    // Names are a convenience: the graph still works with short identifiers.
+    return {};
+  }
+};
+
 const getNodesTree = async (nodeId: string) => {
   const response = await axios.get<TreeApiNode>(apiUrl(`/api/node-tree/${nodeId}`), {
     withCredentials: true,
@@ -55,61 +71,53 @@ const getNodesTree = async (nodeId: string) => {
 const getIncentiveTotal = (incentives: Incentive[] = []) =>
   incentives.reduce((sum, incentive) => sum + (incentive.numPoints || 0), 0);
 
-const truncateMiddle = (value: string, maxLength = 46) => {
-  if (value.length <= maxLength) {
-    return value;
-  }
-
-  const leading = Math.ceil((maxLength - 1) / 2);
-  const trailing = Math.floor((maxLength - 1) / 2);
-  return `${value.slice(0, leading)}…${value.slice(-trailing)}`;
-};
-
-const formatReference = (value?: string | null, maxLength = 42) => {
+// Short, readable form of an identifier for organizations without a registered name:
+// the last path segment of a URL (catalog ids shortened), or its host.
+const shortId = (value?: string | null) => {
   if (!value) {
-    return 'N/A';
+    return 'Unknown';
   }
 
+  let tail = value;
   try {
     const parsedUrl = new URL(value);
-    const segments = parsedUrl.pathname.split('/').filter(Boolean);
-    const tail = segments.slice(-2).join('/');
-
-    if (tail) {
-      return truncateMiddle(`${parsedUrl.hostname}/${tail}`, maxLength);
-    }
+    tail = parsedUrl.pathname.split('/').filter(Boolean).pop() || parsedUrl.host;
   } catch (error) {
-    // Fall back to generic truncation for non-URL values.
+    tail = value.split(/[/:]/).filter(Boolean).pop() || value;
   }
 
-  return truncateMiddle(value, maxLength);
+  return tail.length > 12 ? `…${tail.slice(-8)}` : tail;
 };
 
-const getInspectorHeading = (node: ApiNode) =>
-  formatReference(
-    node.participantId ||
-      node.dataId ||
-      node.usecaseContractTitle ||
-      node.nodeMetadata.usecaseContractId ||
-      node.nodeMetadata.dvctId ||
-      node.nodeId,
-    54,
-  );
+const nameOf = (names: NameMap, identifier?: string | null) =>
+  (identifier && names[identifier]) || shortId(identifier);
 
-const buildEdgeSummary = (node: ApiNode) => {
-  const { dvctId, usecaseContractId, dataProviderId, dataConsumerId, incentiveReceivedFrom = [] } =
-    node.nodeMetadata || {};
+const STEP_LABELS: Record<string, string> = {
+  raw_data: 'Data source',
+  ai_processing: 'Processing step',
+  use_case_step: 'Use case step',
+  linked_data: 'Linked data',
+};
 
-  const summaryParts = [
-    dvctId ? `DVCT ${dvctId}` : null,
-    dataProviderId && dataConsumerId
-      ? `${formatReference(dataProviderId, 18)} -> ${formatReference(dataConsumerId, 18)}`
-      : null,
-    usecaseContractId ? formatReference(usecaseContractId, 22) : null,
-    incentiveReceivedFrom.length > 0 ? `${getIncentiveTotal(incentiveReceivedFrom)} pts` : null,
-  ].filter(Boolean);
+const stepLabel = (nodeType?: string) =>
+  STEP_LABELS[nodeType || ''] || (nodeType || 'Trace node').replace(/_/g, ' ');
 
-  return summaryParts.join(' • ');
+// Titles are "<ecosystem> – <service chain>": the chain name is the readable part.
+const chainName = (title?: string) => (title ? title.split(' – ').pop()?.trim() || title : '');
+
+const organizationOf = (node?: ApiNode) =>
+  node?.participantId || node?.nodeMetadata?.dataConsumerId || node?.nodeMetadata?.dataProviderId;
+
+const getInspectorHeading = (node: ApiNode, names: NameMap) => nameOf(names, organizationOf(node));
+
+const buildEdgeSummary = (source: ApiNode, target: ApiNode, names: NameMap) => {
+  const points = getIncentiveTotal(target.nodeMetadata?.incentiveReceivedFrom);
+  return [
+    `${nameOf(names, organizationOf(source))} → ${nameOf(names, organizationOf(target))}`,
+    points > 0 ? `${points} pts` : null,
+  ]
+    .filter(Boolean)
+    .join(' • ');
 };
 
 const flattenTree = (root: TreeApiNode): ApiNode[] => {
@@ -127,6 +135,7 @@ const flattenTree = (root: TreeApiNode): ApiNode[] => {
       participantSourceId: node.participantSourceId,
       usecaseContractTitle: node.usecaseContractTitle,
       nodeMetadata: node.nodeMetadata,
+      executions: node.executions,
       prevNode: parentId ? [{ nodeId: parentId }] : [],
       childNode: node.childNode.map((child) => ({ nodeId: child.nodeId })),
     });
@@ -153,6 +162,7 @@ const dedupeIncentives = (incentives: Incentive[] = []) => {
     const key = [
       incentive.organizationId,
       incentive.contractId,
+      incentive.dvctId,
       incentive.numPoints,
     ].join('::');
 
@@ -164,6 +174,26 @@ const dedupeIncentives = (incentives: Incentive[] = []) => {
     return true;
   });
 };
+
+// Unique executions (one per data exchange), oldest first.
+const mergeExecutions = (executions: Execution[] = []) =>
+  Array.from(new Map(executions.filter((run) => run?.dvctId).map((run) => [run.dvctId, run])).values()).sort(
+    (left, right) => String(left.executedAt || '').localeCompare(String(right.executedAt || '')),
+  );
+
+// Points per organization on a node, summed over all executions.
+const pointsByOrganization = (incentives: Incentive[] = []) => {
+  const totals = new Map<string, { points: number; runs: number }>();
+  incentives.forEach((incentive) => {
+    const entry = totals.get(incentive.organizationId) || { points: 0, runs: 0 };
+    entry.points += incentive.numPoints || 0;
+    entry.runs += 1;
+    totals.set(incentive.organizationId, entry);
+  });
+  return Array.from(totals.entries());
+};
+
+const formatDate = (value?: string) => (value ? new Date(value).toLocaleString() : 'Unknown');
 
 const mergeLinks = (links: { nodeId: string; '@nodeUrl'?: string }[]) => {
   const seen = new Set<string>();
@@ -217,6 +247,7 @@ const normalizeApiNodes = (data: ApiNode[]) => {
           ...node.nodeMetadata,
           incentiveReceivedFrom: dedupeIncentives(node.nodeMetadata?.incentiveReceivedFrom),
         },
+        executions: mergeExecutions(node.executions),
       });
 
       return;
@@ -247,6 +278,7 @@ const normalizeApiNodes = (data: ApiNode[]) => {
       },
       prevNode: mergeLinks([...(existingNode.prevNode || []), ...prevNode]),
       childNode: mergeLinks([...(existingNode.childNode || []), ...childNode]),
+      executions: mergeExecutions([...(existingNode.executions || []), ...(node.executions || [])]),
     });
   });
 
@@ -298,7 +330,7 @@ const getLayoutMetrics = (data: ApiNode[]) => {
   };
 };
 
-const buildGraph = (data: ApiNode[]) => {
+const buildGraph = (data: ApiNode[], names: NameMap) => {
   const normalizedData = normalizeApiNodes(data);
   const { maxDepth, widestLevelCount } = getLayoutMetrics(normalizedData);
   const nodeMap = new Map(normalizedData.map((node) => [node.nodeId, node]));
@@ -349,29 +381,19 @@ const buildGraph = (data: ApiNode[]) => {
   const horizontalSpacing = Math.max(400, Math.min(620, 340 + widestLevelCount * 28));
   const verticalSpacing = Math.max(420, Math.min(620, 360 + maxDepth * 32));
 
-  const getDisplayConsumerIds = (node?: ApiNode) => {
-    if (!node) {
-      return [];
-    }
+  const getConsumerNames = (node?: ApiNode) =>
+    Array.from(
+      new Set(
+        (node?.childNode || [])
+          .map((child) => organizationOf(nodeMap.get(child.nodeId)))
+          .filter((value): value is string => Boolean(value))
+          .map((identifier) => nameOf(names, identifier)),
+      ),
+    );
 
-    const childConsumers = (node.childNode || [])
-      .map((child) => nodeMap.get(child.nodeId))
-      .filter(Boolean)
-      .map(
-        (childNode) =>
-          childNode?.participantId ||
-          childNode?.nodeMetadata?.dataConsumerId ||
-          childNode?.nodeMetadata?.dataProviderId,
-      )
-      .filter((value): value is string => Boolean(value));
-
-    const uniqueConsumers = Array.from(new Set(childConsumers));
-
-    if (uniqueConsumers.length > 0) {
-      return uniqueConsumers;
-    }
-
-    return [];
+  const getProviderName = (node?: ApiNode) => {
+    const parent = node?.prevNode?.[0] ? nodeMap.get(node.prevNode[0].nodeId) : undefined;
+    return nameOf(names, organizationOf(parent) || node?.nodeMetadata?.dataProviderId);
   };
 
   const flowNodes: Node<FlowNodeData>[] = Object.entries(groupedLevels).flatMap(
@@ -392,34 +414,16 @@ const buildGraph = (data: ApiNode[]) => {
             y: level * verticalSpacing,
           },
           data: {
-            label:
-              formatReference(
-                node?.participantId ||
-                  node?.dataId ||
-                  metadata.usecaseContractId ||
-                  metadata.dvctId ||
-                  nodeId.replace(/^(data|usecase|node):/, ''),
-                48,
-              ),
-            subtitle:
-              truncateMiddle(
-                node?.usecaseContractTitle ||
-                  node?.participantSourceId ||
-                  metadata.dvctId ||
-                  metadata.usecaseContractId ||
-                  node?.dataId ||
-                  'No linked data id',
-                52,
-              ),
-            nodeType: (node?.nodeType || 'trace_node').replace(/_/g, ' '),
+            label: nameOf(names, organizationOf(node)),
+            subtitle: chainName(node?.usecaseContractTitle) || `Data ${shortId(node?.dataId)}`,
+            nodeType: stepLabel(node?.nodeType),
             incentiveTotal,
-            participantShare: node?.participantShare || incentiveTotal,
+            // Sum of the node's points (a shared data source collects them from several exchanges).
+            participantShare: incentiveTotal,
+            executionCount: node?.executions?.length || 0,
             isRoot: !node?.prevNode || node.prevNode.length === 0,
-            providerId: formatReference(metadata.dataProviderId || 'Unknown', 34),
-            consumerIds:
-              !node?.prevNode || node.prevNode.length === 0
-                ? []
-                : getDisplayConsumerIds(node).map((consumerId) => formatReference(consumerId, 34)),
+            providerId: getProviderName(node),
+            consumerIds: getConsumerNames(node),
           },
         };
       });
@@ -442,7 +446,7 @@ const buildGraph = (data: ApiNode[]) => {
             color: '#8b5e18',
           },
           data: {
-            label: buildEdgeSummary(childNode),
+            label: buildEdgeSummary(node, childNode, names),
           },
         };
       }),
@@ -451,8 +455,9 @@ const buildGraph = (data: ApiNode[]) => {
   return { flowNodes, flowEdges, normalizedData };
 };
 
-export const DataNodes = ({ organizationId }: DataNodesProps) => {
+export const DataNodes = ({ organizationId, organizationName }: DataNodesProps) => {
   const [sourceNodes, setSourceNodes] = useState<ApiNode[]>([]);
+  const [names, setNames] = useState<NameMap>({});
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<FlowNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<FlowEdgeData>>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -466,8 +471,8 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
   >(null);
 
   const hydrateGraph = useCallback(
-    (graphSource: ApiNode[]) => {
-      const { flowNodes, flowEdges, normalizedData } = buildGraph(graphSource);
+    (graphSource: ApiNode[], nameMap: NameMap) => {
+      const { flowNodes, flowEdges, normalizedData } = buildGraph(graphSource, nameMap);
 
       setSourceNodes(normalizedData);
       setNodes(flowNodes);
@@ -483,9 +488,10 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
       setLoading(true);
       setError(null);
 
-      const allNodes = await getNodes();
+      const [allNodes, nameMap] = await Promise.all([getNodes(), getParticipantNames()]);
+      setNames(nameMap);
       setActiveRoot(null);
-      hydrateGraph(allNodes);
+      hydrateGraph(allNodes, nameMap);
     } catch (loadError) {
       setError('Unable to load node data. Check that the Express API is running.');
     } finally {
@@ -516,14 +522,14 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
 
       const tree = await getNodesTree(focusNodeId.trim());
       const subtree = flattenTree(tree);
-      setActiveRoot(focusNodeId.trim());
-      hydrateGraph(subtree);
+      setActiveRoot(nameOf(names, organizationOf(subtree[0])));
+      hydrateGraph(subtree, names);
     } catch (focusError) {
       setError(`No subtree found for node "${focusNodeId.trim()}".`);
     } finally {
       setLoading(false);
     }
-  }, [focusNodeId, hydrateGraph]);
+  }, [focusNodeId, hydrateGraph, names]);
 
   const resetGraph = useCallback(() => {
     setFocusNodeId('');
@@ -603,7 +609,9 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
             Switch between the full network and a focused subtree, then inspect
             details in the side panel instead of reading raw JSON on the canvas.
           </p>
-          <p className="graph-status">Scoped to {organizationId}.</p>
+          <p className="graph-status" title={organizationId}>
+            Showing the chains of {organizationName || shortId(organizationId)}.
+          </p>
         </div>
 
         <div className="graph-panel__section graph-panel__section--surface">
@@ -613,7 +621,7 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
               id="focus-node-id"
               value={focusNodeId}
               onChange={(event) => setFocusNodeId(event.target.value)}
-              placeholder="Enter a nodeId"
+              placeholder="Node ID, canonical key or data ID"
             />
           </label>
 
@@ -627,7 +635,7 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
           </div>
 
           {activeRoot ? (
-            <p className="graph-status">Focused on subtree rooted at {activeRoot}.</p>
+            <p className="graph-status">Focused on the chain starting at {activeRoot}.</p>
           ) : (
             <p className="graph-status">Viewing the complete network.</p>
           )}
@@ -660,7 +668,7 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
         <div className="graph-canvas-shell__header">
           <div className="graph-canvas-shell__heading">
             <p className="graph-panel__label">Network view</p>
-            <h2>{activeRoot ? `Subtree: ${activeRoot}` : 'Full chain overview'}</h2>
+            <h2>{activeRoot ? `Chain from ${activeRoot}` : 'Full chain overview'}</h2>
             <p className="graph-canvas-shell__hint">
               Select a node or edge to inspect metadata without crowding the canvas.
             </p>
@@ -727,85 +735,101 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
         {selectedNode ? (
           <div className="graph-panel__section graph-panel__section--surface">
             <div className="graph-detail-card__header">
-              <h3>{getInspectorHeading(selectedNode)}</h3>
+              <h3 title={organizationOf(selectedNode)}>{getInspectorHeading(selectedNode, names)}</h3>
               <span>{getIncentiveTotal(selectedNode.nodeMetadata.incentiveReceivedFrom)} pts</span>
             </div>
 
             <dl className="graph-detail-list">
               <div>
-                  <dt>Node ID</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--technical">
-                  {selectedNode.rawNodeId || selectedNode.nodeId}
-                </dd>
-              </div>
-              <div>
-                <dt>Data ID</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--technical">
-                  {selectedNode.dataId || 'N/A'}
-                </dd>
-              </div>
-              <div>
-                <dt>Node type</dt>
+                <dt>Step</dt>
                 <dd className="graph-detail-list__value graph-detail-list__value--emphasis">
-                  {(selectedNode.nodeType || 'N/A').replace(/_/g, ' ')}
+                  {stepLabel(selectedNode.nodeType)}
                 </dd>
               </div>
               <div>
-                <dt>Canonical key</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--technical">
-                  {selectedNode.canonicalKey || selectedNode.nodeId}
+                <dt>Service chain</dt>
+                <dd className="graph-detail-list__value">
+                  {chainName(selectedNode.usecaseContractTitle) || 'Not named'}
                 </dd>
               </div>
               <div>
-                <dt>DVCT ID</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--emphasis">
-                  {selectedNode.nodeMetadata.dvctId || 'N/A'}
+                <dt>Receives data from</dt>
+                <dd className="graph-detail-list__value">
+                  {selectedNode.prevNode.length > 0
+                    ? selectedNode.prevNode
+                        .map((link) => nameOf(names, organizationOf(sourceNodes.find((node) => node.nodeId === link.nodeId))))
+                        .join(', ')
+                    : 'Original data source'}
                 </dd>
               </div>
               <div>
-                <dt>Provider</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--technical">
-                  {selectedNode.nodeMetadata.dataProviderId || 'Unknown'}
+                <dt>Sends data to</dt>
+                <dd className="graph-detail-list__value">
+                  {selectedNode.childNode.length > 0
+                    ? selectedNode.childNode
+                        .map((link) => nameOf(names, organizationOf(sourceNodes.find((node) => node.nodeId === link.nodeId))))
+                        .join(', ')
+                    : 'End of the chain'}
                 </dd>
               </div>
               <div>
-                <dt>Consumer</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--technical">
-                  {selectedNode.nodeMetadata.dataConsumerId || 'Unknown'}
+                <dt>Executions</dt>
+                <dd className="graph-detail-list__value">
+                  {(selectedNode.executions?.length || 0) > 0
+                    ? `${selectedNode.executions!.length} run${selectedNode.executions!.length > 1 ? 's' : ''} · last ${formatDate(
+                        selectedNode.executions![selectedNode.executions!.length - 1].executedAt,
+                      )}`
+                    : 'Not recorded'}
                 </dd>
               </div>
               <div>
-                <dt>Use case contract</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--technical">
-                  {selectedNode.nodeMetadata.usecaseContractId || 'N/A'}
-                </dd>
-              </div>
-              <div>
-                <dt>Parents / Children</dt>
-                <dd className="graph-detail-list__value graph-detail-list__value--emphasis">
-                  {selectedNode.prevNode.length} / {selectedNode.childNode.length}
+                <dt>Incentive points (all runs)</dt>
+                <dd>
+                  {selectedNode.nodeMetadata.incentiveReceivedFrom?.length ? (
+                    <ul className="graph-chip-list">
+                      {pointsByOrganization(selectedNode.nodeMetadata.incentiveReceivedFrom)
+                        .filter(([, total]) => total.points > 0)
+                        .map(([organizationId, total]) => (
+                          <li key={organizationId} title={organizationId}>
+                            {nameOf(names, organizationId)}: {total.points} pts
+                            {total.runs > 1 ? ` (${total.runs} runs)` : ''}
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    'None'
+                  )}
                 </dd>
               </div>
             </dl>
 
-            <div className="graph-detail-list graph-detail-list--stacked">
-              <div>
-                <dt>Incentive sources</dt>
-                <dd>
-                  {selectedNode.nodeMetadata.incentiveReceivedFrom?.length ? (
-                    <ul className="graph-chip-list">
-                      {selectedNode.nodeMetadata.incentiveReceivedFrom.map((incentive) => (
-                        <li key={`${incentive.organizationId}-${incentive.contractId}`}>
-                          {incentive.organizationId}: {incentive.numPoints} pts
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    'No incentive data'
-                  )}
-                </dd>
-              </div>
-            </div>
+            <details className="graph-technical">
+              <summary>Technical details</summary>
+              <dl className="graph-detail-list graph-detail-list--stacked">
+                {[
+                  ['Organization ID', organizationOf(selectedNode)],
+                  ['Data ID', selectedNode.dataId],
+                  ['Data exchange (DVCT ID)', selectedNode.nodeMetadata.dvctId],
+                  ['Service chain ID', selectedNode.nodeMetadata.usecaseContractId],
+                  ['Use case title', selectedNode.usecaseContractTitle],
+                  [
+                    'Data exchanges',
+                    (selectedNode.executions || []).map((run) => `${run.dvctId} (${formatDate(run.executedAt)})`).join(', '),
+                  ],
+                  ['Provider ID', selectedNode.nodeMetadata.dataProviderId],
+                  ['Consumer ID', selectedNode.nodeMetadata.dataConsumerId],
+                  ['Node ID', selectedNode.rawNodeId || selectedNode.nodeId],
+                  ['Canonical key', selectedNode.canonicalKey || selectedNode.nodeId],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <dt>{label}</dt>
+                    <dd className="graph-detail-list__value graph-detail-list__value--technical">
+                      {value || 'N/A'}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </details>
           </div>
         ) : null}
 
@@ -815,9 +839,12 @@ export const DataNodes = ({ organizationId }: DataNodesProps) => {
               <h3>Connection summary</h3>
             </div>
             <p className="graph-panel__text">{selectedEdge.data?.label || 'No summary available.'}</p>
-            <p className="graph-panel__text">
-              {selectedEdge.source} → {selectedEdge.target}
-            </p>
+            <details className="graph-technical">
+              <summary>Technical details</summary>
+              <p className="graph-detail-list__value--technical">
+                {selectedEdge.source} → {selectedEdge.target}
+              </p>
+            </details>
           </div>
         ) : null}
 

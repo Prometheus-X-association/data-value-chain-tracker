@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/express-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+          cache-dependency-path: app/express-server/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  trace-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trace-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+          cache-dependency-path: trace-api/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: incentive/blockchain
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+          cache-dependency-path: incentive/blockchain/package-lock.json
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.0.0
+      - run: npm ci --legacy-peer-deps
+      - run: npx hardhat test
+        env:
+          NODE_ENV: docker
+      - run: forge test
+
+  incentive-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: incentive/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+
+  incentive-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: incentive/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.20.0"
+      - run: yarn install --frozen-lockfile --network-timeout 600000
+      - run: yarn build
+        env:
+          SKIP_ENV_VALIDATION: "1"
+
+  e2e-incentive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+      - run: yarn install --frozen-lockfile
+      - run: npm ci --legacy-peer-deps && NODE_ENV=docker npx hardhat compile
+        working-directory: incentive/blockchain
+      - run: yarn install --frozen-lockfile
+        working-directory: incentive/api
+      - name: Run scenarios against a local Hardhat node
+        env:
+          NODE_ENV: docker
+        run: |
+          (cd incentive/blockchain && npx hardhat node > /tmp/hardhat.log 2>&1 &)
+          sleep 8
+          npx ts-mocha -p ./tsconfig.json --timeout 60000 'e2e-tests/integration/*.test.ts'
+
+  docker-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate throwaway secrets
+        run: node scripts/init-dev-env.mjs
+      - run: docker compose build
