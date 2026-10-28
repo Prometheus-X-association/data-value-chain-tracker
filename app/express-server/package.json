@@ -19,7 +19,7 @@
   "dependencies": {
     "cors": "2.8.5",
     "express": "4.22.3",
-    "helmet": "8.1.0",
+    "helmet": "8.3.0",
     "jsonld": "8.3.3",
     "mongoose": "8.24.4",
     "swagger-jsdoc": "6.2.8",
