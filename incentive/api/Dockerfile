@@ -1,4 +1,4 @@
-FROM node:20.19.0-slim AS build
+FROM node:26.12.0-slim AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN yarn build
 
-FROM node:20.19.0-slim
+FROM node:26.12.0-slim
 
 WORKDIR /app
 ENV NODE_ENV=production
