@@ -42,14 +42,15 @@ const createUseCaseSchema = z.object({
     .optional(),
 });
 
-type CreateUseCaseForm = z.infer<typeof createUseCaseSchema>;
+type CreateUseCaseFormInput = z.input<typeof createUseCaseSchema>;
+type CreateUseCaseForm = z.output<typeof createUseCaseSchema>;
 
 export default function CreateUseCasePage() {
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract();
   const [isAdvanced, setIsAdvanced] = useState(false);
 
-  const form = useForm<CreateUseCaseForm>({
+  const form = useForm<CreateUseCaseFormInput, unknown, CreateUseCaseForm>({
     resolver: zodResolver(createUseCaseSchema),
     defaultValues: {
       useCaseId: "",

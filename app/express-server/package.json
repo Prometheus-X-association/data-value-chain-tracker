@@ -5,16 +5,12 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "jest --runInBand",
+    "test": "node --test --require ./test-setup.js src/tests",
     "debug": "node --inspect src/server.js",
     "hash-password": "node scripts/hash-password.js"
   },
   "engines": {
     "node": ">=20.12"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testTimeout": 60000
   },
   "dependencies": {
     "cors": "2.8.5",
@@ -29,8 +25,14 @@
   "author": "PTX-DVCT",
   "license": "MIT",
   "devDependencies": {
-    "jest": "29.7.0",
-    "mongodb-memory-server": "10.1.4",
+    "expect": "30.5.2",
+    "mongodb-memory-server": "10.4.3",
     "supertest": "7.0.0"
+  },
+  "overrides": {
+    "@fastify/busboy": "3.2.2",
+    "body-parser": "2.4.0",
+    "follow-redirects": "1.16.2",
+    "undici": "6.29.1"
   }
 }
