@@ -6,6 +6,11 @@ updates:
     directory: "/incentive/api"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "axios"
         update-types:
@@ -62,6 +67,11 @@ updates:
     directory: "/incentive/frontend"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "react"
         update-types:
@@ -112,6 +122,11 @@ updates:
     directory: "/incentive/blockchain"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "hardhat"
         update-types:
@@ -240,6 +255,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "hardhat"
         update-types:
@@ -296,10 +316,20 @@ updates:
     directory: "/app/express-server"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/app"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "react-scripts"
         update-types:
@@ -308,6 +338,11 @@ updates:
     directory: "/trace-api"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
   - package-ecosystem: "docker"
     directories:
       - "/app"
@@ -321,3 +356,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
