@@ -1,71 +1,75 @@
 const normalizeString = (value) =>
   typeof value === 'string' ? value.trim() : '';
 
-const buildCanonicalKey = ({
-  nodeScope,
-  dataId,
-  usecaseContractId,
-  dvctId,
-  participantId,
-  dataProviderId,
-  dataConsumerId,
-  nodeId,
-}) => {
-  const normalizedDataId = normalizeString(dataId);
-  const normalizedUseCase = normalizeString(usecaseContractId);
-  const normalizedDvctId = normalizeString(dvctId);
-  const normalizedParticipantId = normalizeString(participantId);
-  const normalizedProvider = normalizeString(dataProviderId);
-  const normalizedConsumer = normalizeString(dataConsumerId);
-  const normalizedNodeId = normalizeString(nodeId);
-
-  // A data source is one node per data resource and provider, shared by every use case, service
-  // chain and exchange that uses it, so its branches show up side by side.
-  if (nodeScope === 'data-source' && normalizedDataId && normalizedParticipantId) {
-    return `trace-source:${normalizedDataId}:${normalizedParticipantId}`;
+const buildParticipantKey = ({ nodeScope, dataId, useCaseId, dvctId, participantId }) => {
+  if (nodeScope === 'data-source' && dataId && participantId) {
+    return `trace-source:${dataId}:${participantId}`;
   }
 
-  if (normalizedDataId && normalizedUseCase && normalizedParticipantId) {
-    return `trace-node:${normalizedUseCase}:${normalizedDataId}:${normalizedParticipantId}`;
+  if (dataId && useCaseId && participantId) {
+    return `trace-node:${useCaseId}:${dataId}:${participantId}`;
   }
 
-  if (normalizedDataId && normalizedDvctId && normalizedParticipantId) {
-    return `trace-node:${normalizedDvctId}:${normalizedDataId}:${normalizedParticipantId}`;
+  if (dataId && dvctId && participantId) {
+    return `trace-node:${dvctId}:${dataId}:${participantId}`;
   }
 
-  if (normalizedDataId && normalizedParticipantId) {
-    return `trace-node:${normalizedDataId}:${normalizedParticipantId}`;
+  return dataId && participantId ? `trace-node:${dataId}:${participantId}` : '';
+};
+
+const buildRelationshipKey = ({ dataId, useCaseId, dvctId, providerId, consumerId }) => {
+  const organizations = providerId || consumerId;
+
+  if (dataId && useCaseId && organizations) {
+    return `trace:${useCaseId}:${dataId}:${providerId || 'unknown'}:${consumerId || 'unknown'}`;
   }
 
-  if (normalizedDataId && normalizedUseCase && (normalizedProvider || normalizedConsumer)) {
-    return `trace:${normalizedUseCase}:${normalizedDataId}:${normalizedProvider || 'unknown'}:${normalizedConsumer || 'unknown'}`;
-  }
-
-  if (normalizedDataId && normalizedDvctId && (normalizedProvider || normalizedConsumer)) {
-    return `trace:${normalizedDvctId}:${normalizedDataId}:${normalizedProvider || 'unknown'}:${normalizedConsumer || 'unknown'}`;
-  }
-
-  if (normalizedDataId && normalizedUseCase) {
-    return `trace:${normalizedUseCase}:${normalizedDataId}`;
-  }
-
-  if (normalizedDataId) {
-    return `data:${normalizedDataId}`;
-  }
-
-  if (normalizedUseCase) {
-    return `usecase:${normalizedUseCase}`;
-  }
-
-  if (normalizedDvctId) {
-    return `dvct:${normalizedDvctId}`;
-  }
-
-  if (normalizedNodeId) {
-    return `node:${normalizedNodeId}`;
+  if (dataId && dvctId && organizations) {
+    return `trace:${dvctId}:${dataId}:${providerId || 'unknown'}:${consumerId || 'unknown'}`;
   }
 
   return '';
+};
+
+const buildFallbackKey = ({ dataId, useCaseId, dvctId, nodeId }) => {
+  if (dataId && useCaseId) {
+    return `trace:${useCaseId}:${dataId}`;
+  }
+
+  if (dataId) {
+    return `data:${dataId}`;
+  }
+
+  if (useCaseId) {
+    return `usecase:${useCaseId}`;
+  }
+
+  if (dvctId) {
+    return `dvct:${dvctId}`;
+  }
+
+  return nodeId ? `node:${nodeId}` : '';
+};
+
+const buildCanonicalKey = (node) => {
+  const normalized = {
+    nodeScope: node.nodeScope,
+    dataId: normalizeString(node.dataId),
+    useCaseId: normalizeString(node.usecaseContractId),
+    dvctId: normalizeString(node.dvctId),
+    participantId: normalizeString(node.participantId),
+    providerId: normalizeString(node.dataProviderId),
+    consumerId: normalizeString(node.dataConsumerId),
+    nodeId: normalizeString(node.nodeId),
+  };
+
+  // A data source is one node per data resource and provider, shared by every use case, service
+  // chain and exchange that uses it, so its branches show up side by side.
+  return (
+    buildParticipantKey(normalized) ||
+    buildRelationshipKey(normalized) ||
+    buildFallbackKey(normalized)
+  );
 };
 
 const buildNodeType = ({ prevDataId, dataConsumerIsAIProvider, usecaseContractId }) => {

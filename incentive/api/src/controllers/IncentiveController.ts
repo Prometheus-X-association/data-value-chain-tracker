@@ -28,7 +28,7 @@ const depositSchema = Joi.object<UseCaseDepositRequest>({
 });
 
 export class IncentiveController {
-  constructor(private incentiveService: IncentiveService) {}
+  constructor(private readonly incentiveService: IncentiveService) {}
 
   public distributeIncentive = async (req: Request, res: Response): Promise<void> => {
     const { value, error } = depositSchema.validate(req.body, { abortEarly: true });

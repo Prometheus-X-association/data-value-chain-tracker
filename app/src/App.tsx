@@ -25,6 +25,9 @@ function App() {
         });
         setProfile(response.data);
       } catch (error) {
+        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+          console.error('Unable to restore the authenticated session.', error);
+        }
         setProfile(null);
       } finally {
         setLoading(false);
@@ -72,6 +75,7 @@ function App() {
       setUsername('');
       setPassword('');
     } catch (error) {
+      console.warn('Sign-in request failed.', error);
       setAuthError('Sign-in failed. Check your organization credentials.');
     } finally {
       setLoading(false);
@@ -90,7 +94,8 @@ function App() {
         },
       );
     } catch (error) {
-      // Clear local auth state even when the session has already expired.
+      // Clearing local state is still correct when the server-side session has already expired.
+      console.info('The server-side session was already unavailable during sign-out.', error);
     } finally {
       setProfile(null);
       setPassword('');

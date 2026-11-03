@@ -84,9 +84,9 @@ export function UseCaseOverview({ useCase }: UseCaseOverviewProps) {
         </CardHeader>
         <CardContent>
           <div className="divide-y">
-            {useCase.participants.map((participant, index) => (
+            {useCase.participants.map((participant) => (
               <div
-                key={index}
+                key={participant.participant}
                 className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
               >
                 <div>

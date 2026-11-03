@@ -62,7 +62,7 @@ export function TestWalletSwitcher() {
               // Anvil signs for its unlocked dev accounts (requires RPC_ALLOW_DEV_SIGNING=true)
               connect({
                 connector: mock({
-                  accounts: [wallet.address as `0x${string}`],
+                  accounts: [wallet.address],
                 }),
               });
             }}

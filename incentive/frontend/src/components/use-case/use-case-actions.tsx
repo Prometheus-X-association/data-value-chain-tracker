@@ -90,7 +90,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
           );
           break;
 
-        case "updateShares":
+        case "updateShares": {
           const addresses = data.participants.map(
             (p) => p.address as `0x${string}`,
           );
@@ -106,8 +106,9 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
             },
           );
           break;
+        }
 
-        case "addFixedRewards":
+        case "addFixedRewards": {
           const rewardAddresses = data.fixedRewards.map(
             (p) => p.address as `0x${string}`,
           );
@@ -126,6 +127,7 @@ export function UseCaseActions({ useCaseId }: { useCaseId: string }) {
             },
           );
           break;
+        }
       }
     } catch (error) {
       console.error(error);

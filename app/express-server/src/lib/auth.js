@@ -124,7 +124,7 @@ const parseCookieHeader = (cookieHeader = '') =>
       if (name) {
         try {
           cookies[name] = decodeURIComponent(value);
-        } catch (error) {
+        } catch {
           cookies[name] = value;
         }
       }
@@ -275,19 +275,11 @@ const requireTrustedOrigin = (req, res, next) => {
 };
 
 const safeOrigin = (url) => {
-  try {
-    return new URL(url).origin;
-  } catch (error) {
-    return 'invalid';
-  }
+  return URL.canParse(url) ? new URL(url).origin : 'invalid';
 };
 
 const safeHost = (url) => {
-  try {
-    return new URL(url).host;
-  } catch (error) {
-    return 'invalid';
-  }
+  return URL.canParse(url) ? new URL(url).host : 'invalid';
 };
 
 // --- Organization-scoped visibility -------------------------------------------------------

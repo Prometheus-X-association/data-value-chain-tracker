@@ -9,11 +9,11 @@ export class RequestError extends Error {}
  * holds RELAYER_ROLE on the contract; it can only move tokens that their owner signed a permit for.
  */
 export class IncentiveService {
-  private useCase: ethers.Contract;
+  private readonly useCase: ethers.Contract;
 
   constructor(
     wallet: ethers.Wallet,
-    private useCaseAddress: string
+    private readonly useCaseAddress: string
   ) {
     this.useCase = new ethers.Contract(useCaseAddress, USECASE_ABI, wallet);
   }

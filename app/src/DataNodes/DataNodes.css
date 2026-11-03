@@ -114,8 +114,8 @@
 }
 
 .graph-button--primary {
-  background: linear-gradient(135deg, #d7a63c, #b78018);
-  color: #fffaf1;
+  background: linear-gradient(135deg, #8b5e18, #704707);
+  color: #ffffff;
   box-shadow: 0 12px 24px rgba(183, 128, 24, 0.24);
 }
 

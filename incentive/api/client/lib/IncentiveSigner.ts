@@ -3,11 +3,11 @@ import { ethers } from "ethers";
 import { Permit } from "../../src/types/types";
 
 export class IncentiveSigner {
-  private wallet: ethers.Wallet;
+  private readonly wallet: ethers.Wallet;
 
   constructor(
     privateKey: string,
-    private tokenAddress: string,
+    private readonly tokenAddress: string,
     provider: ethers.Provider
   ) {
     this.wallet = new ethers.Wallet(privateKey, provider);
@@ -22,18 +22,26 @@ export class IncentiveSigner {
     deadline?: number
   ): Promise<Permit> {
     const owner = this.wallet.address;
+    const provider = this.wallet.provider;
+
+    if (!provider) {
+      throw new Error("A provider is required to create an incentive permit");
+    }
+
     const token = new ethers.Contract(
       this.tokenAddress,
       [
         "function nonces(address) view returns (uint256)",
         "function DOMAIN_SEPARATOR() view returns (bytes32)",
       ],
-      this.wallet.provider!
+      provider
     );
 
-    const currentBlockTimestamp = (await this.wallet.provider!.getBlock(
-      "latest"
-    ))!.timestamp;
+    const currentBlock = await provider.getBlock("latest");
+    if (!currentBlock) {
+      throw new Error("Unable to read the latest block");
+    }
+    const currentBlockTimestamp = currentBlock.timestamp;
 
     const actualDeadline = deadline || currentBlockTimestamp + 7200;
 
@@ -44,7 +52,7 @@ export class IncentiveSigner {
       {
         name: "PTXToken",
         version: "1",
-        chainId: (await this.wallet.provider!.getNetwork()).chainId,
+        chainId: (await provider.getNetwork()).chainId,
         verifyingContract: this.tokenAddress,
       },
       // Types

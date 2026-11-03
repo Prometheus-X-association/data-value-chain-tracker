@@ -57,6 +57,7 @@ const getParticipantNames = async (): Promise<NameMap> => {
     return response.data || {};
   } catch (error) {
     // Names are a convenience: the graph still works with short identifiers.
+    console.info('Participant names are unavailable; using shortened identifiers.', error);
     return {};
   }
 };
@@ -83,6 +84,7 @@ const shortId = (value?: string | null) => {
     const parsedUrl = new URL(value);
     tail = parsedUrl.pathname.split('/').filter(Boolean).pop() || parsedUrl.host;
   } catch (error) {
+    console.debug('Identifier is not a URL; using its last path segment.', error);
     tail = value.split(/[/:]/).filter(Boolean).pop() || value;
   }
 
@@ -285,7 +287,7 @@ const normalizeApiNodes = (data: ApiNode[]) => {
   return Array.from(normalizedMap.values());
 };
 
-const getLayoutMetrics = (data: ApiNode[]) => {
+const getNodeLevels = (data: ApiNode[]) => {
   const nodeMap = new Map(data.map((node) => [node.nodeId, node]));
   const levelMap = new Map<string, number>();
   const queue = data
@@ -319,6 +321,11 @@ const getLayoutMetrics = (data: ApiNode[]) => {
     });
   }
 
+  return levelMap;
+};
+
+const getLayoutMetrics = (levelMap: Map<string, number>) => {
+
   const levelCounts = Array.from(levelMap.values()).reduce<Record<number, number>>((acc, level) => {
     acc[level] = (acc[level] || 0) + 1;
     return acc;
@@ -330,41 +337,25 @@ const getLayoutMetrics = (data: ApiNode[]) => {
   };
 };
 
+const buildFlowEdge = (node: ApiNode, childNode: ApiNode, names: NameMap): Edge<FlowEdgeData> => ({
+  id: `${node.nodeId}-${childNode.nodeId}`,
+  source: node.nodeId,
+  target: childNode.nodeId,
+  type: 'custom',
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    color: '#8b5e18',
+  },
+  data: {
+    label: buildEdgeSummary(node, childNode, names),
+  },
+});
+
 const buildGraph = (data: ApiNode[], names: NameMap) => {
   const normalizedData = normalizeApiNodes(data);
-  const { maxDepth, widestLevelCount } = getLayoutMetrics(normalizedData);
   const nodeMap = new Map(normalizedData.map((node) => [node.nodeId, node]));
-  const levelMap = new Map<string, number>();
-  const queue: string[] = normalizedData
-    .filter((node) => !node.prevNode || node.prevNode.length === 0)
-    .map((node) => node.nodeId);
-
-  if (queue.length === 0 && normalizedData[0]) {
-    queue.push(normalizedData[0].nodeId);
-  }
-
-  queue.forEach((nodeId) => levelMap.set(nodeId, 0));
-
-  while (queue.length > 0) {
-    const currentNodeId = queue.shift();
-
-    if (!currentNodeId) {
-      continue;
-    }
-
-    const currentNode = nodeMap.get(currentNodeId);
-    const currentLevel = levelMap.get(currentNodeId) ?? 0;
-
-    currentNode?.childNode?.forEach((child) => {
-      const nextLevel = currentLevel + 1;
-      const savedLevel = levelMap.get(child.nodeId);
-
-      if (savedLevel === undefined || nextLevel > savedLevel) {
-        levelMap.set(child.nodeId, nextLevel);
-        queue.push(child.nodeId);
-      }
-    });
-  }
+  const levelMap = getNodeLevels(normalizedData);
+  const { maxDepth, widestLevelCount } = getLayoutMetrics(levelMap);
 
   const groupedLevels = Array.from(levelMap.entries()).reduce<Record<number, string[]>>(
     (levels, [nodeId, level]) => {
@@ -431,25 +422,10 @@ const buildGraph = (data: ApiNode[], names: NameMap) => {
   );
 
   const flowEdges: Edge<FlowEdgeData>[] = normalizedData.flatMap((node) =>
-    (node.childNode || [])
-      .filter((child) => nodeMap.has(child.nodeId))
-      .map((child) => {
-        const childNode = nodeMap.get(child.nodeId)!;
-
-        return {
-          id: `${node.nodeId}-${child.nodeId}`,
-          source: node.nodeId,
-          target: child.nodeId,
-          type: 'custom',
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: '#8b5e18',
-          },
-          data: {
-            label: buildEdgeSummary(node, childNode, names),
-          },
-        };
-      }),
+    (node.childNode || []).flatMap((child) => {
+      const childNode = nodeMap.get(child.nodeId);
+      return childNode ? [buildFlowEdge(node, childNode, names)] : [];
+    }),
   );
 
   return { flowNodes, flowEdges, normalizedData };
@@ -493,6 +469,7 @@ export const DataNodes = ({ organizationId, organizationName }: DataNodesProps) 
       setActiveRoot(null);
       hydrateGraph(allNodes, nameMap);
     } catch (loadError) {
+      console.error('Unable to load the traceability graph.', loadError);
       setError('Unable to load node data. Check that the Express API is running.');
     } finally {
       setLoading(false);
@@ -525,6 +502,7 @@ export const DataNodes = ({ organizationId, organizationName }: DataNodesProps) 
       setActiveRoot(nameOf(names, organizationOf(subtree[0])));
       hydrateGraph(subtree, names);
     } catch (focusError) {
+      console.warn(`Unable to load subtree for node "${focusNodeId.trim()}".`, focusError);
       setError(`No subtree found for node "${focusNodeId.trim()}".`);
     } finally {
       setLoading(false);

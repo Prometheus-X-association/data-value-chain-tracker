@@ -6,9 +6,7 @@ import { UseCaseContract, PTXToken } from "../typechain-types";
 describe("UseCaseContract Integration Tests", function () {
   let useCase: UseCaseContract;
   let token: PTXToken;
-  let owner: SignerWithAddress;
   let user: SignerWithAddress;
-  let notifier: SignerWithAddress;
   let participant: SignerWithAddress;
 
   const INITIAL_SUPPLY = ethers.parseEther("1000000");
@@ -17,7 +15,7 @@ describe("UseCaseContract Integration Tests", function () {
   const USE_CASE_ID = "test-use-case-1";
 
   beforeEach(async function () {
-    [owner, user, notifier, participant] = await ethers.getSigners();
+    [, user, , participant] = await ethers.getSigners();
 
     // Deploy PTX Token
     const PTXToken = await ethers.getContractFactory("PTXToken");
