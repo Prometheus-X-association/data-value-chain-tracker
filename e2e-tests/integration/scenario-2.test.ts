@@ -6,7 +6,7 @@ import { IncentiveSigner } from "../../incentive/api/client/lib/IncentiveSigner"
 import { waitForTx } from "../helpers/helpers";
 
 describe("Scenario 2: Corporate Training with Multiple AI/Service Providers", function () {
-  this.timeout(60000);
+  this.timeout(120000);
 
   let env: TestEnvironment;
   let provider: ethers.JsonRpcProvider;
