@@ -1,4 +1,4 @@
-FROM ghcr.io/foundry-rs/foundry:v1.0.0 AS foundry
+FROM ghcr.io/foundry-rs/foundry:v1.9.0 AS foundry
 
 FROM node:20.19.0-slim
 
