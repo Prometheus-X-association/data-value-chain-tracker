@@ -20,7 +20,7 @@ jobs:
         working-directory: app/express-server
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20.19.0"
           cache: npm
@@ -35,7 +35,7 @@ jobs:
         working-directory: trace-api
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20.19.0"
           cache: npm
@@ -50,7 +50,7 @@ jobs:
         working-directory: incentive/blockchain
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20.19.0"
           cache: npm
@@ -71,7 +71,7 @@ jobs:
         working-directory: incentive/api
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20.19.0"
       - run: yarn install --frozen-lockfile
@@ -84,7 +84,7 @@ jobs:
         working-directory: incentive/frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22.20.0"
       - run: yarn install --frozen-lockfile --network-timeout 600000
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20.19.0"
       - run: yarn install --frozen-lockfile
