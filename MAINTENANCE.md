@@ -8,13 +8,30 @@ DVCT is maintained by **Scheer IMC**.
 
 ## Commitment
 
-Scheer IMC intends to maintain DVCT for a period of **12 months following the original end of the Prometheus-X project**. This period includes the **6-month extension** of the project.
+Scheer IMC intends to maintain DVCT after the Prometheus-X project ends, in two phases:
 
-During this period, our aim is to keep DVCT in a stable, usable state as it is today. Our effort will focus on small, low-risk updates that keep the existing functionality working.
+| Phase | Duration | Ends |
+|---|---|---|
+| Initial maintenance period | 12 months after the original end of the Prometheus-X project | 31 December 2026 |
+| Extension | 6 months after the initial period | **30 June 2027** |
+
+In total, the maintenance period runs until **30 June 2027**.
+
+### What "maintained" means
+
+The goal of maintenance is to keep the features that DVCT provides on the `main` branch at the end of the Prometheus-X project working. These features are:
+
+- recording data exchanges as a tree of nodes (core-api and MongoDB),
+- viewing the node tree in core-frontend,
+- distributing PTX token rewards on-chain (incentive-api and smart contracts),
+- the `incenti-trace` entry point used by the Prometheus-X Connector (PDC),
+- running the full stack locally with Docker Compose, as described in the README.
+
+Maintenance means keeping these features installable, buildable and running with up-to-date, secure dependencies. It does not mean adding new features or changing how the existing ones work. All changes will be small and low-risk, so that existing deployments and integrations are not affected.
 
 ## Scope of maintenance
 
-During the maintenance period, we aim to cover minor issues such as:
+Until 30 June 2027, we aim to cover minor issues such as:
 
 - **Dependency updates**: reviewing and applying patch and minor updates, in particular those flagged by Dependabot.
 - **Security fixes** in dependencies, where they can be applied without major changes to the code.
@@ -48,7 +65,7 @@ We welcome ideas and suggestions for larger changes, and are happy to discuss th
 
 ## After the maintenance period
 
-At the end of the 12-month period, Scheer IMC will review the status of the project and update this file accordingly, for example to:
+At the end of the maintenance period (30 June 2027), Scheer IMC will review the status of the project and update this file accordingly, for example to:
 
 - *Extended maintenance*
 - *Looking for maintainers*
