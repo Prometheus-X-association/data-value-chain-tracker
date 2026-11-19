@@ -27,7 +27,7 @@
   "devDependencies": {
     "expect": "30.5.2",
     "mongodb-memory-server": "10.4.3",
-    "supertest": "7.0.0"
+    "supertest": "7.3.1"
   },
   "overrides": {
     "@fastify/busboy": "3.2.2",
