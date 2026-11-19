@@ -1,26 +1,44 @@
 # Data value chain tracker BB
 
+# Documentation
+
+The full documentation is in the **[DVCT Wiki](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki)**:
+
+- [Overview](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Overview) – concepts and architecture
+- [Getting started](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Getting-Started) – installation, development mode, first exchange
+- [Configuration](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Configuration) – environment variables and organization registry
+- [Data Exchange Integration](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Data-Exchange-Integration) and [Run Script Protocol](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Run-Script-Protocol) – how the PDC calls DVCT
+- [Processing Jobs](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Processing-Jobs) – job status, steps, errors and retries
+- [Traceability Graph](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Traceability-Graph), [Incentive Distribution](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Incentive-Distribution), [Smart Contracts](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Smart-Contracts)
+- [Security Model](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Security-Model), [API Reference](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/API-Reference), [Testing](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Testing)
+
 # Design Document
 
 See the design document [here](docs/design-document.md).
 
 # Building instructions
-DVCT requires to build&start services like: core-api, core-frontend, hardhat, incentive-api, incentive-frontend, incenti-trace alongside mongodb
+DVCT requires to build&start services like: core-api, core-frontend, hardhat, incentive-api, incentive-frontend, trace-api alongside mongodb
+
+RUN **make init** once to generate the local secrets: `.env`, `config/organizations.json` (organization registry with wallet addresses and login users) and `config/dev-credentials.local.txt` (demo login passwords). These files are gitignored and must never be committed. See [Configuration](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Configuration).
 
 RUN **make build-all** 
 
 ## Running instructions
 RUN **make up**
-- **core-frontend**: provides the data visualisation of nodes (listens on port 3000)
-- **core-api**: serves the endpoints or backend resources
-- **incenti-trace**:  constructs the traceability and incentive-mechanism by exposing an endpoint (POST /run-script) which can be called by a third party
-- **incentive-api**: starts a server by exposing an endpoint (**POST /api/incentives/distribute**) that executes the distribution of points (tokens)
-- **incentive-frontend**: provides detailed information of the predefined use-cases higlighted in ./blockchain/script folder which are then deployed and presented in the UI
-- **hardhat**: provides the infrastructure for building, testing and deploying smart contracts on the ETH blockchain
+
+All services are served through a single gateway on `http://localhost:3000` (configurable with `PUBLIC_PORT` in `.env`). The other services are only reachable on the internal `core-network`.
+- **core-frontend**: nginx gateway that provides the data visualisation of nodes at `http://localhost:3000/core/` and routes `/api/`, `/trace-api/` and `/incentive` to the internal services
+- **core-api**: serves the endpoints or backend resources (`http://localhost:3000/api/...`)
+- **trace-api**: constructs the traceability and incentive-mechanism by exposing the endpoints called by a third party (PDC): `POST /trace-api/api/dataexchanges/{id}/run` and `POST /trace-api/api/run-script`. Each request becomes a background [processing job](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Processing-Jobs)
+- **incentive-api**: internal server exposing an endpoint (**POST /api/incentives/distribute**) that relays the reward (token) deposits to the smart contract; only accepts HMAC-signed requests from trace-api
+- **incentive-frontend**: provides detailed information of the use-cases, participants and rewards at `http://localhost:3000/incentive`
+- **hardhat**: provides the local chain with the deployed smart contracts (PTXToken, UseCaseContract)
 - **mongodb**: database where information is kept and saved
 
+For local debugging, **make up-dev** additionally publishes the internal services on `127.0.0.1`: core-api on `3001` (Swagger at `/api-docs`), incentive-api on `3002`, trace-api on `3005`, MongoDB on `27017` and the chain RPC on `8545`. Never use it on a shared or reachable host.
+
 ## Example usage
-For more detailed information, please check the [swagger](http://localhost:3001/api-docs/) (be sure that services are running)
+For more detailed information, please check the [API Reference](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/API-Reference) or the [swagger](http://localhost:3001/api-docs/) (only available with `make up-dev`)
 
 Important note:
 
@@ -51,8 +69,8 @@ Authentication is now done through:
 This endpoint creates an `HttpOnly` session cookie in the browser.
 
 Practical browser flow:
-- open the DVCT core frontend on `http://localhost:3000`
-- sign in using the login form
+- open the DVCT core frontend on `http://localhost:3000/core/`
+- sign in using the login form (demo users and passwords are listed in `config/dev-credentials.local.txt`, generated by `make init`)
 - after successful login, the browser stores the session cookie
 - the browser can then access protected endpoints such as:
   - `GET /api/data`
@@ -83,6 +101,8 @@ Important note:
 | /api/data               | GET         | none                          | none                                                                                                                       | 200      |
 | /api/node-tree/{nodeId} | GET         | {nodeId}, id of the node tree | none                                                                                                                       | 200      |
 
+Note: `POST /api/node` is an internal endpoint. Only trace-api may write nodes (header `X-DVCT-Internal-Token`). The endpoints of trace-api and incentive-api are listed in the [API Reference](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/API-Reference).
+
 
 
 
@@ -96,9 +116,13 @@ They can be run with the following command:
 
 To run all the components together in docker, run the following command:
 
-- `make up`
+- `make init` (once) and `make up`
 
-If needed, more commands and specifics are documented below.
+The unit tests of core-api, trace-api and the smart contracts can be run with:
+
+- `make test`
+
+If needed, more commands and specifics are documented below and in the [Testing](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Testing) wiki page.
 
 ## DVCT Core components
 
@@ -234,7 +258,7 @@ You will also be able to create a use case in this UI. This is in development. T
 
 Additional notes:
 
-The incentive frontend on port `3003` reads use case information from blockchain events.
+The incentive frontend at `http://localhost:3000/incentive` reads use case information from blockchain events.
 
 Behavior:
 - `All Use Cases` shows all created use cases found on-chain
@@ -274,40 +298,27 @@ We did have some mock endpoints for the information api's, but I removed those, 
 
 ### How it works
 
-The aim of the incentive api is to provide simple access to the smart contracts through a normal api, but still retaining the security. For this we have created a **KeyManagementService**. It manages client authentication and authorization through public-key cryptography.
+The aim of the incentive api is to provide simple access to the smart contracts through a normal api, but still retaining the security. The incentive api is not reachable through the gateway and only accepts requests from trace-api.
 
-**KeyManagementService** overview:
+**HMAC authentication**: every request must carry the headers `X-DVCT-Timestamp` and `X-DVCT-Signature`, where the signature is `HMAC_SHA256(INCENTIVE_API_HMAC_SECRET, "<timestamp>.<raw request body>")`. Requests older than five minutes are rejected, and each signature is accepted only once (replay protection).
 
-- Generates 2048-bit RSA key pairs
-- Associates keys with client IDs
-- Stores public keys and permissions
-- Returns private key for client distribution (centralized management)
-- Validates if clients have specific permissions
-- Clint management (public key retrival, access revocation etc)
+**IncentiveService**: This is the core incentive distribution service. It validates the request and relays the EIP-2612 permit-signed reward deposit to the `UseCaseContract` (`depositRewardsWithPermit`). The relayer wallet connected to the incentive api pays the gas, which is to be seen as a direct operational cost. The PTX tokens come from the operator wallet of trace-api.
 
-**IKeyStorage**: Interface used for the storage implementation. We will probably use a cloud-based secure key-value vault in production. We created this interface so that it is easy to swap storage solutions. Right now we have only implemented a **FileKeyStorage**, used for testing.
-
-**IncentiveService**: This is the core incentive distribution service. This handles a request by validating the request, verifying the signature, and if all is good, then submits the transaction to the blockchain. Meaning that the wallet connected to the incentive api is paying for gas. This is to be seen as a direct operational cost, and can be reduced by using the **notifier** concept we discussed above.
+See the [Security Model](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Security-Model) for details.
 
 Additional notes:
 
-Internal service-to-service communication is now separated from browser authentication.
-
-The `incenti-trace` service uses:
-- `GET /api/internal/data`
-
-This internal endpoint is protected through:
-- `DVCT_INTERNAL_API_TOKEN`
-
-This means:
+Internal service-to-service communication is separated from browser authentication:
 - browser users authenticate through the session-cookie flow
-- internal services authenticate through the internal api token
+- trace-api writes and reads the graph through the core-api internal endpoints (`POST /api/node`, `GET /api/internal/data`), protected by `DVCT_INTERNAL_API_TOKEN`
+- trace-api is called by the PDC with `TRACE_API_TOKEN`
+- trace-api calls the incentive api with the HMAC signature described above
+
+All of these secrets are generated by `make init`.
 
 ### Tools/clients
 
-**Incentive signer**: We have created a a client library that exposes a signer, so that it is easy for clients to create a signature that matches what we expect in the api. This needs to be signed with the private key that we provide to them.
-
-**addClient script**: This is a simple script used to add new clients. Just for ease-of-use. It uses the local FileStorage implementation.
+**Incentive signer**: We have created a client library (`client/lib/IncentiveSigner.ts`) that exposes `signIncentiveApiRequest`, so that it is easy to create a signature that matches what we expect in the api.
 
 ### Scripts
 
@@ -320,11 +331,11 @@ Workspace:
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - Yarn or npm
 - [Forge](https://book.getfoundry.sh/getting-started/installation) (if you want to run the blockchain unit tests)
 
-Run `yarn deps` to install all dependencies. Or `npm run deps-npm` if you are using npm.
+Run `yarn initialize` to install the blockchain and incentive api dependencies, compile the contracts and copy the typechain types.
 
 ### E2E testing
 
@@ -333,12 +344,14 @@ Run `yarn deps` to install all dependencies. Or `npm run deps-npm` if you are us
 
 ### Integration tests
 
-- `test:blockchain:hardhat` (integration like hardhat test for the smart contracts)
+- `yarn test:blockchain:hardhat` or `make test-contracts` (integration like hardhat test for the smart contracts)
 
 ### Unit tests
 
-- `test:blockchain:forge` (unit tests that tests the smart contracts)
-- `test:incentive:api` (unit tests for the incentive api)
+- `yarn test:blockchain:forge` (unit tests that tests the smart contracts)
+- `make test-trace-api` or `yarn test:trace-api` (unit tests for trace-api, location: `trace-api/test`)
+- `make test-core-api` or `yarn test:core-api` (unit tests for core-api, see below)
+- `make test` runs core-api, trace-api and hardhat contract tests together
 
 ### Unit testing
 LOCATION: app/express-server/src/tests/api.test.js
@@ -346,7 +359,7 @@ LOCATION: app/express-server/src/tests/api.test.js
 #### Setup test environment
 - **cd app/express-server**
 - run **"npm install"**
-- make sure all components are running, especially mongodb (**make up**)
+- no running stack is needed: the tests use an in-memory MongoDB
   
 #### Run tests
  - in app/express-server run **"npm test"**
@@ -356,110 +369,30 @@ LOCATION: app/express-server/src/tests/api.test.js
 
 
 ### Component-level testing
-REFERENCE: **"incenti-trace"** defined in the docker-compose.yml of project root (data-value-chain-tracker)
+REFERENCE: **"trace-api"** defined in the docker-compose.yml of project root (data-value-chain-tracker)
 #### Setup test environment
-- run **"yarn initialize"**
+- run **"make init"** (once)
 - run **"make up"**
 #### Run tests
-- call **POST http://localhost:3004/run-script**
-- PAYLOAD fixed for traceability property, but flexible towards the number of participants taking part in the use-case:
-  ```json
-  {
-  "traceibility":
-	  {
-		  "dvctId": "string",
-		  "usecaseContractId": "string",
-		  "usecaseContractTitle": "string",
-		  "extraIncentiveForAIProvider": {
-			  "numPoints": 0,
-			  "factor": 0,
-			  "factorCheck": true
-		  },
-		  "contractId": "string",
-		  "dataId": "string",
-		  "dataProviderId": "2134",
-		  "dataConsumerId": "2135",
-		  "dataConsumerIsAIProvider": true,
-		  "prevDataId": [""],
-		  "incentiveForDataProvider": {
-			  "numPoints": 0,
-			  "factor": 0,
-		  "factorCheck": true
-	  }
-  },
-  "reachEndFlow": true,
-  "providerUrl": "http://localhost:8543",
-  "useCaseID":"13532",
-  "useCaseName": "corporate-training-multi-provider",
-  "data-id": "iqwe80123oiu",
-  "data-Quality-Check": "yes",
-  "participantShare":[{
-        "partipicantName":"Organization A",
-        "rewardDepositor": "false",
-        "role":"Data-Provider", 
-        "participantID": "2134",
-        "participantWallet": "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
-        "numOfShare": 3000
-      },
-      {
-        "partipicantName":"Organization B",
-        "rewardDepositor": "false",
-        "role":"AI-Provider-1",
-        "participantID": "2135",
-        "participantWallet": "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
-        "numOfShare": 2000
-     },
-    {
-      "partipicantName":"Organization C",
-      "rewardDepositor": "false",
-      "role":"AI-Provider-2",
-      "participantID": "2135",
-      "participantWallet": "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
-      "numOfShare": 2000
-    },
-    {
-      "partipicantName":"Organization D",
-      "rewardDepositor": "false",
-      "role":"Service-Provider",
-      "participantID": "2135",
-      "participantWallet": "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
-      "numOfShare": 1500
-    },
-    {
-      "partipicantName":"Organization E",
-      "rewardDepositor": "true",
-      "role":"Orchestrator",
-      "participantID": "Orchestrator",
-      "participantWallet": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-      "numOfShare": 1500
-    }]}
-#### Expected results
-<img width="571" alt="image" src="https://github.com/user-attachments/assets/c2ffa528-ae50-4b13-b103-2f51adbffcb1" />
-.
-.
-.
-<img width="700" alt="image" src="https://github.com/user-attachments/assets/c1e421fe-7c70-4cf3-b18d-e261de80e047" /> <br><br>
+There are two ways to submit a data exchange to trace-api. Both require the bearer token `TRACE_API_TOKEN` from `.env`:
 
-- call **POST http://localhost:3005/api/run-script**, this is the official endpoint which PDC will execute each time there is a data-exchange
-- payload is handled by PDC based on the data found in the contract and must conform to the following format
+- call **POST http://localhost:3000/trace-api/api/dataexchanges/{dataExchangeId}/run** (recommended): the caller only sends the PDC data exchange id, and trace-api reads the participants and weights from the connector, the signed contract and the catalog. See [Data Exchange Integration](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Data-Exchange-Integration)
+- call **POST http://localhost:3000/trace-api/api/run-script**: the caller sends the complete payload. See [Run Script Protocol](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Run-Script-Protocol)
 
-Additional notes:
+Example:
 
-Wallet assignment is no longer based on participant order in the payload.
+```bash
+TOKEN=$(grep ^TRACE_API_TOKEN= .env | cut -d= -f2)
 
-Wallets are now resolved through:
-- `DVCT_ORGANIZATION_WALLETS_FILE`
-- `DVCT_ORGANIZATION_WALLETS_JSON`
+curl -X POST "http://localhost:3000/trace-api/api/run-script?wait=30" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @payload.json
+```
 
-This allows stable participant-to-wallet mapping even when the number of participants changes.
+The request answers `202 Accepted` with a `jobId` and a `statusUrl`. The traceability and payout run as a background job; follow it with **GET http://localhost:3000/trace-api/api/jobs/{jobId}** (same bearer token). With the default 60-second lock, the job reaches `succeeded` with the `payouts` about a minute later. See [Processing Jobs](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Processing-Jobs).
 
-For public repositories and demo environments, real wallet/private-key mappings should not be committed.
-
-Use:
-- `config/organization-wallets.dev.example.json`
-
-Do not commit:
-- `config/organization-wallets.dev.json`
+The run-script payload must conform to the following format.
 
 ```json
 {
@@ -477,6 +410,7 @@ Do not commit:
 	"useCaseId": "http://localhost:4040/v1/catalog/ecosystems/6842ae6a877da765ec2f38bf",
 	"useCaseName": "DVCT AGAIN",
 	"dataQualityCheck": "TBD",
+	"rewardPool": "100",
 	"participantShare": [
 	{
 		"participantName": "ParticipantOne",
@@ -505,13 +439,26 @@ Do not commit:
 ]}
 ```
 
+`reachEndFlow: false` records the traceability only; `true` also pays out the reward pool (`rewardPool` in PTX, default `INCENTIVE_DEFAULT_REWARD_POOL`).
+
+Additional notes:
+
+Wallet assignment is not based on participant order in the payload, and `participantWallet` in the payload is ignored.
+
+Wallets are resolved through the organization registry `config/organizations.json` (generated by `make init` from `config/organizations.example.json`), matched by `participantId`. Every participant with a non-zero `numOfShare` needs a `walletAddress` there, otherwise the payout fails. See [Configuration → Organization registry](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Configuration#organization-registry).
+
+Only wallet **addresses** are stored. Do not commit:
+- `.env`
+- `config/organizations.json`
+- `config/dev-credentials.local.txt`
+
 Important note about `numOfShare`:
 
 The field `numOfShare` is now interpreted as a raw points / weight value.
 
 This means:
-- the core DVCT frontend (`3000`) displays the raw value from the payload
-- the incentive execution flow converts these values internally into basis-point shares before calling the smart contract
+- the core DVCT frontend (`/core/`) displays the raw value from the payload
+- trace-api converts these values internally into basis-point shares before calling the smart contract
 - the smart contract still distributes rewards proportionally
 
 In short:
@@ -544,13 +491,30 @@ Make sure you have the following installed on your machine:
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [Make](https://www.gnu.org/software/make/)
+- Node.js >= 20 (used by `make init`)
+
+### `make init`
+
+Generates `.env`, the organization registry `config/organizations.json` and the demo login passwords `config/dev-credentials.local.txt`. Refuses to overwrite existing files. `make sync-organizations` adds organizations that are missing from `config/organizations.json` without touching `.env`.
+
+```bash
+make init
+```
 
 ### `make up`
 
-Starts all services defined in the Docker Compose file.
+Starts all services defined in the Docker Compose file. `make up-dev` additionally publishes the internal services on `127.0.0.1` for local debugging.
 
 ```bash
 make up
+```
+
+### `make rebuild`
+
+Rebuilds the images and restarts the services.
+
+```bash
+make rebuild
 ```
 
 ### `make down`
@@ -563,7 +527,7 @@ make down
 
 ### `make clean`
 
-Cleans up containers, networks, and volumes created by Docker Compose.
+Cleans up containers, networks, and volumes created by Docker Compose. This **deletes** the database and chain state together, so they stay in sync.
 
 ```bash
 make clean
@@ -581,9 +545,16 @@ make logs
 
 - `make build-core-frontend` - Builds the core frontend Docker image
 - `make build-core-api` - Builds the core API Docker image
+- `make build-trace-api` - Builds the trace API Docker image
 - `make build-incentive-api` - Builds the incentive API Docker image
 - `make build-incentive-frontend` - Builds the incentive frontend Docker image
-- `make build-hardhat` - Builds the Hardhat node Docker image# Individual ddimage build commands
+- `make build-hardhat` - Builds the Hardhat node Docker image
+
+### Tests
+
+- `make test` - Runs the core-api, trace-api and contract tests (`make test-core-api`, `make test-trace-api`, `make test-contracts`)
+
+See [Getting started](https://github.com/Prometheus-X-association/data-value-chain-tracker/wiki/Getting-Started#makefile-commands) for the full list.
 
 ## Frontend pictures
 
