@@ -65,7 +65,7 @@ We welcome ideas and suggestions for larger changes, and are happy to discuss th
 
 ## After the maintenance period
 
-At the end of the maintenance period (30 June 2027), Scheer IMC will review the status of the project and update this file accordingly, for example to:
+At the end of the initial maintenance period (30 June 2027), Scheer IMC will review the status of the project and update this file accordingly, for example to:
 
 - *Extended maintenance*
 - *Looking for maintainers*
