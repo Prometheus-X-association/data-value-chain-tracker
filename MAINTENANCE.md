@@ -12,8 +12,8 @@ Scheer IMC intends to maintain DVCT after the Prometheus-X project ends, in two 
 
 | Phase | Duration | Ends |
 |---|---|---|
-| Initial maintenance period | 12 months after the original end of the Prometheus-X project | 31 December 2026 |
-| Extension | 6 months after the initial period | **30 June 2027** |
+| Initial maintenance period | 6 months after the initial project period | 30 June 2026 |
+| Extension | 12 months after the original end of the Prometheus-X project | **31 December 2027** |
 
 In total, the maintenance period runs until **30 June 2027**.
 
